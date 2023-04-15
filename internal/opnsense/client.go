@@ -18,6 +18,7 @@ type Client struct {
 	client *http.Client
 
 	// Mutexes
+	routeMu   *sync.Mutex
 	unboundMu *sync.Mutex
 
 	opts Options
@@ -35,8 +36,12 @@ func NewClient(options Options) *Client {
 		client: &http.Client{Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: options.AllowInsecure},
 		}},
+
+		// Mutexes
+		routeMu:   &sync.Mutex{},
 		unboundMu: &sync.Mutex{},
-		opts:      options,
+
+		opts: options,
 	}
 }
 
