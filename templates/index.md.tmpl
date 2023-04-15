@@ -1,0 +1,28 @@
+---
+layout: ""
+page_title: "Provider: OPNsense"
+description: |-
+  The OPNsense provider provides resources to interact with an OPNsense host.
+---
+
+# OPNsense Provider
+
+The OPNsense provider is used to interact with resources (only) supported by
+the OPNsense API. This provider does not, and will not, support resources
+not currently supported by the OPNsense API. If required, see if
+[dalet-oss/opnsense](https://github.com/dalet-oss/terraform-provider-opnsense)
+will support your needs.
+
+The provider needs to be configured with the proper API credentials before it can be used.
+
+## Getting Started
+
+To generate the API key & secret, follow the
+[OPNsense docs](https://docs.opnsense.org/development/how-tos/api.html#creating-keys).
+These can then be used to configure the provider.
+
+## Example Usage
+
+{{ tffile "examples/provider/provider.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}
