@@ -81,6 +81,8 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		// Interfaces
+		service.NewInterfacesVlanResource,
 		// Routes
 		service.NewRouteResource,
 		// Unbound
