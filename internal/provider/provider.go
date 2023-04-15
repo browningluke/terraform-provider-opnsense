@@ -79,6 +79,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewUnboundHostOverrideResource,
 		service.NewUnboundHostAliasResource,
 		service.NewUnboundDomainOverrideResource,
+		service.NewUnboundForwardResource,
 	}
 }
 
