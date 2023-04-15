@@ -56,6 +56,9 @@ func unboundHostOverrideResourceSchema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("A"),
+				Validators: []validator.String{
+					stringvalidator.OneOf("A", "AAAA", "MX"),
+				},
 			},
 			"server": schema.StringAttribute{
 				MarkdownDescription: "IP address of the host, e.g. 192.168.100.100 or fd00:abcd::1. Must be set when `type` is `A` or `AAAA`.",
