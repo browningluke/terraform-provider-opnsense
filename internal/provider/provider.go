@@ -81,6 +81,8 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		// Routes
+		service.NewRouteResource,
 		// Unbound
 		service.NewUnboundHostOverrideResource,
 		service.NewUnboundHostAliasResource,
