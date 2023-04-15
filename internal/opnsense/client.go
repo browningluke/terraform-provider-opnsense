@@ -1,6 +1,7 @@
 package opnsense
 
 import (
+	"encoding/base64"
 	"net/http"
 )
 
@@ -21,4 +22,11 @@ func NewClient(options Options) *Client {
 		client: &http.Client{},
 		opts:   options,
 	}
+}
+
+// Requests
+
+func (c *Client) getAuth() string {
+	auth := c.opts.APIKey + ":" + c.opts.APISecret
+	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
