@@ -48,3 +48,7 @@ provider "opnsense" {
 - `api_key` (String) The API key for a user. Alternatively, can be configured using the `OPNSENSE_API_KEY` environment variable.
 - `api_secret` (String) The API secret for a user. Alternatively, can be configured using the `OPNSENSE_API_SECRET` environment variable.
 - `uri` (String) The URI to an OPNsense host. Alternatively, can be configured using the `OPNSENSE_URI` environment variable.
+
+### Optional
+
+- `allow_insecure` (Boolean) Allow insecure TLS connections. Alternatively, can be configured using the `OPNSENSE_ALLOW_INSECURE` environment variable. Defaults to `false`.
