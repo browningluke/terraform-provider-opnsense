@@ -3,6 +3,7 @@ package opnsense
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -23,14 +24,17 @@ type Client struct {
 }
 
 type Options struct {
-	Uri       string
-	APIKey    string
-	APISecret string
+	Uri           string
+	APIKey        string
+	APISecret     string
+	AllowInsecure bool
 }
 
 func NewClient(options Options) *Client {
 	return &Client{
-		client:    &http.Client{},
+		client: &http.Client{Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: options.AllowInsecure},
+		}},
 		unboundMu: &sync.Mutex{},
 		opts:      options,
 	}
