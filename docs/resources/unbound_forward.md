@@ -2,12 +2,12 @@
 page_title: "opnsense_unbound_forward Resource - terraform-provider-opnsense"
 subcategory: Unbound
 description: |-
-  Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.
+  Query Forwarding section allows for entering arbitrary nameservers to forward queries to. Can forward queries normally, or over TLS.
 ---
 
 # opnsense_unbound_forward (Resource)
 
-Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.
+Query Forwarding section allows for entering arbitrary nameservers to forward queries to. Can forward queries normally, or over TLS.
 
 ## Example Usage
 

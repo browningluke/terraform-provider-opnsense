@@ -29,7 +29,7 @@ type UnboundForwardResourceModel struct {
 
 func unboundForwardResourceSchema() schema.Schema {
 	return schema.Schema{
-		MarkdownDescription: "Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.",
+		MarkdownDescription: "Query Forwarding section allows for entering arbitrary nameservers to forward queries to. Can forward queries normally, or over TLS.",
 
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
