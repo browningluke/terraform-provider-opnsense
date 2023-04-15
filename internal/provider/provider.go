@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-opnsense/internal/opnsense"
 )
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
@@ -59,6 +60,16 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	opnOptions := opnsense.Options{
+		Uri:       data.Uri.ValueString(),
+		APIKey:    data.APIKey.ValueString(),
+		APISecret: data.APISecret.ValueString(),
+	}
+
+	client := opnsense.NewClient(opnOptions)
+	resp.DataSourceData = client
+	resp.ResourceData = client
 }
 
 func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
