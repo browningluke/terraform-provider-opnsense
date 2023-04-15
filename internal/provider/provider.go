@@ -24,9 +24,10 @@ type OPNsenseProvider struct {
 
 // OPNsenseProviderModel describes the provider data model.
 type OPNsenseProviderModel struct {
-	Uri       types.String `tfsdk:"uri"`
-	APIKey    types.String `tfsdk:"api_key"`
-	APISecret types.String `tfsdk:"api_secret"`
+	Uri           types.String `tfsdk:"uri"`
+	APIKey        types.String `tfsdk:"api_key"`
+	APISecret     types.String `tfsdk:"api_secret"`
+	AllowInsecure types.Bool   `tfsdk:"allow_insecure"`
 }
 
 func (p *OPNsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -49,6 +50,10 @@ func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaReques
 				MarkdownDescription: "The API secret for a user. Alternatively, can be configured using the `OPNSENSE_API_SECRET` environment variable.",
 				Required:            true,
 			},
+			"allow_insecure": schema.BoolAttribute{
+				MarkdownDescription: "Allow insecure TLS connections. Alternatively, can be configured using the `OPNSENSE_ALLOW_INSECURE` environment variable. Defaults to `false`.",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -63,9 +68,10 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 	}
 
 	opnOptions := opnsense.Options{
-		Uri:       data.Uri.ValueString(),
-		APIKey:    data.APIKey.ValueString(),
-		APISecret: data.APISecret.ValueString(),
+		Uri:           data.Uri.ValueString(),
+		APIKey:        data.APIKey.ValueString(),
+		APISecret:     data.APISecret.ValueString(),
+		AllowInsecure: data.AllowInsecure.ValueBool(),
 	}
 
 	client := opnsense.NewClient(opnOptions)
