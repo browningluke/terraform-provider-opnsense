@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
@@ -21,6 +22,9 @@ type OPNsenseProvider struct {
 
 // OPNsenseProviderModel describes the provider data model.
 type OPNsenseProviderModel struct {
+	Uri       types.String `tfsdk:"uri"`
+	APIKey    types.String `tfsdk:"api_key"`
+	APISecret types.String `tfsdk:"api_secret"`
 }
 
 func (p *OPNsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -30,7 +34,20 @@ func (p *OPNsenseProvider) Metadata(ctx context.Context, req provider.MetadataRe
 
 func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Attributes: map[string]schema.Attribute{},
+		Attributes: map[string]schema.Attribute{
+			"uri": schema.StringAttribute{
+				MarkdownDescription: "The URI to an OPNsense host. Alternatively, can be configured using the `OPNSENSE_URI` environment variable.",
+				Required:            true,
+			},
+			"api_key": schema.StringAttribute{
+				MarkdownDescription: "The API key for a user. Alternatively, can be configured using the `OPNSENSE_API_KEY` environment variable.",
+				Required:            true,
+			},
+			"api_secret": schema.StringAttribute{
+				MarkdownDescription: "The API secret for a user. Alternatively, can be configured using the `OPNSENSE_API_SECRET` environment variable.",
+				Required:            true,
+			},
+		},
 	}
 }
 
