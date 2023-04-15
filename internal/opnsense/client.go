@@ -2,11 +2,14 @@ package opnsense
 
 import (
 	"bytes"
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
+	"net/http/httputil"
 )
 
 type Client struct {
@@ -35,7 +38,7 @@ func (c *Client) getAuth() string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-func (c *Client) doRequest(method, endpoint string, body any, resp any) error {
+func (c *Client) doRequest(ctx context.Context, method, endpoint string, body any, resp any) error {
 	// Build request body
 	var bodyBuf io.Reader = nil
 
@@ -60,12 +63,20 @@ func (c *Client) doRequest(method, endpoint string, body any, resp any) error {
 		req.Header.Add("Content-Type", "application/json")
 	}
 
+	// Log request
+	dReq, _ := httputil.DumpRequest(req, true)
+	tflog.Info(ctx, fmt.Sprintf("\n%s\n%s\n", string(dReq), bodyBuf))
+
 	// Do request
 	res, err := c.client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer res.Body.Close()
+
+	// Log response
+	dRes, _ := httputil.DumpResponse(res, true)
+	tflog.Info(ctx, fmt.Sprintf("\n%s\n", string(dRes)))
 
 	// Check for 200
 	if res.StatusCode != http.StatusOK {
