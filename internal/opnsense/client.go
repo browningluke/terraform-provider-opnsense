@@ -10,10 +10,14 @@ import (
 	"io"
 	"net/http"
 	"net/http/httputil"
+	"sync"
 )
 
 type Client struct {
 	client *http.Client
+
+	// Mutexes
+	unboundMu *sync.Mutex
 
 	opts Options
 }
@@ -26,8 +30,9 @@ type Options struct {
 
 func NewClient(options Options) *Client {
 	return &Client{
-		client: &http.Client{},
-		opts:   options,
+		client:    &http.Client{},
+		unboundMu: &sync.Mutex{},
+		opts:      options,
 	}
 }
 

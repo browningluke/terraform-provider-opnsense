@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-opnsense/internal/opnsense"
+	"terraform-provider-opnsense/internal/service"
 )
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
@@ -73,7 +74,9 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 }
 
 func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		service.NewUnboundHostOverrideResource,
+	}
 }
 
 func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
