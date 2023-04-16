@@ -7,7 +7,7 @@ import (
 )
 
 // makeSetFunc creates a func that creates/updates the resource
-func makeSetFunc(c controller, endpoint string) func(ctx context.Context, data any) (string, error) {
+func makeSetFunc(c controller, endpoint string, reconfigureEndpoint string) func(ctx context.Context, data any) (string, error) {
 	return func(ctx context.Context, data any) (string, error) {
 		// Since the OPNsense controller has to be reconfigured after every change, locking the mutex prevents
 		// the API from being written to while it's reconfiguring, which results in data loss.
@@ -26,8 +26,8 @@ func makeSetFunc(c controller, endpoint string) func(ctx context.Context, data a
 			return "", fmt.Errorf("resource not changed. result: %s. errors: %s", respJson.Result, respJson.Validations)
 		}
 
-		// Reconfigure (i.e. restart) the OPNsense controller
-		err = c.Reconfigure(ctx)
+		// Reconfigure (i.e. restart) the OPNsense service
+		err = c.Client().ReconfigureService(ctx, reconfigureEndpoint)
 		if err != nil {
 			return "", err
 		}
@@ -58,7 +58,7 @@ func makeGetFunc[K any](c *Client, endpoint string, data *K) func(ctx context.Co
 }
 
 // makeDeleteFunc creates a func that deletes the resource
-func makeDeleteFunc(c controller, endpoint string) func(ctx context.Context, id string) error {
+func makeDeleteFunc(c controller, endpoint, reconfigureEndpoint string) func(ctx context.Context, id string) error {
 	return func(ctx context.Context, id string) error {
 		// Since the OPNsense controller has to be reconfigured after every change, locking the mutex prevents
 		// the API from being written to while it's reconfiguring, which results in data loss.
@@ -76,8 +76,8 @@ func makeDeleteFunc(c controller, endpoint string) func(ctx context.Context, id 
 			return fmt.Errorf("resource not deleted. result: %s", respJson.Result)
 		}
 
-		// Reconfigure (i.e. restart) the OPNsense controller
-		err = c.Reconfigure(ctx)
+		// Reconfigure (i.e. restart) the OPNsense service
+		err = c.Client().ReconfigureService(ctx, reconfigureEndpoint)
 		if err != nil {
 			return err
 		}

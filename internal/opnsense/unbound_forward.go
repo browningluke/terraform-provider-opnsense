@@ -26,7 +26,7 @@ type UnboundForward struct {
 // CRUD operations
 
 func (u *unbound) AddForward(ctx context.Context, forward *UnboundForward) (string, error) {
-	return makeSetFunc(u, unboundForwardAddEndpoint)(ctx,
+	return makeSetFunc(u, unboundForwardAddEndpoint, unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundForward{
 			"dot": forward,
 		},
@@ -46,7 +46,8 @@ func (u *unbound) GetForward(ctx context.Context, id string) (*UnboundForward, e
 }
 
 func (u *unbound) UpdateForward(ctx context.Context, id string, forward *UnboundForward) error {
-	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundForwardUpdateEndpoint, id))(ctx,
+	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundForwardUpdateEndpoint, id),
+		unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundForward{
 			"dot": forward,
 		},
@@ -55,5 +56,5 @@ func (u *unbound) UpdateForward(ctx context.Context, id string, forward *Unbound
 }
 
 func (u *unbound) DeleteForward(ctx context.Context, id string) error {
-	return makeDeleteFunc(u, unboundForwardDeleteEndpoint)(ctx, id)
+	return makeDeleteFunc(u, unboundForwardDeleteEndpoint, unboundReconfigureEndpoint)(ctx, id)
 }

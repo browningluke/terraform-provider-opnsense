@@ -28,7 +28,7 @@ type UnboundHostOverride struct {
 // CRUD operations
 
 func (u *unbound) AddHostOverride(ctx context.Context, host *UnboundHostOverride) (string, error) {
-	return makeSetFunc(u, unboundHostOverrideAddEndpoint)(ctx,
+	return makeSetFunc(u, unboundHostOverrideAddEndpoint, unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundHostOverride{
 			"host": host,
 		},
@@ -36,7 +36,7 @@ func (u *unbound) AddHostOverride(ctx context.Context, host *UnboundHostOverride
 }
 
 func (u *unbound) GetHostOverride(ctx context.Context, id string) (*UnboundHostOverride, error) {
-	forward, err := makeGetFunc(u.Client(), unboundHostOverrideGetEndpoint,
+	get, err := makeGetFunc(u.Client(), unboundHostOverrideGetEndpoint,
 		&struct {
 			Host UnboundHostOverride `json:"host"`
 		}{},
@@ -44,11 +44,12 @@ func (u *unbound) GetHostOverride(ctx context.Context, id string) (*UnboundHostO
 	if err != nil {
 		return nil, err
 	}
-	return &forward.Host, nil
+	return &get.Host, nil
 }
 
 func (u *unbound) UpdateHostOverride(ctx context.Context, id string, host *UnboundHostOverride) error {
-	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundHostOverrideUpdateEndpoint, id))(ctx,
+	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundHostOverrideUpdateEndpoint, id),
+		unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundHostOverride{
 			"host": host,
 		},
@@ -57,5 +58,5 @@ func (u *unbound) UpdateHostOverride(ctx context.Context, id string, host *Unbou
 }
 
 func (u *unbound) DeleteHostOverride(ctx context.Context, id string) error {
-	return makeDeleteFunc(u, unboundHostOverrideDeleteEndpoint)(ctx, id)
+	return makeDeleteFunc(u, unboundHostOverrideDeleteEndpoint, unboundReconfigureEndpoint)(ctx, id)
 }

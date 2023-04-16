@@ -29,7 +29,6 @@ type Client struct {
 type controller interface {
 	Client() *Client
 	Mutex() *sync.Mutex
-	Reconfigure(ctx context.Context) error
 }
 
 type Options struct {
@@ -112,6 +111,25 @@ func (c *Client) doRequest(ctx context.Context, method, endpoint string, body an
 	err = json.NewDecoder(res.Body).Decode(resp)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// ReconfigureService defined at the endpoint.
+func (c *Client) ReconfigureService(ctx context.Context, endpoint string) error {
+	// Send reconfigure request to OPNsense
+	respJson := &struct {
+		Status string `json:"status"`
+	}{}
+	err := c.doRequest(ctx, "POST", "/unbound/service/reconfigure", nil, respJson)
+	if err != nil {
+		return err
+	}
+
+	// Validate unbound restarted correctly
+	if respJson.Status != "ok" {
+		return fmt.Errorf("reconfigure failed. status: %s", respJson.Status)
 	}
 
 	return nil

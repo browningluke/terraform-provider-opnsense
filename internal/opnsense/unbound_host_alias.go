@@ -25,7 +25,7 @@ type UnboundHostAlias struct {
 // CRUD operations
 
 func (u *unbound) AddHostAlias(ctx context.Context, alias *UnboundHostAlias) (string, error) {
-	return makeSetFunc(u, unboundHostAliasAddEndpoint)(ctx,
+	return makeSetFunc(u, unboundHostAliasAddEndpoint, unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundHostAlias{
 			"alias": alias,
 		},
@@ -45,7 +45,8 @@ func (u *unbound) GetHostAlias(ctx context.Context, id string) (*UnboundHostAlia
 }
 
 func (u *unbound) UpdateHostAlias(ctx context.Context, id string, alias *UnboundHostAlias) error {
-	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundHostAliasUpdateEndpoint, id))(ctx,
+	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundHostAliasUpdateEndpoint, id),
+		unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundHostAlias{
 			"alias": alias,
 		},
@@ -54,5 +55,5 @@ func (u *unbound) UpdateHostAlias(ctx context.Context, id string, alias *Unbound
 }
 
 func (u *unbound) DeleteHostAlias(ctx context.Context, id string) error {
-	return makeDeleteFunc(u, unboundHostAliasDeleteEndpoint)(ctx, id)
+	return makeDeleteFunc(u, unboundHostAliasDeleteEndpoint, unboundReconfigureEndpoint)(ctx, id)
 }

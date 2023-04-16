@@ -24,7 +24,7 @@ type UnboundDomainOverride struct {
 // CRUD operations
 
 func (u *unbound) AddDomainOverride(ctx context.Context, domain *UnboundDomainOverride) (string, error) {
-	return makeSetFunc(u, unboundDomainOverrideAddEndpoint)(ctx,
+	return makeSetFunc(u, unboundDomainOverrideAddEndpoint, unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundDomainOverride{
 			"domain": domain,
 		},
@@ -44,7 +44,8 @@ func (u *unbound) GetDomainOverride(ctx context.Context, id string) (*UnboundDom
 }
 
 func (u *unbound) UpdateDomainOverride(ctx context.Context, id string, domain *UnboundDomainOverride) error {
-	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundDomainOverrideUpdateEndpoint, id))(ctx,
+	_, err := makeSetFunc(u, fmt.Sprintf("%s/%s", unboundDomainOverrideUpdateEndpoint, id),
+		unboundReconfigureEndpoint)(ctx,
 		map[string]*UnboundDomainOverride{
 			"domain": domain,
 		},
@@ -53,5 +54,5 @@ func (u *unbound) UpdateDomainOverride(ctx context.Context, id string, domain *U
 }
 
 func (u *unbound) DeleteDomainOverride(ctx context.Context, id string) error {
-	return makeDeleteFunc(u, unboundDomainOverrideDeleteEndpoint)(ctx, id)
+	return makeDeleteFunc(u, unboundDomainOverrideDeleteEndpoint, unboundReconfigureEndpoint)(ctx, id)
 }
