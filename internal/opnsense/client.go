@@ -7,15 +7,23 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"sync"
+	"time"
+)
+
+const (
+	clientMaxBackoff = 30
+	clientMinBackoff = 1
+	clientMaxRetries = 4
 )
 
 type Client struct {
-	client *http.Client
+	client *retryablehttp.Client
 
 	// Controllers
 	Routes     *routes
@@ -35,15 +43,38 @@ type Options struct {
 	APIKey        string
 	APISecret     string
 	AllowInsecure bool
+
+	// Retries
+	MaxBackoff int64
+	MinBackoff int64
+	MaxRetries int64
 }
 
 func NewClient(options Options) *Client {
 	client := &Client{
-		client: &http.Client{Transport: &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: options.AllowInsecure},
-		}},
+		client: retryablehttp.NewClient(),
+		opts:   options,
+	}
 
-		opts: options,
+	// Configure HTTP client
+	client.client.HTTPClient.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: options.AllowInsecure},
+	}
+
+	//   Set defaults for retries
+	client.client.RetryWaitMax = clientMaxBackoff
+	client.client.RetryWaitMin = clientMinBackoff
+	client.client.RetryMax = clientMaxRetries
+
+	//   Override defaults for retries, if set
+	if options.MaxBackoff != 0 {
+		client.client.RetryWaitMax = time.Duration(options.MaxBackoff) * time.Second
+	}
+	if options.MinBackoff != 0 {
+		client.client.RetryWaitMin = time.Duration(options.MinBackoff) * time.Second
+	}
+	if options.MaxRetries != 0 {
+		client.client.RetryMax = int(options.MaxRetries)
 	}
 
 	// Add controllers
@@ -62,33 +93,34 @@ func (c *Client) getAuth() string {
 }
 
 func (c *Client) doRequest(ctx context.Context, method, endpoint string, body any, resp any) error {
-	// Build request body
-	var bodyBuf io.Reader = nil
-
+	// Create IO readers
+	var bodyReader io.Reader
 	if body != nil {
+		// Marshal body into bytes
 		bodyBytes, err := json.Marshal(body)
 		if err != nil {
 			return err
 		}
-		bodyBuf = bytes.NewBuffer(bodyBytes)
+
+		// Convert body bytes into reader
+		bodyReader = bytes.NewReader(bodyBytes)
 	}
 
 	// Create request
-	req, err := http.NewRequest(method, fmt.Sprintf("%s/api%s", c.opts.Uri, endpoint), bodyBuf)
+	req, err := retryablehttp.NewRequestWithContext(ctx, method, fmt.Sprintf("%s/api%s", c.opts.Uri, endpoint), bodyReader)
 	if err != nil {
 		return err
 	}
 
 	// Add headers
 	req.Header.Add("Authorization", fmt.Sprintf("Basic %s", c.getAuth()))
-
 	if body != nil {
 		req.Header.Add("Content-Type", "application/json")
 	}
 
 	// Log request
-	dReq, _ := httputil.DumpRequest(req, true)
-	tflog.Info(ctx, fmt.Sprintf("\n%s\n%s\n", string(dReq), bodyBuf))
+	dReq, _ := httputil.DumpRequest(req.Request, true)
+	tflog.Info(ctx, fmt.Sprintf("\n%s\n", string(dReq)))
 
 	// Do request
 	res, err := c.client.Do(req)
