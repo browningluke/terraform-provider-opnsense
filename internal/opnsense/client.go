@@ -18,11 +18,9 @@ type Client struct {
 	client *http.Client
 
 	// Controllers
-	Unbound    *unbound
+	Routes     *routes
 	Interfaces *interfaces
-
-	// Mutexes
-	routeMu *sync.Mutex
+	Unbound    *unbound
 
 	opts Options
 }
@@ -45,12 +43,11 @@ func NewClient(options Options) *Client {
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: options.AllowInsecure},
 		}},
 
-		// Mutexes
-		routeMu: &sync.Mutex{},
-		opts:    options,
+		opts: options,
 	}
 
 	// Add controllers
+	client.Routes = newRoutes(client)
 	client.Interfaces = newInterfaces(client)
 	client.Unbound = newUnbound(client)
 
