@@ -18,7 +18,8 @@ type Client struct {
 	client *http.Client
 
 	// Controllers
-	Unbound *unbound
+	Unbound    *unbound
+	Interfaces *interfaces
 
 	// Mutexes
 	routeMu *sync.Mutex
@@ -50,6 +51,7 @@ func NewClient(options Options) *Client {
 	}
 
 	// Add controllers
+	client.Interfaces = newInterfaces(client)
 	client.Unbound = newUnbound(client)
 
 	return client

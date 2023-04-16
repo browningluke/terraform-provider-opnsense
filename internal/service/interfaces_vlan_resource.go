@@ -69,7 +69,7 @@ func (r *InterfacesVlanResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Add VLAN to OPNsense interfaces
-	id, err := r.client.InterfacesAddVlan(ctx, vlan)
+	id, err := r.client.Interfaces.AddVlan(ctx, vlan)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create vlan, got error: %s", err))
@@ -97,7 +97,7 @@ func (r *InterfacesVlanResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Get VLAN from OPNsense core API
-	vlan, err := r.client.InterfacesGetVlan(ctx, data.Id.ValueString())
+	vlan, err := r.client.Interfaces.GetVlan(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read vlan, got error: %s", err))
@@ -144,7 +144,7 @@ func (r *InterfacesVlanResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Update VLAN in OPNsense core
-	err = r.client.InterfacesUpdateVlan(ctx, data.Id.ValueString(), vlan)
+	err = r.client.Interfaces.UpdateVlan(ctx, data.Id.ValueString(), vlan)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create vlan, got error: %s", err))
@@ -165,7 +165,7 @@ func (r *InterfacesVlanResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	err := r.client.InterfacesDeleteVlan(ctx, data.Id.ValueString())
+	err := r.client.Interfaces.DeleteVlan(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
