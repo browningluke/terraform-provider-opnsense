@@ -99,7 +99,7 @@ func (c *Client) DeleteRoute(ctx context.Context, id string) error {
 	}
 
 	// Reconfigure (i.e. restart) the unbound resolver
-	err = c.reconfigureUnbound(ctx)
+	err = c.reconfigureRoutes(ctx)
 	if err != nil {
 		return err
 	}
