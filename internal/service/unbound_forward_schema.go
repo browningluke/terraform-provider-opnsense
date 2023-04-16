@@ -90,7 +90,7 @@ func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*opnse
 	return &opnsense.UnboundForward{
 		Enabled:  enabled,
 		Domain:   d.Domain.ValueString(),
-		Type:     d.Type.ValueString(),
+		Type:     opnsense.SelectedMap(d.Type.ValueString()),
 		Server:   d.ServerIP.ValueString(),
 		Port:     fmt.Sprintf("%d", d.ServerPort.ValueInt64()),
 		VerifyCN: d.VerifyCN.ValueString(),
@@ -107,7 +107,7 @@ func convertUnboundForwardStructToSchema(d *opnsense.UnboundForward) (*UnboundFo
 	model := &UnboundForwardResourceModel{
 		Enabled:    types.BoolValue(false),
 		Domain:     types.StringValue(d.Domain),
-		Type:       types.StringValue(d.Type),
+		Type:       types.StringValue(d.Type.String()),
 		ServerIP:   types.StringValue(d.Server),
 		ServerPort: types.Int64Value(serverPort),
 		VerifyCN:   types.StringValue(d.VerifyCN),

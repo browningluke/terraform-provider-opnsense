@@ -69,7 +69,7 @@ func (r *RouteResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	// Add route to unbound
-	id, err := r.client.AddRoute(ctx, route)
+	id, err := r.client.Routes.AddRoute(ctx, route)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create route, got error: %s", err))
@@ -97,7 +97,7 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	// Get route from OPNsense core API
-	route, err := r.client.GetRoute(ctx, data.Id.ValueString())
+	route, err := r.client.Routes.GetRoute(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read route, got error: %s", err))
@@ -138,7 +138,7 @@ func (r *RouteResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	// Update route in OPNsense core
-	err = r.client.UpdateRoute(ctx, data.Id.ValueString(), route)
+	err = r.client.Routes.UpdateRoute(ctx, data.Id.ValueString(), route)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create route, got error: %s", err))
@@ -159,7 +159,7 @@ func (r *RouteResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	err := r.client.DeleteRoute(ctx, data.Id.ValueString())
+	err := r.client.Routes.DeleteRoute(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

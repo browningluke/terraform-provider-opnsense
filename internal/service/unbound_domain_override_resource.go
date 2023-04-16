@@ -69,7 +69,7 @@ func (r *UnboundDomainOverrideResource) Create(ctx context.Context, req resource
 	}
 
 	// Add domain override to unbound
-	id, err := r.client.UnboundAddDomainOverride(ctx, domainOverride)
+	id, err := r.client.Unbound.AddDomainOverride(ctx, domainOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create domain override, got error: %s", err))
@@ -97,7 +97,7 @@ func (r *UnboundDomainOverrideResource) Read(ctx context.Context, req resource.R
 	}
 
 	// Get domain override from OPNsense unbound API
-	override, err := r.client.UnboundGetDomainOverride(ctx, data.Id.ValueString())
+	override, err := r.client.Unbound.GetDomainOverride(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read domain override, got error: %s", err))
@@ -138,7 +138,7 @@ func (r *UnboundDomainOverrideResource) Update(ctx context.Context, req resource
 	}
 
 	// Update domain override in unbound
-	err = r.client.UnboundUpdateDomainOverride(ctx, data.Id.ValueString(), domainOverride)
+	err = r.client.Unbound.UpdateDomainOverride(ctx, data.Id.ValueString(), domainOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create domain override, got error: %s", err))
@@ -159,7 +159,7 @@ func (r *UnboundDomainOverrideResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	err := r.client.UnboundDeleteDomainOverride(ctx, data.Id.ValueString())
+	err := r.client.Unbound.DeleteDomainOverride(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

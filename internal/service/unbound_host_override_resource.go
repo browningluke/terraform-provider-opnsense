@@ -69,7 +69,7 @@ func (r *UnboundHostOverrideResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Add host override to unbound
-	id, err := r.client.UnboundAddHostOverride(ctx, hostOverride)
+	id, err := r.client.Unbound.AddHostOverride(ctx, hostOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create host override, got error: %s", err))
@@ -97,7 +97,7 @@ func (r *UnboundHostOverrideResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	// Get host override from OPNsense unbound API
-	override, err := r.client.UnboundGetHostOverride(ctx, data.Id.ValueString())
+	override, err := r.client.Unbound.GetHostOverride(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read host override, got error: %s", err))
@@ -138,7 +138,7 @@ func (r *UnboundHostOverrideResource) Update(ctx context.Context, req resource.U
 	}
 
 	// Update host override in unbound
-	err = r.client.UnboundUpdateHostOverride(ctx, data.Id.ValueString(), hostOverride)
+	err = r.client.Unbound.UpdateHostOverride(ctx, data.Id.ValueString(), hostOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create host override, got error: %s", err))
@@ -159,7 +159,7 @@ func (r *UnboundHostOverrideResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	err := r.client.UnboundDeleteHostOverride(ctx, data.Id.ValueString())
+	err := r.client.Unbound.DeleteHostOverride(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

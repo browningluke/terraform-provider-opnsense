@@ -65,7 +65,7 @@ func convertRouteSchemaToStruct(d *RouteResourceModel) (*opnsense.Route, error) 
 	return &opnsense.Route{
 		Disabled:    disabled,
 		Description: d.Description.ValueString(),
-		Gateway:     d.Gateway.ValueString(),
+		Gateway:     opnsense.SelectedMap(d.Gateway.ValueString()),
 		Network:     d.Network.ValueString(),
 	}, nil
 }
@@ -74,7 +74,7 @@ func convertRouteStructToSchema(d *opnsense.Route) (*RouteResourceModel, error) 
 	model := &RouteResourceModel{
 		Enabled:     types.BoolValue(true),
 		Description: types.StringNull(),
-		Gateway:     types.StringValue(d.Gateway),
+		Gateway:     types.StringValue(d.Gateway.String()),
 		Network:     types.StringValue(d.Network),
 	}
 

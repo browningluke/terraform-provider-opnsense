@@ -1,11 +1,26 @@
 package opnsense
 
-// Response structs
+import (
+	"sync"
+)
 
-type interfacesAddResp struct {
-	Result      string                 `json:"result"`
-	UUID        string                 `json:"uuid"`
-	Validations map[string]interface{} `json:"validations,omitempty"`
+// Interfaces controller
+type interfaces struct {
+	client *Client
+	mu     *sync.Mutex
 }
 
-// Helper functions
+func newInterfaces(c *Client) *interfaces {
+	return &interfaces{
+		client: c,
+		mu:     &sync.Mutex{},
+	}
+}
+
+func (i *interfaces) Client() *Client {
+	return i.client
+}
+
+func (i *interfaces) Mutex() *sync.Mutex {
+	return i.mu
+}

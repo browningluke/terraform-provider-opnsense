@@ -1,38 +1,28 @@
 package opnsense
 
 import (
-	"context"
-	"fmt"
+	"sync"
 )
 
-// Response structs
+const unboundReconfigureEndpoint = "/unbound/service/reconfigure"
 
-type unboundResp struct {
-	Result string `json:"result"`
+// Unbound controller
+type unbound struct {
+	client *Client
+	mu     *sync.Mutex
 }
 
-type unboundAddResp struct {
-	Result      string            `json:"result"`
-	UUID        string            `json:"uuid"`
-	Validations map[string]string `json:"validations,omitempty"`
+func newUnbound(c *Client) *unbound {
+	return &unbound{
+		client: c,
+		mu:     &sync.Mutex{},
+	}
 }
 
-// Helper functions
+func (u *unbound) Client() *Client {
+	return u.client
+}
 
-func (c *Client) reconfigureUnbound(ctx context.Context) error {
-	// Send reconfigure request to OPNsense
-	respJson := &struct {
-		Status string `json:"status"`
-	}{}
-	err := c.doRequest(ctx, "POST", "/unbound/service/reconfigure", nil, respJson)
-	if err != nil {
-		return err
-	}
-
-	// Validate unbound restarted correctly
-	if respJson.Status != "ok" {
-		return fmt.Errorf("unbound reconfigure failed. status: %s", respJson.Status)
-	}
-
-	return nil
+func (u *unbound) Mutex() *sync.Mutex {
+	return u.mu
 }

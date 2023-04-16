@@ -71,7 +71,7 @@ func (r *UnboundHostAliasResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Add host alias to unbound
-	id, err := r.client.UnboundAddHostAlias(ctx, hostAlias)
+	id, err := r.client.Unbound.AddHostAlias(ctx, hostAlias)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create host alias, got error: %s", err))
@@ -99,7 +99,7 @@ func (r *UnboundHostAliasResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	// Get host alias from OPNsense unbound API
-	alias, err := r.client.UnboundGetHostAlias(ctx, data.Id.ValueString())
+	alias, err := r.client.Unbound.GetHostAlias(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read parse alias, got error: %s", err))
@@ -141,7 +141,7 @@ func (r *UnboundHostAliasResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	// Update host override in unbound
-	err = r.client.UnboundUpdateHostAlias(ctx, data.Id.ValueString(), aliasOverride)
+	err = r.client.Unbound.UpdateHostAlias(ctx, data.Id.ValueString(), aliasOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to update host alias, got error: %s", err))
@@ -162,7 +162,7 @@ func (r *UnboundHostAliasResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	err := r.client.UnboundDeleteHostAlias(ctx, data.Id.ValueString())
+	err := r.client.Unbound.DeleteHostAlias(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

@@ -78,8 +78,8 @@ func convertInterfacesVlanSchemaToStruct(d *InterfacesVlanResourceModel) (*opnse
 	return &opnsense.InterfacesVlan{
 		Description: d.Description.ValueString(),
 		Tag:         fmt.Sprintf("%d", d.Tag.ValueInt64()),
-		Priority:    fmt.Sprintf("%d", d.Priority.ValueInt64()),
-		Parent:      d.Parent.ValueString(),
+		Priority:    opnsense.SelectedMap(fmt.Sprintf("%d", d.Priority.ValueInt64())),
+		Parent:      opnsense.SelectedMap(d.Parent.ValueString()),
 		Device:      d.Device.ValueString(),
 	}, nil
 }
@@ -89,7 +89,7 @@ func convertInterfacesVlanStructToSchema(d *opnsense.InterfacesVlan) (*Interface
 		Description: types.StringNull(),
 		Tag:         types.Int64Null(),
 		Priority:    types.Int64Null(),
-		Parent:      types.StringValue(d.Parent),
+		Parent:      types.StringValue(d.Parent.String()),
 		Device:      types.StringValue(d.Device),
 	}
 
@@ -106,7 +106,7 @@ func convertInterfacesVlanStructToSchema(d *opnsense.InterfacesVlan) (*Interface
 	model.Tag = types.Int64Value(tag)
 
 	// Parse 'Priority'
-	priority, err := strconv.ParseInt(d.Priority, 10, 64)
+	priority, err := strconv.ParseInt(d.Priority.String(), 10, 64)
 	if err != nil {
 		return nil, err
 	}
