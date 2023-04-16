@@ -2,10 +2,12 @@ package provider
 
 import (
 	"context"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"terraform-provider-opnsense/internal/opnsense"
 	"terraform-provider-opnsense/internal/service"
@@ -28,6 +30,9 @@ type OPNsenseProviderModel struct {
 	APIKey        types.String `tfsdk:"api_key"`
 	APISecret     types.String `tfsdk:"api_secret"`
 	AllowInsecure types.Bool   `tfsdk:"allow_insecure"`
+	MaxBackoff    types.Int64  `tfsdk:"max_backoff"`
+	MinBackoff    types.Int64  `tfsdk:"min_backoff"`
+	MaxRetries    types.Int64  `tfsdk:"retries"`
 }
 
 func (p *OPNsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -54,6 +59,27 @@ func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaReques
 				MarkdownDescription: "Allow insecure TLS connections. Alternatively, can be configured using the `OPNSENSE_ALLOW_INSECURE` environment variable. Defaults to `false`.",
 				Optional:            true,
 			},
+			"max_backoff": schema.Int64Attribute{
+				MarkdownDescription: "Maximum backoff period in seconds after failed API calls. Alternatively, can be configured using the `OPNSENSE_MAX_BACKOFF` environment variable.",
+				Optional:            true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(1),
+				},
+			},
+			"min_backoff": schema.Int64Attribute{
+				MarkdownDescription: "Minimum backoff period in seconds after failed API calls. Alternatively, can be configured using the `OPNSENSE_MIN_BACKOFF` environment variable.",
+				Optional:            true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(1),
+				},
+			},
+			"retries": schema.Int64Attribute{
+				MarkdownDescription: "Maximum number of retries to perform when an API request fails. Alternatively, can be configured using the `OPNSENSE_RETRIES` environment variable.",
+				Optional:            true,
+				Validators: []validator.Int64{
+					int64validator.Between(1, 2147483647), // Since we convert the int64 to an int(32), set an upper bound.
+				},
+			},
 		},
 	}
 }
@@ -72,6 +98,9 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 		APIKey:        data.APIKey.ValueString(),
 		APISecret:     data.APISecret.ValueString(),
 		AllowInsecure: data.AllowInsecure.ValueBool(),
+		MaxBackoff:    data.MaxBackoff.ValueInt64(),
+		MinBackoff:    data.MinBackoff.ValueInt64(),
+		MaxRetries:    data.MaxRetries.ValueInt64(),
 	}
 
 	client := opnsense.NewClient(opnOptions)
