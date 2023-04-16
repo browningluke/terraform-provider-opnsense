@@ -72,7 +72,7 @@ func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*o
 
 	return &opnsense.UnboundHostAlias{
 		Enabled:     enabled,
-		Host:        d.Override.ValueString(),
+		Host:        opnsense.SelectedMap(d.Override.ValueString()),
 		Hostname:    d.Hostname.ValueString(),
 		Domain:      d.Domain.ValueString(),
 		Description: d.Description.ValueString(),

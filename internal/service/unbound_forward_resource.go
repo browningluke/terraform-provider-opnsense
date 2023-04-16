@@ -69,7 +69,7 @@ func (r *UnboundForwardResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Add forward to unbound
-	id, err := r.client.UnboundAddForward(ctx, forward)
+	id, err := r.client.Unbound.AddForward(ctx, forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create forward, got error: %s", err))
@@ -97,7 +97,7 @@ func (r *UnboundForwardResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Get forward from OPNsense unbound API
-	forward, err := r.client.UnboundGetForward(ctx, data.Id.ValueString())
+	forward, err := r.client.Unbound.GetForward(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read forward, got error: %s", err))
@@ -138,7 +138,7 @@ func (r *UnboundForwardResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Update forward in unbound
-	err = r.client.UnboundUpdateForward(ctx, data.Id.ValueString(), forward)
+	err = r.client.Unbound.UpdateForward(ctx, data.Id.ValueString(), forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create forward, got error: %s", err))
@@ -159,7 +159,7 @@ func (r *UnboundForwardResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	err := r.client.UnboundDeleteForward(ctx, data.Id.ValueString())
+	err := r.client.Unbound.DeleteForward(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

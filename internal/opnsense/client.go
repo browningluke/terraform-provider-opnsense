@@ -17,11 +17,19 @@ import (
 type Client struct {
 	client *http.Client
 
+	// Controllers
+	Unbound *unbound
+
 	// Mutexes
-	routeMu   *sync.Mutex
-	unboundMu *sync.Mutex
+	routeMu *sync.Mutex
 
 	opts Options
+}
+
+type controller interface {
+	Client() *Client
+	Mutex() *sync.Mutex
+	Reconfigure(ctx context.Context) error
 }
 
 type Options struct {
@@ -32,17 +40,20 @@ type Options struct {
 }
 
 func NewClient(options Options) *Client {
-	return &Client{
+	client := &Client{
 		client: &http.Client{Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: options.AllowInsecure},
 		}},
 
 		// Mutexes
-		routeMu:   &sync.Mutex{},
-		unboundMu: &sync.Mutex{},
-
-		opts: options,
+		routeMu: &sync.Mutex{},
+		opts:    options,
 	}
+
+	// Add controllers
+	client.Unbound = newUnbound(client)
+
+	return client
 }
 
 // Requests
