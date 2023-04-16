@@ -52,3 +52,6 @@ provider "opnsense" {
 ### Optional
 
 - `allow_insecure` (Boolean) Allow insecure TLS connections. Alternatively, can be configured using the `OPNSENSE_ALLOW_INSECURE` environment variable. Defaults to `false`.
+- `max_backoff` (Number) Maximum backoff period in seconds after failed API calls. Alternatively, can be configured using the `OPNSENSE_MAX_BACKOFF` environment variable.
+- `min_backoff` (Number) Minimum backoff period in seconds after failed API calls. Alternatively, can be configured using the `OPNSENSE_MIN_BACKOFF` environment variable.
+- `retries` (Number) Maximum number of retries to perform when an API request fails. Alternatively, can be configured using the `OPNSENSE_RETRIES` environment variable.
