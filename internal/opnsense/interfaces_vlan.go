@@ -107,7 +107,7 @@ func (c *Client) InterfacesDeleteVlan(ctx context.Context, id string) error {
 	}
 
 	// Reconfigure the VLAN controller
-	err = c.reconfigureUnbound(ctx)
+	err = c.reconfigureInterfacesVlan(ctx)
 	if err != nil {
 		return err
 	}
