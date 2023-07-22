@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"github.com/browningluke/opnsense-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -9,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/opnsense"
 	"terraform-provider-opnsense/internal/service"
 )
 

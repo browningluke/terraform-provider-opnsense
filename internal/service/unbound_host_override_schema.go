@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/browningluke/opnsense-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -14,7 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
-	"terraform-provider-opnsense/internal/opnsense"
 )
 
 // UnboundHostOverrideResourceModel describes the resource data model.

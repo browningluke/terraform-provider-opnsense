@@ -3,8 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
-	"terraform-provider-opnsense/internal/opnsense"
-
+	"github.com/browningluke/opnsense-go"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"

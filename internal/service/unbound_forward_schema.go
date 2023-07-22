@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/browningluke/opnsense-go"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -12,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
-	"terraform-provider-opnsense/internal/opnsense"
 )
 
 // UnboundForwardResourceModel describes the resource data model.
