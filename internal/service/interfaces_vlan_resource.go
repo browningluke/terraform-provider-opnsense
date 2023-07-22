@@ -98,6 +98,12 @@ func (r *InterfacesVlanResource) Read(ctx context.Context, req resource.ReadRequ
 	// Get VLAN from OPNsense core API
 	vlan, err := r.client.Interfaces.GetVlan(ctx, data.Id.ValueString())
 	if err != nil {
+		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+			tflog.Warn(ctx, fmt.Sprintf("vlan not present in remote, removing from state"))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read vlan, got error: %s", err))
 		return

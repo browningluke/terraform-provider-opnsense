@@ -98,6 +98,12 @@ func (r *UnboundDomainOverrideResource) Read(ctx context.Context, req resource.R
 	// Get domain override from OPNsense unbound API
 	override, err := r.client.Unbound.GetDomainOverride(ctx, data.Id.ValueString())
 	if err != nil {
+		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+			tflog.Warn(ctx, fmt.Sprintf("domain override not present in remote, removing from state"))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read domain override, got error: %s", err))
 		return

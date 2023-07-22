@@ -98,6 +98,12 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	// Get route from OPNsense core API
 	route, err := r.client.Routes.GetRoute(ctx, data.Id.ValueString())
 	if err != nil {
+		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+			tflog.Warn(ctx, fmt.Sprintf("route not present in remote, removing from state"))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read route, got error: %s", err))
 		return
