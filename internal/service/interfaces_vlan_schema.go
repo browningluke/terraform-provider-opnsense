@@ -2,7 +2,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/interfaces"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -74,17 +75,17 @@ func InterfacesVlanResourceSchema() schema.Schema {
 	}
 }
 
-func convertInterfacesVlanSchemaToStruct(d *InterfacesVlanResourceModel) (*opnsense.InterfacesVlan, error) {
-	return &opnsense.InterfacesVlan{
+func convertInterfacesVlanSchemaToStruct(d *InterfacesVlanResourceModel) (*interfaces.Vlan, error) {
+	return &interfaces.Vlan{
 		Description: d.Description.ValueString(),
 		Tag:         fmt.Sprintf("%d", d.Tag.ValueInt64()),
-		Priority:    opnsense.SelectedMap(fmt.Sprintf("%d", d.Priority.ValueInt64())),
-		Parent:      opnsense.SelectedMap(d.Parent.ValueString()),
+		Priority:    api.SelectedMap(fmt.Sprintf("%d", d.Priority.ValueInt64())),
+		Parent:      api.SelectedMap(d.Parent.ValueString()),
 		Device:      d.Device.ValueString(),
 	}, nil
 }
 
-func convertInterfacesVlanStructToSchema(d *opnsense.InterfacesVlan) (*InterfacesVlanResourceModel, error) {
+func convertInterfacesVlanStructToSchema(d *interfaces.Vlan) (*InterfacesVlanResourceModel, error) {
 	model := &InterfacesVlanResourceModel{
 		Description: types.StringNull(),
 		Tag:         types.Int64Null(),

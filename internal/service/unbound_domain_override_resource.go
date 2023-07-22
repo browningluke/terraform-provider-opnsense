@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +23,7 @@ func NewUnboundDomainOverrideResource() resource.Resource {
 
 // UnboundDomainOverrideResource defines the resource implementation.
 type UnboundDomainOverrideResource struct {
-	client *opnsense.Client
+	client opnsense.Client
 }
 
 func (r *UnboundDomainOverrideResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -37,7 +40,7 @@ func (r *UnboundDomainOverrideResource) Configure(ctx context.Context, req resou
 		return
 	}
 
-	client, ok := req.ProviderData.(*opnsense.Client)
+	apiClient, ok := req.ProviderData.(*api.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -46,7 +49,7 @@ func (r *UnboundDomainOverrideResource) Configure(ctx context.Context, req resou
 		return
 	}
 
-	r.client = client
+	r.client = opnsense.NewClient(apiClient)
 }
 
 func (r *UnboundDomainOverrideResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -68,7 +71,7 @@ func (r *UnboundDomainOverrideResource) Create(ctx context.Context, req resource
 	}
 
 	// Add domain override to unbound
-	id, err := r.client.Unbound.AddDomainOverride(ctx, domainOverride)
+	id, err := r.client.Unbound().AddDomainOverride(ctx, domainOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create domain override, got error: %s", err))
@@ -96,9 +99,10 @@ func (r *UnboundDomainOverrideResource) Read(ctx context.Context, req resource.R
 	}
 
 	// Get domain override from OPNsense unbound API
-	override, err := r.client.Unbound.GetDomainOverride(ctx, data.Id.ValueString())
+	override, err := r.client.Unbound().GetDomainOverride(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("domain override not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
@@ -143,7 +147,7 @@ func (r *UnboundDomainOverrideResource) Update(ctx context.Context, req resource
 	}
 
 	// Update domain override in unbound
-	err = r.client.Unbound.UpdateDomainOverride(ctx, data.Id.ValueString(), domainOverride)
+	err = r.client.Unbound().UpdateDomainOverride(ctx, data.Id.ValueString(), domainOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create domain override, got error: %s", err))
@@ -164,7 +168,7 @@ func (r *UnboundDomainOverrideResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	err := r.client.Unbound.DeleteDomainOverride(ctx, data.Id.ValueString())
+	err := r.client.Unbound().DeleteDomainOverride(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

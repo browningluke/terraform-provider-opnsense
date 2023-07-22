@@ -2,7 +2,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -103,7 +104,7 @@ func unboundHostOverrideResourceSchema() schema.Schema {
 	}
 }
 
-func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceModel) (*opnsense.UnboundHostOverride, error) {
+func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceModel) (*unbound.HostOverride, error) {
 	// Parse 'Enabled'
 	var enabled string
 	if d.Enabled.ValueBool() {
@@ -118,11 +119,11 @@ func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceMode
 		mxPriority = ""
 	}
 
-	return &opnsense.UnboundHostOverride{
+	return &unbound.HostOverride{
 		Enabled:     enabled,
 		Hostname:    d.Hostname.ValueString(),
 		Domain:      d.Domain.ValueString(),
-		Type:        opnsense.SelectedMap(d.Type.ValueString()),
+		Type:        api.SelectedMap(d.Type.ValueString()),
 		Server:      d.Server.ValueString(),
 		MXDomain:    d.MXDomain.ValueString(),
 		MXPriority:  mxPriority,
@@ -130,7 +131,7 @@ func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceMode
 	}, nil
 }
 
-func convertUnboundHostOverrideStructToSchema(d *opnsense.UnboundHostOverride) (*UnboundHostOverrideResourceModel, error) {
+func convertUnboundHostOverrideStructToSchema(d *unbound.HostOverride) (*UnboundHostOverrideResourceModel, error) {
 	model := &UnboundHostOverrideResourceModel{
 		Enabled:     types.BoolValue(false),
 		Hostname:    types.StringValue(d.Hostname),

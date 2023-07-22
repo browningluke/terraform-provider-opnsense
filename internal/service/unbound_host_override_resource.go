@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +23,7 @@ func NewUnboundHostOverrideResource() resource.Resource {
 
 // UnboundHostOverrideResource defines the resource implementation.
 type UnboundHostOverrideResource struct {
-	client *opnsense.Client
+	client opnsense.Client
 }
 
 func (r *UnboundHostOverrideResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -37,7 +40,7 @@ func (r *UnboundHostOverrideResource) Configure(ctx context.Context, req resourc
 		return
 	}
 
-	client, ok := req.ProviderData.(*opnsense.Client)
+	apiClient, ok := req.ProviderData.(*api.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -46,7 +49,7 @@ func (r *UnboundHostOverrideResource) Configure(ctx context.Context, req resourc
 		return
 	}
 
-	r.client = client
+	r.client = opnsense.NewClient(apiClient)
 }
 
 func (r *UnboundHostOverrideResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -68,7 +71,7 @@ func (r *UnboundHostOverrideResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Add host override to unbound
-	id, err := r.client.Unbound.AddHostOverride(ctx, hostOverride)
+	id, err := r.client.Unbound().AddHostOverride(ctx, hostOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create host override, got error: %s", err))
@@ -96,9 +99,10 @@ func (r *UnboundHostOverrideResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	// Get host override from OPNsense unbound API
-	override, err := r.client.Unbound.GetHostOverride(ctx, data.Id.ValueString())
+	override, err := r.client.Unbound().GetHostOverride(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("host override not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
@@ -143,7 +147,7 @@ func (r *UnboundHostOverrideResource) Update(ctx context.Context, req resource.U
 	}
 
 	// Update host override in unbound
-	err = r.client.Unbound.UpdateHostOverride(ctx, data.Id.ValueString(), hostOverride)
+	err = r.client.Unbound().UpdateHostOverride(ctx, data.Id.ValueString(), hostOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create host override, got error: %s", err))
@@ -164,7 +168,7 @@ func (r *UnboundHostOverrideResource) Delete(ctx context.Context, req resource.D
 		return
 	}
 
-	err := r.client.Unbound.DeleteHostOverride(ctx, data.Id.ValueString())
+	err := r.client.Unbound().DeleteHostOverride(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

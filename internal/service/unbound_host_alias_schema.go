@@ -1,7 +1,8 @@
 package service
 
 import (
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -61,7 +62,7 @@ func unboundHostAliasResourceSchema() schema.Schema {
 	}
 }
 
-func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*opnsense.UnboundHostAlias, error) {
+func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*unbound.HostAlias, error) {
 	// Parse 'Enabled'
 	var enabled string
 	if d.Enabled.ValueBool() {
@@ -70,16 +71,16 @@ func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*o
 		enabled = "0"
 	}
 
-	return &opnsense.UnboundHostAlias{
+	return &unbound.HostAlias{
 		Enabled:     enabled,
-		Host:        opnsense.SelectedMap(d.Override.ValueString()),
+		Host:        api.SelectedMap(d.Override.ValueString()),
 		Hostname:    d.Hostname.ValueString(),
 		Domain:      d.Domain.ValueString(),
 		Description: d.Description.ValueString(),
 	}, nil
 }
 
-func convertUnboundHostAliasStructToSchema(d *opnsense.UnboundHostAlias) (*UnboundHostAliasResourceModel, error) {
+func convertUnboundHostAliasStructToSchema(d *unbound.HostAlias) (*UnboundHostAliasResourceModel, error) {
 	model := &UnboundHostAliasResourceModel{
 		Enabled:     types.BoolValue(false),
 		Hostname:    types.StringValue(d.Hostname),

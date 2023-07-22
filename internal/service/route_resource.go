@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +23,7 @@ func NewRouteResource() resource.Resource {
 
 // RouteResource defines the resource implementation.
 type RouteResource struct {
-	client *opnsense.Client
+	client opnsense.Client
 }
 
 func (r *RouteResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -37,7 +40,7 @@ func (r *RouteResource) Configure(ctx context.Context, req resource.ConfigureReq
 		return
 	}
 
-	client, ok := req.ProviderData.(*opnsense.Client)
+	apiClient, ok := req.ProviderData.(*api.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -46,7 +49,7 @@ func (r *RouteResource) Configure(ctx context.Context, req resource.ConfigureReq
 		return
 	}
 
-	r.client = client
+	r.client = opnsense.NewClient(apiClient)
 }
 
 func (r *RouteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -68,7 +71,7 @@ func (r *RouteResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	// Add route to unbound
-	id, err := r.client.Routes.AddRoute(ctx, route)
+	id, err := r.client.Routes().AddRoute(ctx, route)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create route, got error: %s", err))
@@ -96,9 +99,10 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	}
 
 	// Get route from OPNsense core API
-	route, err := r.client.Routes.GetRoute(ctx, data.Id.ValueString())
+	route, err := r.client.Routes().GetRoute(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("route not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
@@ -143,7 +147,7 @@ func (r *RouteResource) Update(ctx context.Context, req resource.UpdateRequest, 
 	}
 
 	// Update route in OPNsense core
-	err = r.client.Routes.UpdateRoute(ctx, data.Id.ValueString(), route)
+	err = r.client.Routes().UpdateRoute(ctx, data.Id.ValueString(), route)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create route, got error: %s", err))
@@ -164,7 +168,7 @@ func (r *RouteResource) Delete(ctx context.Context, req resource.DeleteRequest, 
 		return
 	}
 
-	err := r.client.Routes.DeleteRoute(ctx, data.Id.ValueString())
+	err := r.client.Routes().DeleteRoute(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

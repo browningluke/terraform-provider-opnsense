@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +23,7 @@ func NewUnboundHostAliasResource() resource.Resource {
 
 // UnboundHostAliasResource defines the resource implementation.
 type UnboundHostAliasResource struct {
-	client *opnsense.Client
+	client opnsense.Client
 }
 
 func (r *UnboundHostAliasResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -37,18 +40,16 @@ func (r *UnboundHostAliasResource) Configure(ctx context.Context, req resource.C
 		return
 	}
 
-	client, ok := req.ProviderData.(*opnsense.Client)
-
+	apiClient, ok := req.ProviderData.(*api.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *opnsense.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
-
 		return
 	}
 
-	r.client = client
+	r.client = opnsense.NewClient(apiClient)
 }
 
 func (r *UnboundHostAliasResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -70,7 +71,7 @@ func (r *UnboundHostAliasResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Add host alias to unbound
-	id, err := r.client.Unbound.AddHostAlias(ctx, hostAlias)
+	id, err := r.client.Unbound().AddHostAlias(ctx, hostAlias)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create host alias, got error: %s", err))
@@ -98,9 +99,10 @@ func (r *UnboundHostAliasResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	// Get host alias from OPNsense unbound API
-	alias, err := r.client.Unbound.GetHostAlias(ctx, data.Id.ValueString())
+	alias, err := r.client.Unbound().GetHostAlias(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("host alias not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
@@ -146,7 +148,7 @@ func (r *UnboundHostAliasResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	// Update host override in unbound
-	err = r.client.Unbound.UpdateHostAlias(ctx, data.Id.ValueString(), aliasOverride)
+	err = r.client.Unbound().UpdateHostAlias(ctx, data.Id.ValueString(), aliasOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to update host alias, got error: %s", err))
@@ -167,7 +169,7 @@ func (r *UnboundHostAliasResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	err := r.client.Unbound.DeleteHostAlias(ctx, data.Id.ValueString())
+	err := r.client.Unbound().DeleteHostAlias(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

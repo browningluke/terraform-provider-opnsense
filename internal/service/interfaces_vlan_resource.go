@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +23,7 @@ func NewInterfacesVlanResource() resource.Resource {
 
 // InterfacesVlanResource defines the resource implementation.
 type InterfacesVlanResource struct {
-	client *opnsense.Client
+	client opnsense.Client
 }
 
 func (r *InterfacesVlanResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -37,7 +40,7 @@ func (r *InterfacesVlanResource) Configure(ctx context.Context, req resource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*opnsense.Client)
+	apiClient, ok := req.ProviderData.(*api.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -46,7 +49,7 @@ func (r *InterfacesVlanResource) Configure(ctx context.Context, req resource.Con
 		return
 	}
 
-	r.client = client
+	r.client = opnsense.NewClient(apiClient)
 }
 
 func (r *InterfacesVlanResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -68,7 +71,7 @@ func (r *InterfacesVlanResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Add VLAN to OPNsense interfaces
-	id, err := r.client.Interfaces.AddVlan(ctx, vlan)
+	id, err := r.client.Interfaces().AddVlan(ctx, vlan)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create vlan, got error: %s", err))
@@ -96,9 +99,10 @@ func (r *InterfacesVlanResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Get VLAN from OPNsense core API
-	vlan, err := r.client.Interfaces.GetVlan(ctx, data.Id.ValueString())
+	vlan, err := r.client.Interfaces().GetVlan(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("vlan not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
@@ -149,7 +153,7 @@ func (r *InterfacesVlanResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Update VLAN in OPNsense core
-	err = r.client.Interfaces.UpdateVlan(ctx, data.Id.ValueString(), vlan)
+	err = r.client.Interfaces().UpdateVlan(ctx, data.Id.ValueString(), vlan)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create vlan, got error: %s", err))
@@ -170,7 +174,7 @@ func (r *InterfacesVlanResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	err := r.client.Interfaces.DeleteVlan(ctx, data.Id.ValueString())
+	err := r.client.Interfaces().DeleteVlan(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
