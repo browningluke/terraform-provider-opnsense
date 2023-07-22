@@ -2,7 +2,8 @@ package service
 
 import (
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -78,7 +79,7 @@ func unboundForwardResourceSchema() schema.Schema {
 	}
 }
 
-func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*opnsense.UnboundForward, error) {
+func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*unbound.Forward, error) {
 	// Parse 'Enabled'
 	var enabled string
 	if d.Enabled.ValueBool() {
@@ -87,17 +88,17 @@ func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*opnse
 		enabled = "0"
 	}
 
-	return &opnsense.UnboundForward{
+	return &unbound.Forward{
 		Enabled:  enabled,
 		Domain:   d.Domain.ValueString(),
-		Type:     opnsense.SelectedMap(d.Type.ValueString()),
+		Type:     api.SelectedMap(d.Type.ValueString()),
 		Server:   d.ServerIP.ValueString(),
 		Port:     fmt.Sprintf("%d", d.ServerPort.ValueInt64()),
 		VerifyCN: d.VerifyCN.ValueString(),
 	}, nil
 }
 
-func convertUnboundForwardStructToSchema(d *opnsense.UnboundForward) (*UnboundForwardResourceModel, error) {
+func convertUnboundForwardStructToSchema(d *unbound.Forward) (*UnboundForwardResourceModel, error) {
 	// Parse 'ServerPort'
 	serverPort, err := strconv.ParseInt(d.Port, 10, 64)
 	if err != nil {

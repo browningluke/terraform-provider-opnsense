@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -53,7 +53,7 @@ func unboundDomainOverrideResourceSchema() schema.Schema {
 	}
 }
 
-func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResourceModel) (*opnsense.UnboundDomainOverride, error) {
+func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResourceModel) (*unbound.DomainOverride, error) {
 	// Parse 'Enabled'
 	var enabled string
 	if d.Enabled.ValueBool() {
@@ -62,7 +62,7 @@ func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResource
 		enabled = "0"
 	}
 
-	return &opnsense.UnboundDomainOverride{
+	return &unbound.DomainOverride{
 		Enabled:     enabled,
 		Domain:      d.Domain.ValueString(),
 		Server:      d.Server.ValueString(),
@@ -70,7 +70,7 @@ func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResource
 	}, nil
 }
 
-func convertUnboundDomainOverrideStructToSchema(d *opnsense.UnboundDomainOverride) (*UnboundDomainOverrideResourceModel, error) {
+func convertUnboundDomainOverrideStructToSchema(d *unbound.DomainOverride) (*UnboundDomainOverrideResourceModel, error) {
 	model := &UnboundDomainOverrideResourceModel{
 		Enabled:     types.BoolValue(false),
 		Domain:      types.StringValue(d.Domain),

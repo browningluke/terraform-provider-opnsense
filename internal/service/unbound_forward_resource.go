@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -20,7 +21,7 @@ func NewUnboundForwardResource() resource.Resource {
 
 // UnboundForwardResource defines the resource implementation.
 type UnboundForwardResource struct {
-	client *opnsense.Client
+	client opnsense.Client
 }
 
 func (r *UnboundForwardResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -37,7 +38,7 @@ func (r *UnboundForwardResource) Configure(ctx context.Context, req resource.Con
 		return
 	}
 
-	client, ok := req.ProviderData.(*opnsense.Client)
+	apiClient, ok := req.ProviderData.(*api.Client)
 	if !ok {
 		resp.Diagnostics.AddError(
 			"Unexpected Resource Configure Type",
@@ -46,7 +47,7 @@ func (r *UnboundForwardResource) Configure(ctx context.Context, req resource.Con
 		return
 	}
 
-	r.client = client
+	r.client = opnsense.NewClient(apiClient)
 }
 
 func (r *UnboundForwardResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
@@ -68,7 +69,7 @@ func (r *UnboundForwardResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Add forward to unbound
-	id, err := r.client.Unbound.AddForward(ctx, forward)
+	id, err := r.client.Unbound().AddForward(ctx, forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create forward, got error: %s", err))
@@ -96,7 +97,7 @@ func (r *UnboundForwardResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Get forward from OPNsense unbound API
-	forward, err := r.client.Unbound.GetForward(ctx, data.Id.ValueString())
+	forward, err := r.client.Unbound().GetForward(ctx, data.Id.ValueString())
 	if err != nil {
 		if err.Error() == "unable to find resource. it may have been deleted upstream" {
 			tflog.Warn(ctx, fmt.Sprintf("forward not present in remote, removing from state"))
@@ -143,7 +144,7 @@ func (r *UnboundForwardResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Update forward in unbound
-	err = r.client.Unbound.UpdateForward(ctx, data.Id.ValueString(), forward)
+	err = r.client.Unbound().UpdateForward(ctx, data.Id.ValueString(), forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create forward, got error: %s", err))
@@ -164,7 +165,7 @@ func (r *UnboundForwardResource) Delete(ctx context.Context, req resource.Delete
 		return
 	}
 
-	err := r.client.Unbound.DeleteForward(ctx, data.Id.ValueString())
+	err := r.client.Unbound().DeleteForward(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

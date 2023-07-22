@@ -2,7 +2,7 @@ package provider
 
 import (
 	"context"
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -93,7 +93,7 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 		return
 	}
 
-	opnOptions := opnsense.Options{
+	opnOptions := api.Options{
 		Uri:           data.Uri.ValueString(),
 		APIKey:        data.APIKey.ValueString(),
 		APISecret:     data.APISecret.ValueString(),
@@ -103,7 +103,7 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 		MaxRetries:    data.MaxRetries.ValueInt64(),
 	}
 
-	client := opnsense.NewClient(opnOptions)
+	client := api.NewClient(opnOptions)
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

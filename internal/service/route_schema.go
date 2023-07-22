@@ -1,7 +1,8 @@
 package service
 
 import (
-	"github.com/browningluke/opnsense-go"
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/routes"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -53,7 +54,7 @@ func RouteResourceSchema() schema.Schema {
 	}
 }
 
-func convertRouteSchemaToStruct(d *RouteResourceModel) (*opnsense.Route, error) {
+func convertRouteSchemaToStruct(d *RouteResourceModel) (*routes.Route, error) {
 	// Convert 'Enabled' to 'Disabled'
 	var disabled string
 	if d.Enabled.ValueBool() {
@@ -62,15 +63,15 @@ func convertRouteSchemaToStruct(d *RouteResourceModel) (*opnsense.Route, error) 
 		disabled = "1"
 	}
 
-	return &opnsense.Route{
+	return &routes.Route{
 		Disabled:    disabled,
 		Description: d.Description.ValueString(),
-		Gateway:     opnsense.SelectedMap(d.Gateway.ValueString()),
+		Gateway:     api.SelectedMap(d.Gateway.ValueString()),
 		Network:     d.Network.ValueString(),
 	}, nil
 }
 
-func convertRouteStructToSchema(d *opnsense.Route) (*RouteResourceModel, error) {
+func convertRouteStructToSchema(d *routes.Route) (*RouteResourceModel, error) {
 	model := &RouteResourceModel{
 		Enabled:     types.BoolValue(true),
 		Description: types.StringNull(),
