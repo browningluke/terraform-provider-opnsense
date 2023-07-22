@@ -98,6 +98,12 @@ func (r *UnboundForwardResource) Read(ctx context.Context, req resource.ReadRequ
 	// Get forward from OPNsense unbound API
 	forward, err := r.client.Unbound.GetForward(ctx, data.Id.ValueString())
 	if err != nil {
+		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+			tflog.Warn(ctx, fmt.Sprintf("forward not present in remote, removing from state"))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read forward, got error: %s", err))
 		return

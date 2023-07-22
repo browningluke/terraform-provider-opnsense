@@ -100,6 +100,12 @@ func (r *UnboundHostAliasResource) Read(ctx context.Context, req resource.ReadRe
 	// Get host alias from OPNsense unbound API
 	alias, err := r.client.Unbound.GetHostAlias(ctx, data.Id.ValueString())
 	if err != nil {
+		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+			tflog.Warn(ctx, fmt.Sprintf("host alias not present in remote, removing from state"))
+			resp.State.RemoveResource(ctx)
+			return
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read parse alias, got error: %s", err))
 		return
