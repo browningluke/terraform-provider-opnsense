@@ -23,6 +23,8 @@ github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQ
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/browningluke/opnsense-go v0.1.0 h1:2wBoFYisneGepYbtQefMEP5cn1c0pPV050yeXlDlZ0o=
 github.com/browningluke/opnsense-go v0.1.0/go.mod h1:5hQQDOqd2lZQ1x/lO0oU/4Px+hZxBiG6tDRf1GbNPdg=
+github.com/browningluke/opnsense-go v0.2.0 h1:R+Cj0xYhbt1qMst4kVjQ4O7AHs4LhT6vWYdWEa9FebA=
+github.com/browningluke/opnsense-go v0.2.0/go.mod h1:5hQQDOqd2lZQ1x/lO0oU/4Px+hZxBiG6tDRf1GbNPdg=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
