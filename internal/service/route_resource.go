@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -99,7 +101,8 @@ func (r *RouteResource) Read(ctx context.Context, req resource.ReadRequest, resp
 	// Get route from OPNsense core API
 	route, err := r.client.Routes().GetRoute(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("route not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return

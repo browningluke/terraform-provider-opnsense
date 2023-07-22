@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -99,7 +101,8 @@ func (r *UnboundHostOverrideResource) Read(ctx context.Context, req resource.Rea
 	// Get host override from OPNsense unbound API
 	override, err := r.client.Unbound().GetHostOverride(ctx, data.Id.ValueString())
 	if err != nil {
-		if err.Error() == "unable to find resource. it may have been deleted upstream" {
+		var notFoundError *errs.NotFoundError
+		if errors.As(err, &notFoundError) {
 			tflog.Warn(ctx, fmt.Sprintf("host override not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
