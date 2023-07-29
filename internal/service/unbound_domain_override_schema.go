@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/unbound"
+	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -48,6 +49,35 @@ func unboundDomainOverrideResourceSchema() schema.Schema {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+		},
+	}
+}
+
+func UnboundDomainOverrideDataSourceSchema() dschema.Schema {
+	return dschema.Schema{
+		MarkdownDescription: "Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.",
+
+		Attributes: map[string]dschema.Attribute{
+			"id": dschema.StringAttribute{
+				MarkdownDescription: "UUID of the resource.",
+				Required:            true,
+			},
+			"enabled": dschema.BoolAttribute{
+				MarkdownDescription: "Whether this route is enabled.",
+				Computed:            true,
+			},
+			"description": dschema.StringAttribute{
+				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				Computed:            true,
+			},
+			"domain": dschema.StringAttribute{
+				MarkdownDescription: "Domain to override (NOTE: this does not have to be a valid TLD!), e.g. `test` or `mycompany.localdomain` or `1.168.192.in-addr.arpa`.",
+				Computed:            true,
+			},
+			"server": dschema.StringAttribute{
+				MarkdownDescription: "IP address of the authoritative DNS server for this domain, e.g. `192.168.100.100`.",
+				Computed:            true,
 			},
 		},
 	}
