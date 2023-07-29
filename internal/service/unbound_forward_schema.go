@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/unbound"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -11,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strconv"
+	"terraform-provider-opnsense/internal/tools"
 )
 
 // UnboundForwardResourceModel describes the resource data model.
@@ -101,42 +100,21 @@ func UnboundForwardDataSourceSchema() dschema.Schema {
 }
 
 func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*unbound.Forward, error) {
-	// Parse 'Enabled'
-	var enabled string
-	if d.Enabled.ValueBool() {
-		enabled = "1"
-	} else {
-		enabled = "0"
-	}
-
 	return &unbound.Forward{
-		Enabled:  enabled,
+		Enabled:  tools.BoolToString(d.Enabled.ValueBool()),
 		Domain:   d.Domain.ValueString(),
 		Server:   d.ServerIP.ValueString(),
-		Port:     fmt.Sprintf("%d", d.ServerPort.ValueInt64()),
+		Port:     tools.Int64ToString(d.ServerPort.ValueInt64()),
 		VerifyCN: d.VerifyCN.ValueString(),
 	}, nil
 }
 
 func convertUnboundForwardStructToSchema(d *unbound.Forward) (*UnboundForwardResourceModel, error) {
-	// Parse 'ServerPort'
-	serverPort, err := strconv.ParseInt(d.Port, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-
-	model := &UnboundForwardResourceModel{
-		Enabled:    types.BoolValue(false),
+	return &UnboundForwardResourceModel{
+		Enabled:    types.BoolValue(tools.StringToBool(d.Enabled)),
 		Domain:     types.StringValue(d.Domain),
 		ServerIP:   types.StringValue(d.Server),
-		ServerPort: types.Int64Value(serverPort),
+		ServerPort: types.Int64Value(tools.StringToInt64(d.Port)),
 		VerifyCN:   types.StringValue(d.VerifyCN),
-	}
-
-	// Parse 'Enabled'
-	if d.Enabled == "1" {
-		model.Enabled = types.BoolValue(true)
-	}
-
-	return model, nil
+	}, nil
 }

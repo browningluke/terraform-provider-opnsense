@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-opnsense/internal/tools"
 )
 
 // UnboundHostAliasResourceModel describes the resource data model.
@@ -97,16 +98,8 @@ func UnboundHostAliasDataSourceSchema() dschema.Schema {
 }
 
 func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*unbound.HostAlias, error) {
-	// Parse 'Enabled'
-	var enabled string
-	if d.Enabled.ValueBool() {
-		enabled = "1"
-	} else {
-		enabled = "0"
-	}
-
 	return &unbound.HostAlias{
-		Enabled:     enabled,
+		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Host:        api.SelectedMap(d.Override.ValueString()),
 		Hostname:    d.Hostname.ValueString(),
 		Domain:      d.Domain.ValueString(),
@@ -115,23 +108,11 @@ func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*u
 }
 
 func convertUnboundHostAliasStructToSchema(d *unbound.HostAlias) (*UnboundHostAliasResourceModel, error) {
-	model := &UnboundHostAliasResourceModel{
-		Enabled:     types.BoolValue(false),
+	return &UnboundHostAliasResourceModel{
+		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Hostname:    types.StringValue(d.Hostname),
 		Domain:      types.StringValue(d.Domain),
-		Description: types.StringValue(d.Description),
+		Description: tools.StringOrNull(d.Description),
 		Override:    types.StringValue(d.Host.String()),
-	}
-
-	// Parse 'Enabled'
-	if d.Enabled == "1" {
-		model.Enabled = types.BoolValue(true)
-	}
-
-	// Parse 'Description'
-	if d.Description != "" {
-		model.Description = types.StringValue(d.Description)
-	}
-
-	return model, nil
+	}, nil
 }

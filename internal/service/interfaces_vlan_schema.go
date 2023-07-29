@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -13,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strconv"
+	"terraform-provider-opnsense/internal/tools"
 )
 
 // InterfacesVlanResourceModel describes the resource data model.
@@ -112,40 +111,19 @@ func InterfacesVlanDataSourceSchema() dschema.Schema {
 func convertInterfacesVlanSchemaToStruct(d *InterfacesVlanResourceModel) (*interfaces.Vlan, error) {
 	return &interfaces.Vlan{
 		Description: d.Description.ValueString(),
-		Tag:         fmt.Sprintf("%d", d.Tag.ValueInt64()),
-		Priority:    api.SelectedMap(fmt.Sprintf("%d", d.Priority.ValueInt64())),
+		Tag:         tools.Int64ToString(d.Tag.ValueInt64()),
+		Priority:    api.SelectedMap(tools.Int64ToString(d.Priority.ValueInt64())),
 		Parent:      api.SelectedMap(d.Parent.ValueString()),
 		Device:      d.Device.ValueString(),
 	}, nil
 }
 
 func convertInterfacesVlanStructToSchema(d *interfaces.Vlan) (*InterfacesVlanResourceModel, error) {
-	model := &InterfacesVlanResourceModel{
-		Description: types.StringNull(),
-		Tag:         types.Int64Null(),
-		Priority:    types.Int64Null(),
+	return &InterfacesVlanResourceModel{
+		Description: tools.StringOrNull(d.Description),
+		Tag:         tools.StringToInt64Null(d.Tag),
+		Priority:    tools.StringToInt64Null(d.Priority.String()),
 		Parent:      types.StringValue(d.Parent.String()),
 		Device:      types.StringValue(d.Device),
-	}
-
-	// Parse 'Description'
-	if d.Description != "" {
-		model.Description = types.StringValue(d.Description)
-	}
-
-	// Parse 'Tag'
-	tag, err := strconv.ParseInt(d.Tag, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	model.Tag = types.Int64Value(tag)
-
-	// Parse 'Priority'
-	priority, err := strconv.ParseInt(d.Priority.String(), 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	model.Priority = types.Int64Value(priority)
-
-	return model, nil
+	}, nil
 }

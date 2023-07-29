@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-opnsense/internal/tools"
 )
 
 // UnboundDomainOverrideResourceModel describes the resource data model.
@@ -84,16 +85,8 @@ func UnboundDomainOverrideDataSourceSchema() dschema.Schema {
 }
 
 func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResourceModel) (*unbound.DomainOverride, error) {
-	// Parse 'Enabled'
-	var enabled string
-	if d.Enabled.ValueBool() {
-		enabled = "1"
-	} else {
-		enabled = "0"
-	}
-
 	return &unbound.DomainOverride{
-		Enabled:     enabled,
+		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Domain:      d.Domain.ValueString(),
 		Server:      d.Server.ValueString(),
 		Description: d.Description.ValueString(),
@@ -101,22 +94,10 @@ func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResource
 }
 
 func convertUnboundDomainOverrideStructToSchema(d *unbound.DomainOverride) (*UnboundDomainOverrideResourceModel, error) {
-	model := &UnboundDomainOverrideResourceModel{
-		Enabled:     types.BoolValue(false),
+	return &UnboundDomainOverrideResourceModel{
+		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Domain:      types.StringValue(d.Domain),
 		Server:      types.StringValue(d.Server),
-		Description: types.StringNull(),
-	}
-
-	// Parse 'Enabled'
-	if d.Enabled == "1" {
-		model.Enabled = types.BoolValue(true)
-	}
-
-	// Parse 'Description'
-	if d.Description != "" {
-		model.Description = types.StringValue(d.Description)
-	}
-
-	return model, nil
+		Description: tools.StringOrNull(d.Description),
+	}, nil
 }
