@@ -128,6 +128,8 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		service.NewInterfacesVlanDataSource,
 		// Routes
 		service.NewRouteDataSource,
+		// Unbound
+		service.NewUnboundHostOverrideDataSource,
 	}
 }
 

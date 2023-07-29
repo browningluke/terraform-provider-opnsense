@@ -6,6 +6,7 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -99,6 +100,51 @@ func unboundHostOverrideResourceSchema() schema.Schema {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+		},
+	}
+}
+
+func UnboundHostOverrideDataSourceSchema() dschema.Schema {
+	return dschema.Schema{
+		MarkdownDescription: "Host overrides can be used to change DNS results from client queries or to add custom DNS records.",
+
+		Attributes: map[string]dschema.Attribute{
+			"id": dschema.StringAttribute{
+				MarkdownDescription: "UUID of the resource.",
+				Required:            true,
+			},
+			"enabled": dschema.BoolAttribute{
+				MarkdownDescription: "Whether this route is enabled.",
+				Computed:            true,
+			},
+			"description": dschema.StringAttribute{
+				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				Computed:            true,
+			},
+			"hostname": dschema.StringAttribute{
+				MarkdownDescription: "Name of the host, without the domain part. Use `*` to create a wildcard entry.",
+				Computed:            true,
+			},
+			"domain": dschema.StringAttribute{
+				MarkdownDescription: "Domain of the host, e.g. example.com",
+				Computed:            true,
+			},
+			"type": dschema.StringAttribute{
+				MarkdownDescription: "Type of resource record. Available values: `A`, `AAAA`, `MX`.",
+				Computed:            true,
+			},
+			"server": dschema.StringAttribute{
+				MarkdownDescription: "IP address of the host, e.g. 192.168.100.100 or fd00:abcd::1.",
+				Computed:            true,
+			},
+			"mx_priority": dschema.Int64Attribute{
+				MarkdownDescription: "Priority of MX record, e.g. 10.",
+				Computed:            true,
+			},
+			"mx_host": dschema.StringAttribute{
+				MarkdownDescription: "Host name of MX host, e.g. mail.example.com.",
+				Computed:            true,
 			},
 		},
 	}
