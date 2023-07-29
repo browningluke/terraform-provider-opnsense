@@ -132,6 +132,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		service.NewUnboundHostOverrideDataSource,
 		service.NewUnboundHostAliasDataSource,
 		service.NewUnboundDomainOverrideDataSource,
+		service.NewUnboundForwardDataSource,
 	}
 }
 
