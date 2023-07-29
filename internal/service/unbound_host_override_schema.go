@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -16,7 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strconv"
+	"terraform-provider-opnsense/internal/tools"
 )
 
 // UnboundHostOverrideResourceModel describes the resource data model.
@@ -151,59 +150,27 @@ func UnboundHostOverrideDataSourceSchema() dschema.Schema {
 }
 
 func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceModel) (*unbound.HostOverride, error) {
-	// Parse 'Enabled'
-	var enabled string
-	if d.Enabled.ValueBool() {
-		enabled = "1"
-	} else {
-		enabled = "0"
-	}
-
-	// Parse 'MXPriority'
-	mxPriority := fmt.Sprintf("%d", d.MXPriority.ValueInt64())
-	if d.MXPriority.ValueInt64() == -1 {
-		mxPriority = ""
-	}
-
 	return &unbound.HostOverride{
-		Enabled:     enabled,
+		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Hostname:    d.Hostname.ValueString(),
 		Domain:      d.Domain.ValueString(),
 		Type:        api.SelectedMap(d.Type.ValueString()),
 		Server:      d.Server.ValueString(),
 		MXDomain:    d.MXDomain.ValueString(),
-		MXPriority:  mxPriority,
+		MXPriority:  tools.Int64ToStringNegative(d.MXPriority.ValueInt64()),
 		Description: d.Description.ValueString(),
 	}, nil
 }
 
 func convertUnboundHostOverrideStructToSchema(d *unbound.HostOverride) (*UnboundHostOverrideResourceModel, error) {
-	model := &UnboundHostOverrideResourceModel{
-		Enabled:     types.BoolValue(false),
+	return &UnboundHostOverrideResourceModel{
+		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Hostname:    types.StringValue(d.Hostname),
 		Domain:      types.StringValue(d.Domain),
 		Type:        types.StringValue(d.Type.String()),
 		Server:      types.StringValue(d.Server),
-		MXPriority:  types.Int64Value(-1),
+		MXPriority:  types.Int64Value(tools.StringToInt64(d.MXPriority)),
 		MXDomain:    types.StringValue(d.MXDomain),
-		Description: types.StringNull(),
-	}
-
-	// Parse 'Enabled'
-	if d.Enabled == "1" {
-		model.Enabled = types.BoolValue(true)
-	}
-
-	// Parse 'MXPriority'
-	mxPriority, err := strconv.ParseInt(d.MXPriority, 10, 64)
-	if err == nil {
-		model.MXPriority = types.Int64Value(mxPriority)
-	}
-
-	// Parse 'Description'
-	if d.Description != "" {
-		model.Description = types.StringValue(d.Description)
-	}
-
-	return model, nil
+		Description: tools.StringOrNull(d.Description),
+	}, nil
 }

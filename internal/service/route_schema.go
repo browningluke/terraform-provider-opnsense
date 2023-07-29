@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"terraform-provider-opnsense/internal/tools"
 )
 
 // RouteResourceModel describes the resource data model.
@@ -85,16 +86,8 @@ func RouteDataSourceSchema() dschema.Schema {
 }
 
 func convertRouteSchemaToStruct(d *RouteResourceModel) (*routes.Route, error) {
-	// Convert 'Enabled' to 'Disabled'
-	var disabled string
-	if d.Enabled.ValueBool() {
-		disabled = "0"
-	} else {
-		disabled = "1"
-	}
-
 	return &routes.Route{
-		Disabled:    disabled,
+		Disabled:    tools.BoolToString(!d.Enabled.ValueBool()),
 		Description: d.Description.ValueString(),
 		Gateway:     api.SelectedMap(d.Gateway.ValueString()),
 		Network:     d.Network.ValueString(),
@@ -102,22 +95,10 @@ func convertRouteSchemaToStruct(d *RouteResourceModel) (*routes.Route, error) {
 }
 
 func convertRouteStructToSchema(d *routes.Route) (*RouteResourceModel, error) {
-	model := &RouteResourceModel{
-		Enabled:     types.BoolValue(true),
-		Description: types.StringNull(),
+	return &RouteResourceModel{
+		Enabled:     types.BoolValue(!tools.StringToBool(d.Disabled)),
+		Description: tools.StringOrNull(d.Description),
 		Gateway:     types.StringValue(d.Gateway.String()),
 		Network:     types.StringValue(d.Network),
-	}
-
-	// Parse 'Disabled'
-	if d.Disabled == "1" {
-		model.Enabled = types.BoolValue(false)
-	}
-
-	// Parse 'Description'
-	if d.Description != "" {
-		model.Description = types.StringValue(d.Description)
-	}
-
-	return model, nil
+	}, nil
 }
