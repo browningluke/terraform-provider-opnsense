@@ -1,0 +1,26 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Firewall
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> This resource requires the `os-firewall` plugin to be installed. It will *not* behave correctly if it is not installed.
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{ printf "{{codefile \"shell\" %q}}" .ImportFile }}
+{{- end }}
