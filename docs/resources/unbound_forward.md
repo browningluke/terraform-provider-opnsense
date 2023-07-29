@@ -43,7 +43,6 @@ resource "opnsense_unbound_forward" "dot" {
 
 - `enabled` (Boolean) Enable this query forward.  Defaults to `true`.
 - `server_port` (Number) Port of DNS server, for usual DNS use `53`, if you use DoT set it to `853`. Defaults to `53`.
-- `type` (String) Type of forward. Available values: `forward`, `dot`. Defaults to `forward`.
 - `verify_cn` (String) The Common Name of the DNS server (e.g. `dns.example.com`). This field is required to verify its TLS certificate. DNS-over-TLS is susceptible to man-in-the-middle attacks unless certificates can be verified. Set to `""` to accept self-signed yet also potentially fraudulent certificates. Must be set when `type` is `dot`.
 
 ### Read-Only

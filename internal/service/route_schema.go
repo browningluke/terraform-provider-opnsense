@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/routes"
+	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -49,6 +50,35 @@ func RouteResourceSchema() schema.Schema {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+		},
+	}
+}
+
+func RouteDataSourceSchema() dschema.Schema {
+	return dschema.Schema{
+		MarkdownDescription: "Routes can be used to teach your firewall which path it should take when forwarding packets to a specific network.",
+
+		Attributes: map[string]dschema.Attribute{
+			"id": dschema.StringAttribute{
+				MarkdownDescription: "UUID of the resource.",
+				Required:            true,
+			},
+			"enabled": dschema.BoolAttribute{
+				MarkdownDescription: "Whether this route is enabled.",
+				Computed:            true,
+			},
+			"description": dschema.StringAttribute{
+				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				Computed:            true,
+			},
+			"gateway": dschema.StringAttribute{
+				MarkdownDescription: "Which gateway this route applies, e.g. `WAN`.",
+				Computed:            true,
+			},
+			"network": dschema.StringAttribute{
+				MarkdownDescription: "Destination network for this static route.",
+				Computed:            true,
 			},
 		},
 	}

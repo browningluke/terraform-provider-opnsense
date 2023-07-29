@@ -2,16 +2,14 @@ package service
 
 import (
 	"fmt"
-	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/unbound"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
 )
@@ -19,7 +17,6 @@ import (
 // UnboundForwardResourceModel describes the resource data model.
 type UnboundForwardResourceModel struct {
 	Enabled    types.Bool   `tfsdk:"enabled"`
-	Type       types.String `tfsdk:"type"`
 	Domain     types.String `tfsdk:"domain"`
 	ServerIP   types.String `tfsdk:"server_ip"`
 	ServerPort types.Int64  `tfsdk:"server_port"`
@@ -38,15 +35,6 @@ func unboundForwardResourceSchema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(true),
-			},
-			"type": schema.StringAttribute{
-				MarkdownDescription: "Type of forward. Available values: `forward`, `dot`. Defaults to `forward`.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("forward"),
-				Validators: []validator.String{
-					stringvalidator.OneOf([]string{"forward", "dot"}...),
-				},
 			},
 			"domain": schema.StringAttribute{
 				MarkdownDescription: "If a domain is entered here, queries for this specific domain will be forwarded to the specified server. Set to `\"\"` to forward all queries to the specified server.",
@@ -79,6 +67,39 @@ func unboundForwardResourceSchema() schema.Schema {
 	}
 }
 
+func UnboundForwardDataSourceSchema() dschema.Schema {
+	return dschema.Schema{
+		MarkdownDescription: "Query Forwarding section allows for entering arbitrary nameservers to forward queries to. Can forward queries normally, or over TLS.",
+
+		Attributes: map[string]dschema.Attribute{
+			"id": dschema.StringAttribute{
+				MarkdownDescription: "UUID of the resource.",
+				Required:            true,
+			},
+			"enabled": dschema.BoolAttribute{
+				MarkdownDescription: "Whether this route is enabled.",
+				Computed:            true,
+			},
+			"domain": dschema.StringAttribute{
+				MarkdownDescription: "If a domain is entered here, queries for this specific domain will be forwarded to the specified server.",
+				Computed:            true,
+			},
+			"server_ip": dschema.StringAttribute{
+				MarkdownDescription: "IP address of DNS server to forward all requests.",
+				Computed:            true,
+			},
+			"server_port": dschema.Int64Attribute{
+				MarkdownDescription: "Port of DNS server, for usual DNS use `53`, if you use DoT set it to `853`.",
+				Computed:            true,
+			},
+			"verify_cn": dschema.StringAttribute{
+				MarkdownDescription: "The Common Name of the DNS server (e.g. `dns.example.com`). This field is required to verify its TLS certificate. DNS-over-TLS is susceptible to man-in-the-middle attacks unless certificates can be verified.",
+				Computed:            true,
+			},
+		},
+	}
+}
+
 func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*unbound.Forward, error) {
 	// Parse 'Enabled'
 	var enabled string
@@ -91,7 +112,6 @@ func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*unbou
 	return &unbound.Forward{
 		Enabled:  enabled,
 		Domain:   d.Domain.ValueString(),
-		Type:     api.SelectedMap(d.Type.ValueString()),
 		Server:   d.ServerIP.ValueString(),
 		Port:     fmt.Sprintf("%d", d.ServerPort.ValueInt64()),
 		VerifyCN: d.VerifyCN.ValueString(),
@@ -108,7 +128,6 @@ func convertUnboundForwardStructToSchema(d *unbound.Forward) (*UnboundForwardRes
 	model := &UnboundForwardResourceModel{
 		Enabled:    types.BoolValue(false),
 		Domain:     types.StringValue(d.Domain),
-		Type:       types.StringValue(d.Type.String()),
 		ServerIP:   types.StringValue(d.Server),
 		ServerPort: types.Int64Value(serverPort),
 		VerifyCN:   types.StringValue(d.VerifyCN),

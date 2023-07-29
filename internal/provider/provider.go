@@ -123,7 +123,17 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 }
 
 func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{}
+	return []func() datasource.DataSource{
+		// Interfaces
+		service.NewInterfacesVlanDataSource,
+		// Routes
+		service.NewRouteDataSource,
+		// Unbound
+		service.NewUnboundHostOverrideDataSource,
+		service.NewUnboundHostAliasDataSource,
+		service.NewUnboundDomainOverrideDataSource,
+		service.NewUnboundForwardDataSource,
+	}
 }
 
 func New(version string) func() provider.Provider {

@@ -5,6 +5,7 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -70,6 +71,39 @@ func InterfacesVlanResourceSchema() schema.Schema {
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
+			},
+		},
+	}
+}
+
+func InterfacesVlanDataSourceSchema() dschema.Schema {
+	return dschema.Schema{
+		MarkdownDescription: "VLANs (Virtual LANs) can be used to segment a single physical network into multiple virtual networks.",
+
+		Attributes: map[string]dschema.Attribute{
+			"id": dschema.StringAttribute{
+				MarkdownDescription: "UUID of the resource.",
+				Required:            true,
+			},
+			"description": dschema.StringAttribute{
+				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				Computed:            true,
+			},
+			"tag": dschema.Int64Attribute{
+				MarkdownDescription: "802.1Q VLAN tag.",
+				Computed:            true,
+			},
+			"priority": dschema.Int64Attribute{
+				MarkdownDescription: "802.1Q VLAN PCP (priority code point).",
+				Computed:            true,
+			},
+			"parent": dschema.StringAttribute{
+				MarkdownDescription: "VLAN capable interface to attach the VLAN to, e.g. `vtnet0`.",
+				Computed:            true,
+			},
+			"device": dschema.StringAttribute{
+				MarkdownDescription: "Custom VLAN name. Custom names are possible, but only if the start of the name matches the required prefix and contains numeric characters or dots, e.g. `vlan0.1.2` or `qinq0.3.4`.",
+				Computed:            true,
 			},
 		},
 	}
