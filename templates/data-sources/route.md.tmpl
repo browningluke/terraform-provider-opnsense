@@ -9,10 +9,6 @@ description: |-
 
 {{ .Description | trimspace }}
 
-## Example Usage
-
-{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
-
 {{ .SchemaMarkdown | trimspace }}
 
 {{ if .HasImport -}}
