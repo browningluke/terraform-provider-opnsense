@@ -119,6 +119,8 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewUnboundHostAliasResource,
 		service.NewUnboundDomainOverrideResource,
 		service.NewUnboundForwardResource,
+		// Firewall
+		service.NewFirewallFilterResource,
 	}
 }
 
@@ -133,6 +135,8 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		service.NewUnboundHostAliasDataSource,
 		service.NewUnboundDomainOverrideDataSource,
 		service.NewUnboundForwardDataSource,
+		// Firewall
+		service.NewFirewallFilterDataSource,
 	}
 }
 
