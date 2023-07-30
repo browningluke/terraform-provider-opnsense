@@ -122,6 +122,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		// Firewall
 		service.NewFirewallFilterResource,
 		service.NewFirewallNATResource,
+		service.NewFirewallCategoryResource,
 	}
 }
 
@@ -139,6 +140,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		// Firewall
 		service.NewFirewallFilterDataSource,
 		service.NewFirewallNATDataSource,
+		service.NewFirewallCategoryDataSource,
 	}
 }
 
