@@ -2,12 +2,12 @@
 page_title: "opnsense_firewall_nat Resource - terraform-provider-opnsense"
 subcategory: Firewall
 description: |-
-  Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded
+  Network Address Translation (abbreviated to NAT) is a way to separate external and internal networks (WANs and LANs), and to share an external IP between clients on the internal network.
 ---
 
 # opnsense_firewall_nat (Resource)
 
-Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded
+Network Address Translation (abbreviated to NAT) is a way to separate external and internal networks (WANs and LANs), and to share an external IP between clients on the internal network.
 
 ~> This resource requires the `os-firewall` plugin to be installed. It will *not* behave correctly if it is not installed.
 
