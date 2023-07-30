@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"strconv"
 )
@@ -36,6 +37,28 @@ func Int64ToStringNegative(i int64) string {
 	return s
 }
 
+// Floats
+
+func Float64ToString(i float64) string {
+	return fmt.Sprintf("%f", i)
+}
+
+func Float64ToStringNegative(i float64) string {
+	s := fmt.Sprintf("%f", i)
+	if i == -1 {
+		s = ""
+	}
+	return s
+}
+
+func StringToFloat64(s string) float64 {
+	i, err := strconv.ParseFloat(s, 64)
+	if err == nil {
+		return i
+	}
+	return -1
+}
+
 // Bools
 
 func BoolToString(b bool) string {
@@ -58,4 +81,11 @@ func StringOrNull(s string) types.String {
 	} else {
 		return types.StringNull()
 	}
+}
+
+// Sets
+
+func EmptySetValue() types.Set {
+	sv, _ := types.SetValue(types.StringType, []attr.Value{})
+	return sv
 }
