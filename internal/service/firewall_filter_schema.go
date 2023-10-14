@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
+	"regexp"
 	"terraform-provider-opnsense/internal/tools"
 )
 
@@ -297,8 +298,15 @@ func FirewallFilterDataSourceSchema() dschema.Schema {
 				Computed:            true,
 			},
 			"description": dschema.StringAttribute{
-				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.",
 				Computed:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-zA-Z0-9 .]*$`),
+						"must only contain only alphanumeric characters, spaces or `.`",
+					),
+					stringvalidator.LengthBetween(1, 255),
+				},
 			},
 		},
 	}
