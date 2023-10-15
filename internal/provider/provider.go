@@ -122,6 +122,8 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		// Wireguard
 		service.NewWireguardServerResource,
 		service.NewWireguardClientResource,
+		// Quagga
+		service.NewQuaggaBGPNeighborResource,
 		// Firewall
 		service.NewFirewallFilterResource,
 		service.NewFirewallNATResource,
@@ -144,6 +146,8 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		// Wireguard
 		service.NewWireguardServerDataSource,
 		service.NewWireguardClientDataSource,
+		// Quagga
+		service.NewQuaggaBGPNeighborDataSource,
 		// Firewall
 		service.NewFirewallFilterDataSource,
 		service.NewFirewallNATDataSource,
