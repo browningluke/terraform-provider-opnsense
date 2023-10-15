@@ -127,6 +127,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewQuaggaBGPASPathResource,
 		service.NewQuaggaBGPPrefixListResource,
 		service.NewQuaggaBGPCommunityListResource,
+		service.NewQuaggaBGPRouteMapResource,
 		// Firewall
 		service.NewFirewallFilterResource,
 		service.NewFirewallNATResource,
@@ -154,6 +155,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		service.NewQuaggaBGPASPathDataSource,
 		service.NewQuaggaBGPPrefixListDataSource,
 		service.NewQuaggaBGPCommunityListDataSource,
+		service.NewQuaggaBGPRouteMapDataSource,
 		// Firewall
 		service.NewFirewallFilterDataSource,
 		service.NewFirewallNATDataSource,
