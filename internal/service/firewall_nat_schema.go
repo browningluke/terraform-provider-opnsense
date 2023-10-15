@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"regexp"
 	"terraform-provider-opnsense/internal/tools"
 )
 
@@ -182,8 +183,15 @@ func FirewallNATResourceSchema() schema.Schema {
 				Default:             booldefault.StaticBool(false),
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.",
 				Optional:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-zA-Z0-9 .]*$`),
+						"must only contain only alphanumeric characters, spaces or `.`",
+					),
+					stringvalidator.LengthBetween(1, 255),
+				},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
