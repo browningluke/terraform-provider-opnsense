@@ -119,6 +119,9 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewUnboundHostAliasResource,
 		service.NewUnboundDomainOverrideResource,
 		service.NewUnboundForwardResource,
+		// Wireguard
+		service.NewWireguardServerResource,
+		service.NewWireguardClientResource,
 		// Firewall
 		service.NewFirewallFilterResource,
 		service.NewFirewallNATResource,
@@ -138,6 +141,9 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		service.NewUnboundHostAliasDataSource,
 		service.NewUnboundDomainOverrideDataSource,
 		service.NewUnboundForwardDataSource,
+		// Wireguard
+		service.NewWireguardServerDataSource,
+		service.NewWireguardClientDataSource,
 		// Firewall
 		service.NewFirewallFilterDataSource,
 		service.NewFirewallNATDataSource,

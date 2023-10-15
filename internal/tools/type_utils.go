@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"strconv"
 )
 
@@ -88,4 +89,18 @@ func StringOrNull(s string) types.String {
 func EmptySetValue() types.Set {
 	sv, _ := types.SetValue(types.StringType, []attr.Value{})
 	return sv
+}
+
+func StringSliceToSet(s []string) basetypes.SetValue {
+	var list []attr.Value
+	for _, i := range s {
+		// OPNsense API always returns empty string in list of content, skip it.
+		if i == "" {
+			continue
+		}
+		list = append(list, basetypes.NewStringValue(i))
+	}
+	typeList, _ := types.SetValue(types.StringType, list)
+
+	return typeList
 }
