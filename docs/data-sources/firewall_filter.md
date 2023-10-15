@@ -21,7 +21,7 @@ Firewall filter rules can be used to restrict or allow traffic from and/or to sp
 ### Read-Only
 
 - `action` (String) Choose what to do with packets that match the criteria specified below. Hint: the difference between block and reject is that with reject, a packet (TCP RST or ICMP port unreachable for UDP) is returned to the sender, whereas with block the packet is dropped silently. In either case, the original packet is discarded. Available values: `pass`, `block`, `reject`.
-- `description` (String) Optional description here for your reference (not parsed).
+- `description` (String) Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.
 - `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `direction` (String) Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic. Available values: `in`, `out`.
 - `enabled` (Boolean) Enable this firewall filter rule.
