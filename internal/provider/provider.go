@@ -125,6 +125,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		// Quagga
 		service.NewQuaggaBGPNeighborResource,
 		service.NewQuaggaBGPASPathResource,
+		service.NewQuaggaBGPPrefixListResource,
 		// Firewall
 		service.NewFirewallFilterResource,
 		service.NewFirewallNATResource,
@@ -150,6 +151,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		// Quagga
 		service.NewQuaggaBGPNeighborDataSource,
 		service.NewQuaggaBGPASPathDataSource,
+		service.NewQuaggaBGPPrefixListDataSource,
 		// Firewall
 		service.NewFirewallFilterDataSource,
 		service.NewFirewallNATDataSource,
