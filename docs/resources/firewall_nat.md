@@ -40,12 +40,12 @@ resource "opnsense_firewall_nat" "example_two" {
 
   destination = {
     net  = "10.8.0.1"
-    port = 443
+    port = "443"
   }
 
   target = {
     ip = "wanip"
-    port = 80
+    port = "http"
   }
 
   log         = true
@@ -63,12 +63,12 @@ resource "opnsense_firewall_nat" "example_three" {
 
   destination = {
     net  = "examplealias"
-    port = 443
+    port = "80-443"
   }
 
   target = {
     ip = "wanip"
-    port = 443
+    port = "443"
   }
 
   description = "Example"
@@ -108,7 +108,7 @@ Required:
 
 Optional:
 
-- `port` (Number) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `-1`.
+- `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `""`.
 
 
 <a id="nestedatt--destination"></a>
@@ -118,7 +118,7 @@ Optional:
 
 - `invert` (Boolean) Use this option to invert the sense of the match. Defaults to `false`.
 - `net` (String) Specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
-- `port` (Number) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `-1`.
+- `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `""`.
 
 
 <a id="nestedatt--source"></a>
@@ -128,5 +128,5 @@ Optional:
 
 - `invert` (Boolean) Use this option to invert the sense of the match. Defaults to `false`.
 - `net` (String) Specify the IP address, CIDR or alias for the source of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
-- `port` (Number) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `-1`). Defaults to `-1`.
+- `port` (String) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `""`). Defaults to `""`.
 
