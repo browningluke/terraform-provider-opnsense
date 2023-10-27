@@ -24,7 +24,7 @@ import (
 
 type firewallLocation struct {
 	Net    types.String `tfsdk:"net"`
-	Port   types.Int64  `tfsdk:"port"`
+	Port   types.String `tfsdk:"port"`
 	Invert types.Bool   `tfsdk:"invert"`
 }
 
@@ -117,12 +117,12 @@ func FirewallFilterResourceSchema() schema.Schema {
 					types.ObjectValueMust(
 						map[string]attr.Type{
 							"net":    types.StringType,
-							"port":   types.Int64Type,
+							"port":   types.StringType,
 							"invert": types.BoolType,
 						},
 						map[string]attr.Value{
 							"net":    types.StringValue("any"),
-							"port":   types.Int64Value(-1),
+							"port":   types.StringValue(""),
 							"invert": types.BoolValue(false),
 						},
 					),
@@ -134,11 +134,15 @@ func FirewallFilterResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString("any"),
 					},
-					"port": schema.Int64Attribute{
-						MarkdownDescription: "Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `-1`). Defaults to `-1`.",
+					"port": schema.StringAttribute{
+						MarkdownDescription: "Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `\"\"`). Defaults to `\"\"`.",
 						Optional:            true,
 						Computed:            true,
-						Default:             int64default.StaticInt64(-1),
+						Default:             stringdefault.StaticString(""),
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
+								"must be number (80), range (80-443) or well known name (http)"),
+						},
 					},
 					"invert": schema.BoolAttribute{
 						MarkdownDescription: "Use this option to invert the sense of the match. Defaults to `false`.",
@@ -155,12 +159,12 @@ func FirewallFilterResourceSchema() schema.Schema {
 					types.ObjectValueMust(
 						map[string]attr.Type{
 							"net":    types.StringType,
-							"port":   types.Int64Type,
+							"port":   types.StringType,
 							"invert": types.BoolType,
 						},
 						map[string]attr.Value{
 							"net":    types.StringValue("any"),
-							"port":   types.Int64Value(-1),
+							"port":   types.StringValue(""),
 							"invert": types.BoolValue(false),
 						},
 					),
@@ -172,11 +176,15 @@ func FirewallFilterResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString("any"),
 					},
-					"port": schema.Int64Attribute{
-						MarkdownDescription: "Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `-1`.",
+					"port": schema.StringAttribute{
+						MarkdownDescription: "Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `\"\"`.",
 						Optional:            true,
 						Computed:            true,
-						Default:             int64default.StaticInt64(-1),
+						Default:             stringdefault.StaticString(""),
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
+								"must be number (80), range (80-443) or well known name (http)"),
+						},
 					},
 					"invert": schema.BoolAttribute{
 						MarkdownDescription: "Use this option to invert the sense of the match. Defaults to `false`.",
@@ -262,8 +270,8 @@ func FirewallFilterDataSourceSchema() dschema.Schema {
 						MarkdownDescription: "Specify the IP address, CIDR or alias for the source of the packet for this mapping.",
 						Computed:            true,
 					},
-					"port": dschema.Int64Attribute{
-						MarkdownDescription: "Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `-1`).",
+					"port": dschema.StringAttribute{
+						MarkdownDescription: "Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `\"\"`).",
 						Computed:            true,
 					},
 					"invert": dschema.BoolAttribute{
@@ -279,7 +287,7 @@ func FirewallFilterDataSourceSchema() dschema.Schema {
 						MarkdownDescription: "Specify the IP address, CIDR or alias for the destination of the packet for this mapping.",
 						Computed:            true,
 					},
-					"port": dschema.Int64Attribute{
+					"port": dschema.StringAttribute{
 						MarkdownDescription: "Specify the port for the destination of the packet for this mapping.",
 						Computed:            true,
 					},
@@ -327,10 +335,10 @@ func convertFirewallFilterSchemaToStruct(d *FirewallFilterResourceModel) (*firew
 		IPProtocol:        api.SelectedMap(d.IPProtocol.ValueString()),
 		Protocol:          api.SelectedMap(d.Protocol.ValueString()),
 		SourceNet:         d.Source.Net.ValueString(),
-		SourcePort:        tools.Int64ToStringNegative(d.Source.Port.ValueInt64()),
+		SourcePort:        d.Source.Port.ValueString(),
 		SourceInvert:      tools.BoolToString(d.Source.Invert.ValueBool()),
 		DestinationNet:    d.Destination.Net.ValueString(),
-		DestinationPort:   tools.Int64ToStringNegative(d.Destination.Port.ValueInt64()),
+		DestinationPort:   d.Destination.Port.ValueString(),
 		DestinationInvert: tools.BoolToString(d.Destination.Invert.ValueBool()),
 		Gateway:           api.SelectedMap(d.Gateway.ValueString()),
 		Log:               tools.BoolToString(d.Log.ValueBool()),
@@ -350,12 +358,12 @@ func convertFirewallFilterStructToSchema(d *firewall.Filter) (*FirewallFilterRes
 		Protocol:   types.StringValue(d.Protocol.String()),
 		Source: &firewallLocation{
 			Net:    types.StringValue(d.SourceNet),
-			Port:   types.Int64Value(tools.StringToInt64(d.SourcePort)),
+			Port:   types.StringValue(d.SourcePort),
 			Invert: types.BoolValue(tools.StringToBool(d.SourceInvert)),
 		},
 		Destination: &firewallLocation{
 			Net:    types.StringValue(d.DestinationNet),
-			Port:   types.Int64Value(tools.StringToInt64(d.DestinationPort)),
+			Port:   types.StringValue(d.DestinationPort),
 			Invert: types.BoolValue(tools.StringToBool(d.DestinationInvert)),
 		},
 		Gateway:     types.StringValue(d.Gateway.String()),

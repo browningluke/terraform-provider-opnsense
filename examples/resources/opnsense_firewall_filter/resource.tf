@@ -21,7 +21,7 @@ resource "opnsense_firewall_filter" "example_one" {
 
   destination = {
     net    = "examplealias"
-    port   = 443
+    port   = "https"
   }
 
   log = false
@@ -43,7 +43,7 @@ resource "opnsense_firewall_filter" "example_two" {
 
   destination = {
     net  = "10.8.0.1"
-    port = 443
+    port = "443"
   }
 
   description = "example rule"
@@ -64,7 +64,7 @@ resource "opnsense_firewall_filter" "example_three" {
 
   destination = {
     net  = "wanip" # This is equiv. to WAN Address
-    port = 443
+    port = "80-443"
   }
 
   description = "example rule"

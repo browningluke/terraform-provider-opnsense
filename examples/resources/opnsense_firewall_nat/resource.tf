@@ -24,12 +24,12 @@ resource "opnsense_firewall_nat" "example_two" {
 
   destination = {
     net  = "10.8.0.1"
-    port = 443
+    port = "443"
   }
 
   target = {
     ip = "wanip"
-    port = 80
+    port = "http"
   }
 
   log         = true
@@ -47,12 +47,12 @@ resource "opnsense_firewall_nat" "example_three" {
 
   destination = {
     net  = "examplealias"
-    port = 443
+    port = "80-443"
   }
 
   target = {
     ip = "wanip"
-    port = 443
+    port = "443"
   }
 
   description = "Example"

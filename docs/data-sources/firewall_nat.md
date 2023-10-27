@@ -39,7 +39,7 @@ Read-Only:
 
 - `invert` (Boolean) Use this option to invert the sense of the match.
 - `net` (String) Specify the IP address, CIDR or alias for the destination of the packet for this mapping.
-- `port` (Number) Specify the port for the destination of the packet for this mapping.
+- `port` (String) Specify the port for the destination of the packet for this mapping.
 
 
 <a id="nestedatt--source"></a>
@@ -49,7 +49,7 @@ Read-Only:
 
 - `invert` (Boolean) Use this option to invert the sense of the match.
 - `net` (String) Specify the IP address, CIDR or alias for the source of the packet for this mapping.
-- `port` (Number) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `-1`).
+- `port` (String) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `""`).
 
 
 <a id="nestedatt--target"></a>
@@ -58,5 +58,5 @@ Read-Only:
 Read-Only:
 
 - `ip` (String) Specify the IP address or alias for the packets to be mapped to.
-- `port` (Number) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.
+- `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.
 
