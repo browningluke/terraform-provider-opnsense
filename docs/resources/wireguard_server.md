@@ -63,7 +63,7 @@ resource "opnsense_wireguard_server" "example0" {
 ### Required
 
 - `name` (String) Name of the server.
-- `private_key` (String) Private key of this server. Must be a 256-bit base64 string.
+- `private_key` (String, Sensitive) Private key of this server. Must be a 256-bit base64 string.
 - `public_key` (String) Public key of this server. Must be a 256-bit base64 string.
 
 ### Optional

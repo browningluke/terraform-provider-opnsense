@@ -43,7 +43,7 @@ resource "opnsense_wireguard_client" "example0" {
 
 - `enabled` (Boolean) Enable this client config. Defaults to `true`.
 - `keep_alive` (Number) The persistent keepalive interval in seconds. Defaults to `-1`.
-- `psk` (String) Shared secret (PSK) for this peer. You can generate a key using `wg genpsk` on a client with WireGuard installed. Must be a 256-bit base64 string. Defaults to `""`.
+- `psk` (String, Sensitive) Shared secret (PSK) for this peer. You can generate a key using `wg genpsk` on a client with WireGuard installed. Must be a 256-bit base64 string. Defaults to `""`.
 - `server_address` (String) The public IP address the endpoint listens to. Defaults to `""`.
 - `server_port` (Number) The port the endpoint listens to. Defaults to `-1`.
 

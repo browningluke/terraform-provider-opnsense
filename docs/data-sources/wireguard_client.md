@@ -21,7 +21,7 @@ Client resources can be used to setup Wireguard clients.
 - `enabled` (Boolean) Whether this client config is enabled.
 - `keep_alive` (Number) The persistent keepalive interval in seconds.
 - `name` (String) Name of the client config.
-- `psk` (String) Shared secret (PSK) for this peer.
+- `psk` (String, Sensitive) Shared secret (PSK) for this peer.
 - `public_key` (String) Public key of this client config.
 - `server_address` (String) The public IP address the endpoint listens to.
 - `server_port` (Number) The port the endpoint listens to.

@@ -27,7 +27,7 @@ Server resources can be used to setup Wireguard servers.
 - `name` (String) Name of the server.
 - `peers` (Set of String) List of peer IDs for this server.
 - `port` (Number) The fixed port for this instance to listen on. The standard port range starts at 51820.
-- `private_key` (String) Private key of this server.
+- `private_key` (String, Sensitive) Private key of this server.
 - `public_key` (String) Public key of this server.
 - `tunnel_address` (Set of String) List of addresses to configure on the tunnel adapter.
 
