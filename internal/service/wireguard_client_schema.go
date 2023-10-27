@@ -53,6 +53,7 @@ func wireguardClientResourceSchema() schema.Schema {
 				MarkdownDescription: "Shared secret (PSK) for this peer. You can generate a key using `wg genpsk` on a client with WireGuard installed. Must be a 256-bit base64 string. Defaults to `\"\"`.",
 				Optional:            true,
 				Computed:            true,
+				Sensitive:           true,
 				Default:             stringdefault.StaticString(""),
 			},
 			"server_address": schema.StringAttribute{
@@ -116,6 +117,7 @@ func WireguardClientDataSourceSchema() dschema.Schema {
 			"psk": schema.StringAttribute{
 				MarkdownDescription: "Shared secret (PSK) for this peer.",
 				Computed:            true,
+				Sensitive:           true,
 			},
 			"server_address": schema.StringAttribute{
 				MarkdownDescription: "The public IP address the endpoint listens to.",

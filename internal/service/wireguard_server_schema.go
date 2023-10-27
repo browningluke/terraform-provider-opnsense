@@ -58,6 +58,7 @@ func wireguardServerResourceSchema() schema.Schema {
 			"private_key": schema.StringAttribute{
 				MarkdownDescription: "Private key of this server. Must be a 256-bit base64 string.",
 				Required:            true,
+				Sensitive:           true,
 			},
 			"port": schema.Int64Attribute{
 				MarkdownDescription: "The fixed port for this instance to listen on. The standard port range starts at 51820. Defaults to `-1`.",
@@ -152,6 +153,7 @@ func WireguardServerDataSourceSchema() dschema.Schema {
 			"private_key": schema.StringAttribute{
 				MarkdownDescription: "Private key of this server.",
 				Computed:            true,
+				Sensitive:           true,
 			},
 			"port": schema.Int64Attribute{
 				MarkdownDescription: "The fixed port for this instance to listen on. The standard port range starts at 51820.",
