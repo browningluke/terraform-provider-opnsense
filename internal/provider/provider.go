@@ -140,6 +140,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 	return []func() datasource.DataSource{
 		// Interfaces
 		service.NewInterfacesVlanDataSource,
+		service.NewInterfaceDataSource,
 		// Routes
 		service.NewRouteDataSource,
 		// Unbound
