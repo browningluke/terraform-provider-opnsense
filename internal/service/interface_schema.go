@@ -44,6 +44,41 @@ type Ipv6Model struct {
 	Tentative  types.Bool   `tfsdk:"tentative"`
 }
 
+var interfaceAttrTypes = map[string]attr.Type{
+	"device":      types.StringType,
+	"media":       types.StringType,
+	"media_raw":   types.StringType,
+	"macaddr":     types.StringType,
+	"is_physical": types.BoolType,
+	"mtu":         types.Int64Type,
+	"status":      types.StringType,
+	"flags": types.SetType{
+		ElemType: types.StringType,
+	},
+	"capabilities": types.SetType{
+		ElemType: types.StringType,
+	},
+	"options": types.SetType{
+		ElemType: types.StringType,
+	},
+	"supported_media": types.SetType{
+		ElemType: types.StringType,
+	},
+	"groups": types.SetType{
+		ElemType: types.StringType,
+	},
+	"ipv4": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: ipv4AttrTypes,
+		},
+	},
+	"ipv6": types.ListType{
+		ElemType: types.ObjectType{
+			AttrTypes: ipv6AttrTypes,
+		},
+	},
+}
+
 var ipv4AttrTypes = map[string]attr.Type{
 	"ipaddr":     types.StringType,
 	"subnetbits": types.Int64Type,
