@@ -21,8 +21,8 @@ github.com/armon/go-radix v1.0.0/go.mod h1:ufUuZ+zHj4x4TnLV4JWEpy2hxWSpsRywHrMgI
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQkY=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
-github.com/browningluke/opnsense-go v0.8.0 h1:i2d1evSXAWTGbe4O24UJAOydQd89YnG4qDbq3fMXRqk=
-github.com/browningluke/opnsense-go v0.8.0/go.mod h1:8TRAG1xjiFzRUEuaosv4mHSXwBJd+R35o6QSEKGVwSA=
+github.com/browningluke/opnsense-go v0.9.0 h1:0vSefSX4ZGrDp48zVIDWpU+akGN0UzqmWghiFyRJBBM=
+github.com/browningluke/opnsense-go v0.9.0/go.mod h1:8TRAG1xjiFzRUEuaosv4mHSXwBJd+R35o6QSEKGVwSA=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
