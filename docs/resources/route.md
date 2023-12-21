@@ -45,3 +45,19 @@ resource "opnsense_route" "two_route" {
 
 - `id` (String) UUID of the route.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_route using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_route.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_route using the `id`. For example:
+
+```console
+% terraform import opnsense_route.example <opnsense-resource-id>
+```

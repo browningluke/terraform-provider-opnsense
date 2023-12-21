@@ -95,3 +95,19 @@ resource "opnsense_quagga_bgp_routemap" "example0" {
 
 - `id` (String) UUID of the route map.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_quagga_bgp_routemap using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_quagga_bgp_routemap.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_quagga_bgp_routemap using the `id`. For example:
+
+```console
+% terraform import opnsense_quagga_bgp_routemap.example <opnsense-resource-id>
+```

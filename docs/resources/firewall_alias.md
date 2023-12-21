@@ -72,3 +72,19 @@ resource "opnsense_firewall_alias" "example_two" {
 
 - `id` (String) UUID of the resource.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_firewall_alias using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_firewall_alias.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_firewall_alias using the `id`. For example:
+
+```console
+% terraform import opnsense_firewall_alias.example <opnsense-resource-id>
+```

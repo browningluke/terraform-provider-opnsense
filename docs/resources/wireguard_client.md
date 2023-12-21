@@ -51,3 +51,19 @@ resource "opnsense_wireguard_client" "example0" {
 
 - `id` (String) UUID of the client.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_wireguard_client using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_wireguard_client.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_wireguard_client using the `id`. For example:
+
+```console
+% terraform import opnsense_wireguard_client.example <opnsense-resource-id>
+```

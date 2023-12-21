@@ -47,3 +47,19 @@ resource "opnsense_unbound_domain_override" "two_override" {
 
 - `id` (String) UUID of the host override.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_unbound_domain_override using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_unbound_domain_override.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_unbound_domain_override using the `id`. For example:
+
+```console
+% terraform import opnsense_unbound_domain_override.example <opnsense-resource-id>
+```
