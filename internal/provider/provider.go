@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -12,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"os"
 	"strconv"
 	"terraform-provider-opnsense/internal/service"
@@ -269,8 +267,6 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 		MaxRetries:    retries,
 	}
 	client := api.NewClient(opnOptions)
-
-	tflog.Warn(ctx, fmt.Sprintf("Created client with options: %+v\n", opnOptions))
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
