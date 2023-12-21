@@ -2,14 +2,19 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"os"
+	"strconv"
 	"terraform-provider-opnsense/internal/service"
 )
 
@@ -44,16 +49,19 @@ func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaReques
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"uri": schema.StringAttribute{
+				// Required, but computed from environment variable if possible
 				MarkdownDescription: "The URI to an OPNsense host. Alternatively, can be configured using the `OPNSENSE_URI` environment variable.",
-				Required:            true,
+				Optional:            true,
 			},
 			"api_key": schema.StringAttribute{
+				// Required, but computed from environment variable if possible
 				MarkdownDescription: "The API key for a user. Alternatively, can be configured using the `OPNSENSE_API_KEY` environment variable.",
-				Required:            true,
+				Optional:            true,
 			},
 			"api_secret": schema.StringAttribute{
+				// Required, but computed from environment variable if possible
 				MarkdownDescription: "The API secret for a user. Alternatively, can be configured using the `OPNSENSE_API_SECRET` environment variable.",
-				Required:            true,
+				Optional:            true,
 			},
 			"allow_insecure": schema.BoolAttribute{
 				MarkdownDescription: "Allow insecure TLS connections. Alternatively, can be configured using the `OPNSENSE_ALLOW_INSECURE` environment variable. Defaults to `false`.",
@@ -85,25 +93,185 @@ func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaReques
 }
 
 func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	// Get data from config
 	var data OPNsenseProviderModel
-
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If value is set, it must be known
+
+	if data.Uri.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("uri"),
+			"Unknown OPNsense API URI",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for the OPNsense API uri. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_URI environment variable.",
+		)
+	}
+
+	if data.APIKey.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Unknown OPNsense API Key",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for the OPNsense API key. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_API_KEY environment variable.",
+		)
+	}
+
+	if data.APISecret.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_secret"),
+			"Unknown OPNsense API Secret",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for the OPNsense API secret. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_API_SECRET environment variable.",
+		)
+	}
+
+	if data.AllowInsecure.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("allow_insecure"),
+			"Unknown OPNsense API Value: allow_insecure",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for allow_insecure. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_ALLOW_INSECURE environment variable.",
+		)
+	}
+
+	if data.MaxBackoff.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("max_backoff"),
+			"Unknown OPNsense API Value: max_backoff",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for max_backoff. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_MAX_BACKOFF environment variable.",
+		)
+	}
+
+	if data.MinBackoff.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("min_backoff"),
+			"Unknown OPNsense API Value: min_backoff",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for min_backoff. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_MIN_BACKOFF environment variable.",
+		)
+	}
+
+	if data.MaxRetries.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("retries"),
+			"Unknown OPNsense API Value: retries",
+			"The provider cannot create the OPNsense API client as there is an unknown configuration value for retries. "+
+				"Either target apply the source of the value first, set the value statically in the configuration, or use the OPNSENSE_RETRIES environment variable.",
+		)
+	}
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	opnOptions := api.Options{
-		Uri:           data.Uri.ValueString(),
-		APIKey:        data.APIKey.ValueString(),
-		APISecret:     data.APISecret.ValueString(),
-		AllowInsecure: data.AllowInsecure.ValueBool(),
-		MaxBackoff:    data.MaxBackoff.ValueInt64(),
-		MinBackoff:    data.MinBackoff.ValueInt64(),
-		MaxRetries:    data.MaxRetries.ValueInt64(),
+	// Attempt to load values from environment variables
+
+	uri := os.Getenv("OPNSENSE_URI")
+	if !data.Uri.IsNull() {
+		uri = data.Uri.ValueString()
 	}
 
+	apiKey := os.Getenv("OPNSENSE_API_KEY")
+	if !data.APIKey.IsNull() {
+		apiKey = data.APIKey.ValueString()
+	}
+
+	apiSecret := os.Getenv("OPNSENSE_API_SECRET")
+	if !data.APISecret.IsNull() {
+		apiSecret = data.APISecret.ValueString()
+	}
+
+	allowInsecureStr := os.Getenv("OPNSENSE_ALLOW_INSECURE")
+	allowInsecure, err := strconv.ParseBool(allowInsecureStr)
+	if err != nil {
+		// Set to default (false) if string is unparsable
+		allowInsecure = false
+	}
+	if !data.AllowInsecure.IsNull() {
+		allowInsecure = data.AllowInsecure.ValueBool()
+	}
+
+	maxBackoffStr := os.Getenv("OPNSENSE_MAX_BACKOFF")
+	maxBackoff, err := strconv.ParseInt(maxBackoffStr, 10, 64)
+	if err != nil {
+		// Set to 0 to use client default downstream if string is unparsable
+		maxBackoff = 0
+	}
+	if !data.MaxBackoff.IsNull() {
+		maxBackoff = data.MaxBackoff.ValueInt64()
+	}
+
+	minBackoffStr := os.Getenv("OPNSENSE_MIN_BACKOFF")
+	minBackoff, err := strconv.ParseInt(minBackoffStr, 10, 64)
+	if err != nil {
+		// Set to 0 to use client default downstream if string is unparsable
+		minBackoff = 0
+	}
+	if !data.MinBackoff.IsNull() {
+		maxBackoff = data.MinBackoff.ValueInt64()
+	}
+
+	retriesStr := os.Getenv("OPNSENSE_RETRIES")
+	retries, err := strconv.ParseInt(retriesStr, 10, 64)
+	if err != nil {
+		// Set to 0 to use client default downstream if string is unparsable
+		retries = 0
+	}
+	if !data.MaxRetries.IsNull() {
+		retries = data.MaxRetries.ValueInt64()
+	}
+
+	// Ensure expected variables are not empty
+
+	if uri == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("uri"),
+			"Missing OPNsense API URI",
+			"The provider cannot create the OPNsense API client as there is a missing or empty value for the OPNsense API uri. "+
+				"Set the host value in the configuration or use the OPNSENSE_URI environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	if apiKey == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Missing OPNsense API Key",
+			"The provider cannot create the OPNsense API client as there is a missing or empty value for the OPNsense API key. "+
+				"Set the host value in the configuration or use the OPNSENSE_API_KEY environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	if apiSecret == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_secret"),
+			"Missing OPNsense API Secret",
+			"The provider cannot create the OPNsense API client as there is a missing or empty value for the OPNsense API secret. "+
+				"Set the host value in the configuration or use the OPNSENSE_API_SECRET environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	// Create the OPNsense client
+	opnOptions := api.Options{
+		Uri:           uri,
+		APIKey:        apiKey,
+		APISecret:     apiSecret,
+		AllowInsecure: allowInsecure,
+		MaxBackoff:    maxBackoff,
+		MinBackoff:    minBackoff,
+		MaxRetries:    retries,
+	}
 	client := api.NewClient(opnOptions)
+
+	tflog.Warn(ctx, fmt.Sprintf("Created client with options: %+v\n", opnOptions))
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -141,6 +309,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		// Interfaces
 		service.NewInterfacesVlanDataSource,
 		service.NewInterfaceDataSource,
+		service.NewInterfaceAllDataSource,
 		// Routes
 		service.NewRouteDataSource,
 		// Unbound
