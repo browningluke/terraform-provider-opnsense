@@ -49,3 +49,19 @@ resource "opnsense_unbound_forward" "dot" {
 
 - `id` (String) UUID of the forward.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_unbound_forward using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_unbound_forward.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_unbound_forward using the `id`. For example:
+
+```console
+% terraform import opnsense_unbound_forward.example <opnsense-resource-id>
+```

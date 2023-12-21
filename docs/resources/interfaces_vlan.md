@@ -48,3 +48,19 @@ resource "opnsense_interfaces_vlan" "vlan04" {
 
 - `id` (String) UUID of the VLAN.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_interfaces_vlan using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_interfaces_vlan.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_interfaces_vlan using the `id`. For example:
+
+```console
+% terraform import opnsense_interfaces_vlan.example <opnsense-resource-id>
+```

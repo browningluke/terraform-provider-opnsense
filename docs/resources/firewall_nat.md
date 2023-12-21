@@ -130,3 +130,19 @@ Optional:
 - `net` (String) Specify the IP address, CIDR or alias for the source of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
 - `port` (String) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `""`). Defaults to `""`.
 
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import opnsense_firewall_nat using the `id`. For example:
+
+```terraform
+import {
+  to = opnsense_firewall_nat.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import opnsense_firewall_nat using the `id`. For example:
+
+```console
+% terraform import opnsense_firewall_nat.example <opnsense-resource-id>
+```
