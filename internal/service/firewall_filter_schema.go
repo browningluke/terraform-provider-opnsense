@@ -140,8 +140,8 @@ func FirewallFilterResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
-								"must be number (80), range (80-443) or well known name (http)"),
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^(\\w){0,32}$"),
+								"must be number (80), range (80-443), well known name (http) or alias name"),
 						},
 					},
 					"invert": schema.BoolAttribute{
@@ -177,13 +177,13 @@ func FirewallFilterResourceSchema() schema.Schema {
 						Default:             stringdefault.StaticString("any"),
 					},
 					"port": schema.StringAttribute{
-						MarkdownDescription: "Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `\"\"`.",
+						MarkdownDescription: "Destination port number, well known name (imap, imaps, http, https, ...) or alias name, for ranges use a dash. Defaults to `\"\"`.",
 						Optional:            true,
 						Computed:            true,
 						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
-								"must be number (80), range (80-443) or well known name (http)"),
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^(\\w){0,32}$"),
+								"must be number (80), range (80-443), well known name (http) or alias name"),
 						},
 					},
 					"invert": schema.BoolAttribute{

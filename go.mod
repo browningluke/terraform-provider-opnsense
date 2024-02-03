@@ -3,7 +3,7 @@ module terraform-provider-opnsense
 go 1.20
 
 require (
-	github.com/browningluke/opnsense-go v0.9.0
+	github.com/browningluke/opnsense-go v0.9.1
 	github.com/hashicorp/terraform-plugin-docs v0.14.1
 	github.com/hashicorp/terraform-plugin-framework v1.2.0
 	github.com/hashicorp/terraform-plugin-framework-validators v0.10.0

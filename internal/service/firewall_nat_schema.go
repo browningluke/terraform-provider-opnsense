@@ -157,8 +157,8 @@ func FirewallNATResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
-								"must be number (80), range (80-443) or well known name (http)"),
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^(\\w){0,32}$"),
+								"must be number (80), range (80-443), well known name (http) or alias name"),
 						},
 					},
 					"invert": schema.BoolAttribute{
