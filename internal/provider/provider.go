@@ -300,6 +300,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		// Kea
 		service.NewKeaSubnetResource,
 		service.NewKeaPeerResource,
+		service.NewKeaReservationResource,
 	}
 }
 
@@ -333,6 +334,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		// Kea
 		service.NewKeaSubnetDataSource,
 		service.NewKeaPeerDataSource,
+		service.NewKeaReservationDataSource,
 	}
 }
 
