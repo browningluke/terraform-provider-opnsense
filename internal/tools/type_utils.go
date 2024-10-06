@@ -1,11 +1,13 @@
 package tools
 
 import (
+	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"strconv"
+	"strings"
 )
 
 // Ints
@@ -86,8 +88,8 @@ func StringOrNull(s string) types.String {
 
 // Sets
 
-func EmptySetValue() types.Set {
-	sv, _ := types.SetValue(types.StringType, []attr.Value{})
+func EmptySetValue(t attr.Type) types.Set {
+	sv, _ := types.SetValue(t, []attr.Value{})
 	return sv
 }
 
@@ -103,4 +105,16 @@ func StringSliceToSet(s []string) basetypes.SetValue {
 	typeList, _ := types.SetValue(types.StringType, list)
 
 	return typeList
+}
+
+func SetToString(set types.Set, delim string) string {
+	var strList []string
+	set.ElementsAs(context.Background(), &strList, false)
+	return strings.Join(strList, delim)
+}
+
+func SetToStringSlice(set types.Set) []string {
+	var list []string
+	set.ElementsAs(context.Background(), &list, false)
+	return list
 }

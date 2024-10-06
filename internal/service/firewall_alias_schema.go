@@ -88,14 +88,14 @@ func FirewallAliasResourceSchema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
-				Default:             setdefault.StaticValue(tools.EmptySetValue()),
+				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
 			},
 			"categories": schema.SetAttribute{
 				MarkdownDescription: "Set of category IDs to apply. Defaults to `[]`.",
 				Optional:            true,
 				Computed:            true,
 				ElementType:         types.StringType,
-				Default:             setdefault.StaticValue(tools.EmptySetValue()),
+				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
 			},
 			"update_freq": schema.Float64Attribute{
 				MarkdownDescription: "The frequency that the list will be refreshed, in days (e.g. for 30 hours, enter `1.25`). Only applies (and must be set) when `type = \"urltable\"`. Defaults to `-1`.",
