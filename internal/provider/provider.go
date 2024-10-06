@@ -299,6 +299,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewFirewallCategoryResource,
 		// Kea
 		service.NewKeaSubnetResource,
+		service.NewKeaPeerResource,
 	}
 }
 
@@ -331,6 +332,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		service.NewFirewallCategoryDataSource,
 		// Kea
 		service.NewKeaSubnetDataSource,
+		service.NewKeaPeerDataSource,
 	}
 }
 
