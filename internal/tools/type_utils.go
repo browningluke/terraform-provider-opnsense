@@ -88,8 +88,8 @@ func StringOrNull(s string) types.String {
 
 // Sets
 
-func EmptySetValue() types.Set {
-	sv, _ := types.SetValue(types.StringType, []attr.Value{})
+func EmptySetValue(t attr.Type) types.Set {
+	sv, _ := types.SetValue(t, []attr.Value{})
 	return sv
 }
 
