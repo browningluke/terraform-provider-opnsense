@@ -277,6 +277,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		// BInd
 		service.NewBindAclResource,
 		service.NewBindPrimaryDomainResource,
+		service.NewBindRecordResource,
 		// Interfaces
 		service.NewInterfacesVlanResource,
 		// Routes
@@ -312,6 +313,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		// BInd
 		service.NewBindAclDataSource,
 		service.NewBindPrimaryDomainDataSource,
+		service.NewBindRecordDataSource,
 		// Interfaces
 		service.NewInterfacesVlanDataSource,
 		service.NewInterfaceDataSource,
