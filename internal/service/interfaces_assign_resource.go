@@ -72,8 +72,6 @@ func (r *InterfacesAssignResource) Create(ctx context.Context, req resource.Crea
 		return
 	}
 
-	fmt.Println("convertInterfacesAssignSchemaToStruct: ", assign)
-
 	// Add vip to OPNsense interfaces
 	id, err := r.client.Interfaces().AddAssign(ctx, assign)
 	if err != nil {
