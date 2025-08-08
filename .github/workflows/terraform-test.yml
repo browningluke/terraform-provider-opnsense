@@ -14,27 +14,6 @@ env:
   OPNSENSE_WEB_PORT: 8443
   TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
 jobs:
-  folders:
-    runs-on: ubuntu-latest
-    outputs:
-      folders: ${{ steps.find-folders.outputs.result }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Find all terraform testing folders
-        uses: actions/github-script@v7
-        id: find-folders
-        with:
-          script: |
-            const fs = require('fs');
-            const rootDir = process.cwd();
-            const testDir = 'tests';
-            const folders = fs.readdirSync(`${rootDir}/${testDir}`, { withFileTypes: true })
-              .filter(dirent => dirent.isDirectory())
-              .map(dirent => dirent.name);
-            console.log(`folders: ${folders}`);
-            return folders;
-
   build:
     runs-on: ubuntu-latest
     steps:
@@ -74,13 +53,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: 
-      - folders
       - build
       - opnsense-image
-    strategy:
-      fail-fast: false
-      matrix:
-        folder: ${{ fromJson(needs.folders.outputs.folders) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
