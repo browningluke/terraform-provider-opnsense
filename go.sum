@@ -25,8 +25,8 @@ github.com/bgentry/speakeasy v0.1.0 h1:ByYyxL9InA1OWqxJqqp2A5pYHUrCiAL6K3J+LKSsQ
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
 github.com/bmatcuk/doublestar/v4 v4.6.1 h1:FH9SifrbvJhnlQpztAx++wlkk70QBf0iBWDwNy7PA4I=
 github.com/bmatcuk/doublestar/v4 v4.6.1/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
-github.com/browningluke/opnsense-go v0.11.0 h1:YPn3ENVXAvZoS3uRr+x9tSLQJK6g4iTjQ9dnzTAVloY=
-github.com/browningluke/opnsense-go v0.11.0/go.mod h1:VUyKS+Kfa/IoWqIf4Pmi7SfTnayv6us0KncVU00nbnI=
+github.com/browningluke/opnsense-go v0.11.1 h1:ohTw08plT4rODrEYbEMfHSwFRvwWEEQj/b7ktT8JEC8=
+github.com/browningluke/opnsense-go v0.11.1/go.mod h1:zh2ofl18Q4soldkfczxgbHddNU7NoCDyIuutVN6sOrM=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
 github.com/bufbuild/protocompile v0.4.0/go.mod h1:3v93+mbWn/v3xzN+31nwkJfrEpAUwp+BagBSZWx+TP8=
 github.com/cloudflare/circl v1.6.1 h1:zqIqSPIndyBh1bjLVVDHMPpVKqp8Su/V+6MeDzzQBQ0=
