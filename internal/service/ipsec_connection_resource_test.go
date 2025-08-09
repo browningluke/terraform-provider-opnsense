@@ -227,7 +227,6 @@ resource "opnsense_ipsec_connection" "test" {
 `, enabled, strings.Join(proposals, `", "`), unique, aggressive, version, mobike, strings.Join(localAddresses, `", "`), strings.Join(remoteAddresses, `", "`),
 		localPort, remotePort, udpEncapsulation, reauthenticationTime, rekeyTime, ikeLifetime,
 		dpdDelay, dpdTimeout, ipPoolsLine, sendCertificateRequest, sendCertificate, keyingTries, description)
-	fmt.Println("Generated config:", rval)
 	return rval
 }
 

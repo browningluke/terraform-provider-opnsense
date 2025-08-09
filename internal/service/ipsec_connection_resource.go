@@ -70,7 +70,6 @@ func (r *IpsecConnectionResource) Create(ctx context.Context, req resource.Creat
 			fmt.Sprintf("Unable to parse ipsec connection, got error: %s", err))
 		return
 	}
-	tflog.Error(ctx, fmt.Sprintf("New resource data: %+v", connection))
 
 	// Add IPsec Connection to OPNsense
 	id, err := r.client.Ipsec().AddIPsecConnection(ctx, connection)
