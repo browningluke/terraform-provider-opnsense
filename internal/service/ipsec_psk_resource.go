@@ -104,7 +104,7 @@ func (r *IpsecPskResource) Read(ctx context.Context, req resource.ReadRequest, r
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
-			tflog.Warn(ctx, fmt.Sprintf("ipsec psk not present in remote, removing from state"))
+			tflog.Warn(ctx, "ipsec psk not present in remote, removing from state")
 			resp.State.RemoveResource(ctx)
 			return
 		}

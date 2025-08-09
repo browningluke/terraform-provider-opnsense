@@ -85,31 +85,11 @@ func (r *IpsecConnectionResource) Create(ctx context.Context, req resource.Creat
 	// Tag new resource with ID from OPNsense
 	data.Id = types.StringValue(id)
 
-	// Read the resource back to populate computed fields
-	connectionRead, err := r.client.Ipsec().GetIPsecConnection(ctx, id)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read ipsec connection after creation, got error: %s", err))
-		return
-	}
-	tflog.Error(ctx, fmt.Sprintf("Read resource data after creation: %+v", connectionRead))
-
-	// Convert OPNsense struct back to TF schema to get computed values
-	connectionModel, err := convertIpsecConnectionStructToSchema(connectionRead)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to convert ipsec connection after creation, got error: %s", err))
-		return
-	}
-
-	// Preserve the ID
-	connectionModel.Id = data.Id
-
 	// Write logs using the tflog package
 	tflog.Trace(ctx, "created a resource")
 
 	// Save data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &connectionModel)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
 func (r *IpsecConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -127,7 +107,7 @@ func (r *IpsecConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
-			tflog.Warn(ctx, fmt.Sprintf("ipsec connection not present in remote, removing from state"))
+			tflog.Warn(ctx, "ipsec connection not present in remote, removing from state")
 			resp.State.RemoveResource(ctx)
 			return
 		}
