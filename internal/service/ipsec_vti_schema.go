@@ -10,22 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-/*
-
-type IPsecVTI struct {
-	Enabled         string `json:"enabled"`
-	RequestID       string `json:"reqid"`
-	LocalIP         string `json:"local"`
-	RemoteIP        string `json:"remote"`
-	TunnelLocalIP   string `json:"tunnel_local"`
-	TunnelRemoteIP  string `json:"tunnel_remote"`
-	TunnelLocalIP2  string `json:"tunnel_local2"`
-	TunnelRemoteIP2 string `json:"tunnel_remote2"`
-	Description     string `json:"description"`
-}
-
-*/
-
 // IpsecVtiResourceModel describes the resource data model.
 type IpsecVtiResourceModel struct {
 	Enabled         types.String `tfsdk:"enabled"`
@@ -50,12 +34,11 @@ func IpsecVtiResourceSchema() schema.Schema {
 				MarkdownDescription: "Enable or disable the VTI.",
 				Optional:            true,
 				Computed:            true,
-				Default:             stringdefault.StaticString("true"),
+				Default:             stringdefault.StaticString("1"),
 			},
 			"request_id": schema.StringAttribute{
 				MarkdownDescription: "Request ID for the VTI.",
-				Optional:            true,
-				Computed:            true,
+				Required:            true,
 			},
 			"local_ip": schema.StringAttribute{
 				MarkdownDescription: "Local IP address for the VTI.",
@@ -76,16 +59,19 @@ func IpsecVtiResourceSchema() schema.Schema {
 			"tunnel_local_ip2": schema.StringAttribute{
 				MarkdownDescription: "Second local tunnel IP address for the VTI.",
 				Optional:            true,
+				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
 			"tunnel_remote_ip2": schema.StringAttribute{
 				MarkdownDescription: "Second remote tunnel IP address for the VTI.",
 				Optional:            true,
+				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description for the PSK.",
+				MarkdownDescription: "Optional description for the VTI.",
 				Optional:            true,
+				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
 			"id": schema.StringAttribute{
@@ -101,7 +87,7 @@ func IpsecVtiResourceSchema() schema.Schema {
 
 func IpsecVtiDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
-		MarkdownDescription: "IPsec Pre-Shared Keys (PSKs) are used for authenticating IPsec VPN connections.",
+		MarkdownDescription: "IPsec Virtual Tunnel Interfaces (VTIs) are used by routed IPsec VPN connections.",
 
 		Attributes: map[string]dschema.Attribute{
 			"id": dschema.StringAttribute{
@@ -141,7 +127,7 @@ func IpsecVtiDataSourceSchema() dschema.Schema {
 				Computed:            true,
 			},
 			"description": dschema.StringAttribute{
-				MarkdownDescription: "Optional description for the PSK.",
+				MarkdownDescription: "Optional description for the VTI.",
 				Computed:            true,
 			},
 		},

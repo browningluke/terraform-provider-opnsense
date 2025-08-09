@@ -169,11 +169,11 @@ func (r *IpsecVtiResource) Delete(ctx context.Context, req resource.DeleteReques
 		return
 	}
 
-	err := r.client.Ipsec().DeleteIPsecPSK(ctx, data.Id.ValueString())
+	err := r.client.Ipsec().DeleteIPsecVTI(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to delete ipsec psk, got error: %s", err))
+			fmt.Sprintf("Unable to delete ipsec vti, got error: %s", err))
 		return
 	}
 }
