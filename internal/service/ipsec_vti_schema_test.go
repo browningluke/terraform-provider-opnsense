@@ -44,7 +44,7 @@ func TestConvertIpsecVtiSchemaToStruct(t *testing.T) {
 			name: "minimal_required_fields",
 			input: &IpsecVtiResourceModel{
 				Enabled:         types.StringValue("1"),
-				RequestID:       types.StringValue(""),
+				RequestID:       types.StringValue("100"),
 				LocalIP:         types.StringValue("172.16.1.1"),
 				RemoteIP:        types.StringValue("172.16.2.1"),
 				TunnelLocalIP:   types.StringValue("10.100.1.1"),
@@ -56,7 +56,7 @@ func TestConvertIpsecVtiSchemaToStruct(t *testing.T) {
 			},
 			expected: &ipsec.IPsecVTI{
 				Enabled:         "1",
-				RequestID:       "",
+				RequestID:       "100",
 				LocalIP:         "172.16.1.1",
 				RemoteIP:        "172.16.2.1",
 				TunnelLocalIP:   "10.100.1.1",
@@ -225,7 +225,7 @@ func TestIpsecVtiSchemaValidation(t *testing.T) {
 	schema := IpsecVtiResourceSchema()
 
 	// Verify required fields
-	requiredFields := []string{"local_ip", "remote_ip", "tunnel_local_ip", "tunnel_remote_ip"}
+	requiredFields := []string{"local_ip", "remote_ip", "tunnel_local_ip", "tunnel_remote_ip", "request_id"}
 	for _, field := range requiredFields {
 		attr := schema.Attributes[field]
 		assert.NotNil(t, attr, "Field %s should exist", field)
@@ -250,7 +250,7 @@ func TestIpsecVtiSchemaValidation(t *testing.T) {
 	}
 
 	// Verify computed fields
-	computedFields := []string{"request_id", "id"}
+	computedFields := []string{"id"}
 	for _, field := range computedFields {
 		attr := schema.Attributes[field]
 		assert.NotNil(t, attr, "Field %s should exist", field)
