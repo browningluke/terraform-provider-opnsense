@@ -146,7 +146,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 			name: "empty_optional_fields",
 			input: &ipsec.IPsecVTI{
 				Enabled:         "0",
-				RequestID:       "",
+				RequestID:       "120",
 				LocalIP:         "172.16.100.1",
 				RemoteIP:        "172.16.200.1",
 				TunnelLocalIP:   "10.200.1.1",
@@ -157,7 +157,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 			},
 			expected: &IpsecVtiResourceModel{
 				Enabled:         types.StringValue("0"),
-				RequestID:       types.StringValue(""),
+				RequestID:       types.StringValue("120"),
 				LocalIP:         types.StringValue("172.16.100.1"),
 				RemoteIP:        types.StringValue("172.16.200.1"),
 				TunnelLocalIP:   types.StringValue("10.200.1.1"),
