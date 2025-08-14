@@ -306,6 +306,9 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewIpsecPskResource,
 		service.NewIpsecConnectionResource,
 		service.NewIpsecVtiResource,
+		service.NewIpsecChildResource,
+		service.NewIpsecAuthLocalResource,
+		service.NewIpsecAuthRemoteResource,
 	}
 }
 

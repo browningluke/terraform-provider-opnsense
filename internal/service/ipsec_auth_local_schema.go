@@ -45,69 +45,36 @@ func IpsecAuthLocalResourceSchema() schema.Schema {
 				MarkdownDescription: "The parent connection UUID.",
 				Required:            true,
 			},
-			"proposals": schema.SetAttribute{
-				ElementType:         types.StringType,
-				MarkdownDescription: "List of proposals for the Child Resource.",
-				Required:            true,
-			},
-			"sha256_96": schema.StringAttribute{
-				MarkdownDescription: "Enable or disable SHA256_96.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("0"),
-			},
-			"start_action": schema.StringAttribute{
-				MarkdownDescription: "Start action for the Child Resource.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("start"),
-			},
-			"close_action": schema.StringAttribute{
-				MarkdownDescription: "Close action for the Child Resource.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("none"),
-			},
-			"dpd_action": schema.StringAttribute{
-				MarkdownDescription: "DPD action for the Child Resource.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("hold"),
-			},
-			"mode": schema.StringAttribute{
-				MarkdownDescription: "Mode for the Child Resource.",
-				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("tunnel"),
-			},
-			"install_policies": schema.StringAttribute{
-				MarkdownDescription: "Install policies for the Child Resource.",
+			"round": schema.StringAttribute{
+				MarkdownDescription: "Authentication round for the AuthLocal Resource.",
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString("1"),
 			},
-			"local_networks": schema.SetAttribute{
-				ElementType:         types.StringType,
-				MarkdownDescription: "List of local networks for the Child Resource.",
+			"authentication": schema.StringAttribute{
+				MarkdownDescription: "Authentication method for the AuthLocal Resource.",
 				Required:            true,
 			},
-			"remote_networks": schema.SetAttribute{
+			"auth_id": schema.StringAttribute{
+				MarkdownDescription: "Authentication ID for the AuthLocal Resource.",
+				Optional:            true,
+			},
+			"eap_id": schema.StringAttribute{
+				MarkdownDescription: "EAP ID for the AuthLocal Resource.",
+				Optional:            true,
+			},
+			"certificates": schema.SetAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of remote networks for the Child Resource.",
-				Required:            true,
-			},
-			"request_id": schema.StringAttribute{
-				MarkdownDescription: "Request ID for the Child Resource.",
+				MarkdownDescription: "List of certificates for the AuthLocal Resource.",
 				Optional:            true,
 			},
-			"rekey_time": schema.StringAttribute{
-				MarkdownDescription: "Rekey time for the Child Resource in seconds.",
+			"public_keys": schema.SetAttribute{
+				ElementType:         types.StringType,
+				MarkdownDescription: "List of public keys for the AuthLocal Resource.",
 				Optional:            true,
-				Computed:            true,
-				Default:             stringdefault.StaticString("0"),
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description for the PSK.",
+				MarkdownDescription: "Optional description for the AuthLocal Resource.",
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
@@ -133,62 +100,41 @@ func IpsecAuthLocalDataSourceSchema() dschema.Schema {
 				Required:            true,
 			},
 			"enabled": dschema.StringAttribute{
-				MarkdownDescription: "Enable or disable the Child Resource.",
+				MarkdownDescription: "Enable or disable the AuthLocal Resource.",
 				Computed:            true,
 			},
 			"connection": dschema.StringAttribute{
-				MarkdownDescription: "Connection ID for the Child Resource.",
+				MarkdownDescription: "Connection ID for the AuthLocal Resource.",
 				Computed:            true,
 			},
-			"proposals": dschema.SetAttribute{
+			"round": dschema.StringAttribute{
+				MarkdownDescription: "Authentication round for the AuthLocal Resource.",
+				Computed:            true,
+			},
+			"authentication": dschema.StringAttribute{
+				MarkdownDescription: "Authentication method for the AuthLocal Resource.",
+				Computed:            true,
+			},
+			"auth_id": dschema.StringAttribute{
+				MarkdownDescription: "Authentication ID for the AuthLocal Resource.",
+				Computed:            true,
+			},
+			"eap_id": dschema.StringAttribute{
+				MarkdownDescription: "EAP ID for the AuthLocal Resource.",
+				Computed:            true,
+			},
+			"certificates": dschema.SetAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of proposals for the Child Resource.",
+				MarkdownDescription: "List of certificates for the AuthLocal Resource.",
 				Computed:            true,
 			},
-			"sha256_96": dschema.StringAttribute{
-				MarkdownDescription: "Enable or disable SHA256_96.",
-				Computed:            true,
-			},
-			"start_action": dschema.StringAttribute{
-				MarkdownDescription: "Start action for the Child Resource.",
-				Computed:            true,
-			},
-			"close_action": dschema.StringAttribute{
-				MarkdownDescription: "Close action for the Child Resource.",
-				Computed:            true,
-			},
-			"dpd_action": dschema.StringAttribute{
-				MarkdownDescription: "DPD action for the Child Resource.",
-				Computed:            true,
-			},
-			"mode": dschema.StringAttribute{
-				MarkdownDescription: "Mode for the Child Resource.",
-				Computed:            true,
-			},
-			"install_policies": dschema.StringAttribute{
-				MarkdownDescription: "Install policies for the Child Resource.",
-				Computed:            true,
-			},
-			"local_networks": dschema.SetAttribute{
+			"public_keys": dschema.SetAttribute{
 				ElementType:         types.StringType,
-				MarkdownDescription: "List of local networks for the Child Resource.",
-				Computed:            true,
-			},
-			"remote_networks": dschema.SetAttribute{
-				ElementType:         types.StringType,
-				MarkdownDescription: "List of remote networks for the Child Resource.",
-				Computed:            true,
-			},
-			"request_id": dschema.StringAttribute{
-				MarkdownDescription: "Request ID for the Child Resource.",
-				Computed:            true,
-			},
-			"rekey_time": dschema.StringAttribute{
-				MarkdownDescription: "Rekey time for the Child Resource in seconds.",
+				MarkdownDescription: "List of public keys for the AuthLocal Resource.",
 				Computed:            true,
 			},
 			"description": dschema.StringAttribute{
-				MarkdownDescription: "Optional description for the PSK.",
+				MarkdownDescription: "Optional description for the AuthLocal Resource.",
 				Computed:            true,
 			},
 		},
