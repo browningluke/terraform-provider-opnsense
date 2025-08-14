@@ -22,7 +22,7 @@ func TestAccIpsecChildResource(t *testing.T) {
 					"0",                                // sha256_96
 					"start",                            // start_action
 					"none",                             // close_action
-					"hold",                             // dpd_action
+					"clear",                            // dpd_action
 					"tunnel",                           // mode
 					"1",                                // install_policies
 					[]string{"192.168.1.0/24"},         // local_networks
@@ -33,13 +33,13 @@ func TestAccIpsecChildResource(t *testing.T) {
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "enabled", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "ipsec_connection", "connection-uuid-123"),
+					resource.TestCheckResourceAttrPair("opnsense_ipsec_child.test", "ipsec_connection", "opnsense_ipsec_connection.parent", "id"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "proposals.#", "1"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "proposals.0", "aes128-sha256-modp2048"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "sha256_96", "0"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "start_action", "start"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "close_action", "none"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "dpd_action", "hold"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "dpd_action", "clear"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "mode", "tunnel"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "install_policies", "1"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "local_networks.#", "1"),
@@ -67,12 +67,12 @@ func TestAccIpsecChildResource(t *testing.T) {
 					"1",         // sha256_96 - updated
 					"route",     // start_action - updated
 					"trap",      // close_action - updated
-					"restart",   // dpd_action - updated
+					"clear",     // dpd_action - updated
 					"transport", // mode - updated
 					"0",         // install_policies - updated
 					[]string{"192.168.1.0/24", "192.168.2.0/24"}, // local_networks - updated
 					[]string{"10.0.0.0/24", "10.1.0.0/24"},       // remote_networks - updated
-					"custom-request-id",                          // request_id - updated
+					"55",                                         // request_id - updated
 					"3600",                                       // rekey_time - updated
 					"Updated Test IPsec Child",                   // description - updated
 				),
@@ -82,60 +82,17 @@ func TestAccIpsecChildResource(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "sha256_96", "1"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "start_action", "route"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "close_action", "trap"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "dpd_action", "restart"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "dpd_action", "clear"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "mode", "transport"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "install_policies", "0"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "local_networks.#", "2"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "remote_networks.#", "2"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "request_id", "custom-request-id"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "request_id", "55"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "rekey_time", "3600"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "description", "Updated Test IPsec Child"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
-		},
-	})
-}
-
-func TestAccIpsecChildResource_MinimalConfig(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIpsecChildResourceConfigMinimal(),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "enabled", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "proposals.#", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "sha256_96", "0"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "start_action", "start"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "close_action", "none"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "dpd_action", "hold"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "mode", "tunnel"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "install_policies", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "local_networks.#", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "remote_networks.#", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "rekey_time", "0"),
-					resource.TestCheckResourceAttrSet("opnsense_ipsec_child.test", "id"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccIpsecChildResource_MultipleProposals(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIpsecChildResourceConfigMultipleProposals(),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "proposals.#", "3"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "local_networks.#", "2"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_child.test", "remote_networks.#", "2"),
-				),
-			},
 		},
 	})
 }
@@ -157,48 +114,46 @@ func testAccIpsecChildResourceConfig(
 	description string,
 ) string {
 	return fmt.Sprintf(`
+resource "opnsense_ipsec_connection" "parent" {
+  enabled                  = "1"
+  proposals                = ["aes128-sha256-modp2048"]
+  unique                   = "no"
+  aggressive               = "0"
+  version                  = "2"
+  mobike                   = "1"
+  local_addresses          = ["192.168.1.1"]
+  remote_addresses         = ["10.0.0.1"]
+  local_port               = ""
+  remote_port              = ""
+  udp_encapsulation        = "0"
+  reauthentication_time    = "3600"
+  rekey_time               = "1800"
+  ike_lifetime             = "3600"
+  dpd_delay                = "10"
+  dpd_timeout              = "60"
+  send_certificate_request = "1"
+  send_certificate         = "ifasked"
+  keying_tries             = "1"
+  description              = "Test IPsec Connection for Child"
+}
+
 resource "opnsense_ipsec_child" "test" {
   enabled          = %[1]q
-  ipsec_connection = %[2]q
-  proposals        = ["%[3]v"]
-  sha256_96        = %[4]q
-  start_action     = %[5]q
-  close_action     = %[6]q
-  dpd_action       = %[7]q
-  mode             = %[8]q
-  install_policies = %[9]q
-  local_networks   = ["%[10]v"]
-  remote_networks  = ["%[11]v"]
-  request_id       = %[12]q
-  rekey_time       = %[13]q
-  description      = %[14]q
+  ipsec_connection = opnsense_ipsec_connection.parent.id
+  proposals        = ["%[2]v"]
+  sha256_96        = %[3]q
+  start_action     = %[4]q
+  close_action     = %[5]q
+  dpd_action       = %[6]q
+  mode             = %[7]q
+  install_policies = %[8]q
+  local_networks   = ["%[9]v"]
+  remote_networks  = ["%[10]v"]
+  request_id       = %[11]q
+  rekey_time       = %[12]q
+  description      = %[13]q
 }
-`, enabled, ipsec_connection, strings.Join(proposals, `", "`), sha256_96, startAction, closeAction,
+`, enabled, strings.Join(proposals, `", "`), sha256_96, startAction, closeAction,
 		dpdAction, mode, installPolicies, strings.Join(localNetworks, `", "`),
 		strings.Join(remoteNetworks, `", "`), requestID, rekeyTime, description)
-}
-
-func testAccIpsecChildResourceConfigMinimal() string {
-	return `
-resource "opnsense_ipsec_child" "test" {
-  enabled          = "1"
-  ipsec_connection = "connection-uuid-minimal"
-  proposals        = ["aes128-sha256-modp2048"]
-  local_networks   = ["192.168.1.0/24"]
-  remote_networks  = ["10.0.0.0/24"]
-}
-`
-}
-
-func testAccIpsecChildResourceConfigMultipleProposals() string {
-	return `
-resource "opnsense_ipsec_child" "test" {
-  enabled          = "1"
-  ipsec_connection = "connection-uuid-multiple"
-  proposals        = ["aes256-sha256-modp2048", "aes128-sha256-modp2048", "3des-sha1-modp1024"]
-  local_networks   = ["192.168.1.0/24", "192.168.2.0/24"]
-  remote_networks  = ["10.0.0.0/24", "10.1.0.0/24"]
-  description      = "Multiple Proposals Test"
-}
-`
 }

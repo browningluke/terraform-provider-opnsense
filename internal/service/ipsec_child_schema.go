@@ -77,7 +77,7 @@ func IpsecChildResourceSchema() schema.Schema {
 				MarkdownDescription: "DPD action for the Child Resource.",
 				Optional:            true,
 				Computed:            true,
-				Default:             stringdefault.StaticString("hold"),
+				Default:             stringdefault.StaticString("clear"),
 			},
 			"mode": schema.StringAttribute{
 				MarkdownDescription: "Mode for the Child Resource.",
