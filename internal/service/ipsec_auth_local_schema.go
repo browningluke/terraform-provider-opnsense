@@ -17,15 +17,15 @@ import (
 
 // IpsecAuthLocalResourceModel describes the resource data model.
 type IpsecAuthLocalResourceModel struct {
-	Enabled        types.String `tfsdk:"enabled"`
-	Connection     types.String `tfsdk:"connection"`
-	Round          types.String `tfsdk:"round"`
-	Authentication types.String `tfsdk:"authentication"`
-	AuthId         types.String `tfsdk:"auth_id"`
-	EAPId          types.String `tfsdk:"eap_id"`
-	Certificates   types.Set    `tfsdk:"certificates"`
-	PublicKeys     types.Set    `tfsdk:"public_keys"`
-	Description    types.String `tfsdk:"description"`
+	Enabled         types.String `tfsdk:"enabled"`
+	IPsecConnection types.String `tfsdk:"ipsec_connection"`
+	Round           types.String `tfsdk:"round"`
+	Authentication  types.String `tfsdk:"authentication"`
+	AuthId          types.String `tfsdk:"auth_id"`
+	EAPId           types.String `tfsdk:"eap_id"`
+	Certificates    types.Set    `tfsdk:"certificates"`
+	PublicKeys      types.Set    `tfsdk:"public_keys"`
+	Description     types.String `tfsdk:"description"`
 
 	Id types.String `tfsdk:"id"`
 }
@@ -41,7 +41,7 @@ func IpsecAuthLocalResourceSchema() schema.Schema {
 				Computed:            true,
 				Default:             stringdefault.StaticString("1"),
 			},
-			"connection": schema.StringAttribute{
+			"ipsec_connection": schema.StringAttribute{
 				MarkdownDescription: "The parent connection UUID.",
 				Required:            true,
 			},
@@ -103,7 +103,7 @@ func IpsecAuthLocalDataSourceSchema() dschema.Schema {
 				MarkdownDescription: "Enable or disable the AuthLocal Resource.",
 				Computed:            true,
 			},
-			"connection": dschema.StringAttribute{
+			"ipsec_connection": dschema.StringAttribute{
 				MarkdownDescription: "Connection ID for the AuthLocal Resource.",
 				Computed:            true,
 			},
@@ -152,7 +152,7 @@ func convertIpsecAuthLocalSchemaToStruct(d *IpsecAuthLocalResourceModel) (*ipsec
 
 	return &ipsec.IPsecAuthLocal{
 		Enabled:        d.Enabled.ValueString(),
-		Connection:     api.SelectedMap(d.Connection.ValueString()),
+		Connection:     api.SelectedMap(d.IPsecConnection.ValueString()),
 		Round:          d.Round.ValueString(),
 		Authentication: api.SelectedMap(d.Authentication.ValueString()),
 		Id:             d.AuthId.ValueString(),
@@ -175,15 +175,15 @@ func convertIpsecAuthLocalStructToSchema(d *ipsec.IPsecAuthLocal) (*IpsecAuthLoc
 	}
 
 	return &IpsecAuthLocalResourceModel{
-		Enabled:        types.StringValue(d.Enabled),
-		Connection:     types.StringValue(d.Connection.String()),
-		Round:          types.StringValue(d.Round),
-		Authentication: types.StringValue(d.Authentication.String()),
-		AuthId:         types.StringValue(d.Id),
-		EAPId:          types.StringValue(d.EAPId),
-		Certificates:   certificates,
-		PublicKeys:     publicKeys,
-		Description:    types.StringValue(d.Description),
-		Id:             types.StringValue(""), // ID will be set after creation
+		Enabled:         types.StringValue(d.Enabled),
+		IPsecConnection: types.StringValue(d.Connection.String()),
+		Round:           types.StringValue(d.Round),
+		Authentication:  types.StringValue(d.Authentication.String()),
+		AuthId:          types.StringValue(d.Id),
+		EAPId:           types.StringValue(d.EAPId),
+		Certificates:    certificates,
+		PublicKeys:      publicKeys,
+		Description:     types.StringValue(d.Description),
+		Id:              types.StringValue(""), // ID will be set after creation
 	}, nil
 }

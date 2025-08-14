@@ -20,7 +20,7 @@ func TestConvertIpsecChildSchemaToStruct(t *testing.T) {
 			name: "basic conversion",
 			input: &IpsecChildResourceModel{
 				Enabled:         types.StringValue("1"),
-				Connection:      types.StringValue("connection-uuid-123"),
+				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Proposals:       types.SetValueMust(types.StringType, []attr.Value{types.StringValue("aes128-sha256-modp2048")}),
 				SHA256_96:       types.StringValue("0"),
 				StartAction:     types.StringValue("start"),
@@ -55,8 +55,8 @@ func TestConvertIpsecChildSchemaToStruct(t *testing.T) {
 		{
 			name: "multiple proposals and networks",
 			input: &IpsecChildResourceModel{
-				Enabled:    types.StringValue("1"),
-				Connection: types.StringValue("connection-uuid-456"),
+				Enabled:         types.StringValue("1"),
+				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Proposals: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("aes256-sha256-modp2048"),
 					types.StringValue("aes128-sha1-modp1024"),
@@ -148,7 +148,7 @@ func TestConvertIpsecChildStructToSchema(t *testing.T) {
 			},
 			expected: &IpsecChildResourceModel{
 				Enabled:         types.StringValue("1"),
-				Connection:      types.StringValue("connection-uuid-123"),
+				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Proposals:       types.SetValueMust(types.StringType, []attr.Value{types.StringValue("aes128-sha256-modp2048")}),
 				SHA256_96:       types.StringValue("0"),
 				StartAction:     types.StringValue("start"),
@@ -191,8 +191,8 @@ func TestConvertIpsecChildStructToSchema(t *testing.T) {
 				Description: "Complex Test Child",
 			},
 			expected: &IpsecChildResourceModel{
-				Enabled:    types.StringValue("1"),
-				Connection: types.StringValue("connection-uuid-456"),
+				Enabled:         types.StringValue("1"),
+				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Proposals: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("aes256-sha256-modp2048"),
 					types.StringValue("aes128-sha1-modp1024"),

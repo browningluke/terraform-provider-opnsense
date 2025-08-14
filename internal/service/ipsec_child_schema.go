@@ -18,7 +18,7 @@ import (
 // IpsecChildResourceModel describes the resource data model.
 type IpsecChildResourceModel struct {
 	Enabled         types.String `tfsdk:"enabled"`
-	Connection      types.String `tfsdk:"connection"`
+	IPsecConnection types.String `tfsdk:"ipsec_connection"`
 	Proposals       types.Set    `tfsdk:"proposals"`
 	SHA256_96       types.String `tfsdk:"sha256_96"`
 	StartAction     types.String `tfsdk:"start_action"`
@@ -46,7 +46,7 @@ func IpsecChildResourceSchema() schema.Schema {
 				Computed:            true,
 				Default:             stringdefault.StaticString("1"),
 			},
-			"connection": schema.StringAttribute{
+			"ipsec_connection": schema.StringAttribute{
 				MarkdownDescription: "The parent connection UUID.",
 				Required:            true,
 			},
@@ -141,7 +141,7 @@ func IpsecChildDataSourceSchema() dschema.Schema {
 				MarkdownDescription: "Enable or disable the Child Resource.",
 				Computed:            true,
 			},
-			"connection": dschema.StringAttribute{
+			"ipsec_connection": dschema.StringAttribute{
 				MarkdownDescription: "Connection ID for the Child Resource.",
 				Computed:            true,
 			},
@@ -216,7 +216,7 @@ func convertIpsecChildSchemaToStruct(d *IpsecChildResourceModel) (*ipsec.IPsecCh
 
 	return &ipsec.IPsecChild{
 		Enabled:         d.Enabled.ValueString(),
-		Connection:      api.SelectedMap(d.Connection.ValueString()),
+		Connection:      api.SelectedMap(d.IPsecConnection.ValueString()),
 		Proposals:       api.SelectedMapList(proposalsList),
 		SHA256_96:       d.SHA256_96.ValueString(),
 		StartAction:     api.SelectedMap(d.StartAction.ValueString()),
@@ -252,7 +252,7 @@ func convertIpsecChildStructToSchema(d *ipsec.IPsecChild) (*IpsecChildResourceMo
 
 	return &IpsecChildResourceModel{
 		Enabled:         types.StringValue(d.Enabled),
-		Connection:      types.StringValue(d.Connection.String()),
+		IPsecConnection: types.StringValue(d.Connection.String()),
 		Proposals:       proposals,
 		SHA256_96:       types.StringValue(d.SHA256_96),
 		StartAction:     types.StringValue(d.StartAction.String()),

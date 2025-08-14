@@ -16,19 +16,19 @@ func TestAccIpsecAuthRemoteResource(t *testing.T) {
 			// Create and Read testing
 			{
 				Config: testAccIpsecAuthRemoteResourceConfig(
-					"1",                              // enabled
-					"connection-uuid-123",            // connection
-					"1",                              // round
-					"pubkey",                         // authentication
-					"remote@example.com",             // auth_id
-					"",                               // eap_id (empty)
-					[]string{"cert-uuid-1"},          // certificates
-					[]string{"pubkey-uuid-1"},        // public_keys
-					"Test IPsec Auth Remote",         // description
+					"1",                       // enabled
+					"connection-uuid-123",     // connection
+					"1",                       // round
+					"pubkey",                  // authentication
+					"remote@example.com",      // auth_id
+					"",                        // eap_id (empty)
+					[]string{"cert-uuid-1"},   // certificates
+					[]string{"pubkey-uuid-1"}, // public_keys
+					"Test IPsec Auth Remote",  // description
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "enabled", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "connection", "connection-uuid-123"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "ipsec_connection", "connection-uuid-123"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "round", "1"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "authentication", "pubkey"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "auth_id", "remote@example.com"),
@@ -50,15 +50,15 @@ func TestAccIpsecAuthRemoteResource(t *testing.T) {
 			// Update and Read testing
 			{
 				Config: testAccIpsecAuthRemoteResourceConfig(
-					"1",                                                // enabled
-					"connection-uuid-123",                              // connection
-					"2",                                                // round - updated
-					"psk",                                              // authentication - updated
-					"updated-remote@example.com",                       // auth_id - updated
-					"eap-remote@example.com",                           // eap_id - updated
-					[]string{"cert-uuid-1", "cert-uuid-2"},            // certificates - updated
-					[]string{"pubkey-uuid-1", "pubkey-uuid-2"},        // public_keys - updated
-					"Updated Test IPsec Auth Remote",                   // description - updated
+					"1",                                    // enabled
+					"connection-uuid-123",                  // connection
+					"2",                                    // round - updated
+					"psk",                                  // authentication - updated
+					"updated-remote@example.com",           // auth_id - updated
+					"eap-remote@example.com",               // eap_id - updated
+					[]string{"cert-uuid-1", "cert-uuid-2"}, // certificates - updated
+					[]string{"pubkey-uuid-1", "pubkey-uuid-2"}, // public_keys - updated
+					"Updated Test IPsec Auth Remote",           // description - updated
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_remote.test", "enabled", "1"),
@@ -119,7 +119,7 @@ func TestAccIpsecAuthRemoteResource_CertificateAuth(t *testing.T) {
 
 func testAccIpsecAuthRemoteResourceConfig(
 	enabled string,
-	connection string,
+	ipsec_connection string,
 	round string,
 	authentication string,
 	authID string,
@@ -139,24 +139,24 @@ func testAccIpsecAuthRemoteResourceConfig(
 
 	return fmt.Sprintf(`
 resource "opnsense_ipsec_auth_remote" "test" {
-  enabled        = %[1]q
-  connection     = %[2]q
-  round          = %[3]q
-  authentication = %[4]q
-  auth_id        = %[5]q
-  eap_id         = %[6]q
+  enabled          = %[1]q
+  ipsec_connection = %[2]q
+  round            = %[3]q
+  authentication   = %[4]q
+  auth_id          = %[5]q
+  eap_id           = %[6]q
 %[7]s%[8]s  description    = %[9]q
 }
-`, enabled, connection, round, authentication, authID, eapID, 
-   certificatesLine, publicKeysLine, description)
+`, enabled, ipsec_connection, round, authentication, authID, eapID,
+		certificatesLine, publicKeysLine, description)
 }
 
 func testAccIpsecAuthRemoteResourceConfigMinimal() string {
 	return `
 resource "opnsense_ipsec_auth_remote" "test" {
-  enabled        = "1"
-  connection     = "connection-uuid-minimal"
-  authentication = "psk"
+  enabled          = "1"
+  ipsec_connection = "connection-uuid-minimal"
+  authentication   = "psk"
 }
 `
 }
@@ -164,13 +164,13 @@ resource "opnsense_ipsec_auth_remote" "test" {
 func testAccIpsecAuthRemoteResourceConfigCertificate() string {
 	return `
 resource "opnsense_ipsec_auth_remote" "test" {
-  enabled        = "1"
-  connection     = "connection-uuid-cert"
-  round          = "1"
-  authentication = "pubkey"
-  auth_id        = "CN=remote.example.com"
-  certificates   = ["cert-uuid-ca", "cert-uuid-remote"]
-  description    = "Certificate Authentication Test"
+  enabled          = "1"
+  ipsec_connection = "connection-uuid-cert"
+  round            = "1"
+  authentication   = "pubkey"
+  auth_id          = "CN=remote.example.com"
+  certificates     = ["cert-uuid-ca", "cert-uuid-remote"]
+  description      = "Certificate Authentication Test"
 }
 `
 }
