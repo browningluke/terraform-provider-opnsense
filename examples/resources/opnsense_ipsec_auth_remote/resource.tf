@@ -31,5 +31,5 @@ resource "opnsense_ipsec_auth_remote" "example" {
   eap_id           = ""
   certificates     = []
   public_keys      = []
-  description      = "Example IPsec Auth Local"
+  description      = "Example IPsec Auth Remote"
 }
