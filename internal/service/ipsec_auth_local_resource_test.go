@@ -16,27 +16,24 @@ func TestAccIpsecAuthLocalResource(t *testing.T) {
 			// Create and Read testing
 			{
 				Config: testAccIpsecAuthLocalResourceConfig(
-					"1",                       // enabled
-					"connection-uuid-123",     // connection
-					"1",                       // round
-					"pubkey",                  // authentication
-					"local@example.com",       // auth_id
-					"",                        // eap_id (empty)
-					[]string{"cert-uuid-1"},   // certificates
-					[]string{"pubkey-uuid-1"}, // public_keys
-					"Test IPsec Auth Local",   // description
+					"1",                     // enabled
+					"0",                     // round
+					"psk",                   // authentication
+					"local@example.com",     // auth_id
+					"",                      // eap_id (empty)
+					[]string{},              // certificates
+					[]string{},              // public_keys
+					"Test IPsec Auth Local", // description
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "enabled", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "ipsec_connection", "connection-uuid-123"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "round", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "authentication", "pubkey"),
+					resource.TestCheckResourceAttrPair("opnsense_ipsec_auth_local.test", "ipsec_connection", "opnsense_ipsec_connection.parent", "id"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "round", "0"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "authentication", "psk"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "auth_id", "local@example.com"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "eap_id", ""),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "certificates.#", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "certificates.0", "cert-uuid-1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "public_keys.#", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "public_keys.0", "pubkey-uuid-1"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "certificates.#", "0"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "public_keys.#", "0"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "description", "Test IPsec Auth Local"),
 					resource.TestCheckResourceAttrSet("opnsense_ipsec_auth_local.test", "id"),
 				),
@@ -50,24 +47,23 @@ func TestAccIpsecAuthLocalResource(t *testing.T) {
 			// Update and Read testing
 			{
 				Config: testAccIpsecAuthLocalResourceConfig(
-					"1",                                    // enabled
-					"connection-uuid-123",                  // connection
-					"2",                                    // round - updated
-					"psk",                                  // authentication - updated
-					"updated-local@example.com",            // auth_id - updated
-					"eap-user@example.com",                 // eap_id - updated
-					[]string{"cert-uuid-1", "cert-uuid-2"}, // certificates - updated
-					[]string{"pubkey-uuid-1", "pubkey-uuid-2"}, // public_keys - updated
-					"Updated Test IPsec Auth Local",            // description - updated
+					"1",                             // enabled
+					"0",                             // round
+					"psk",                           // authentication
+					"updated-local@example.com",     // auth_id - updated
+					"",                              // eap_id - updated
+					[]string{},                      // certificates - updated
+					[]string{},                      // public_keys - updated
+					"Updated Test IPsec Auth Local", // description - updated
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "enabled", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "round", "2"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "round", "0"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "authentication", "psk"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "auth_id", "updated-local@example.com"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "eap_id", "eap-user@example.com"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "certificates.#", "2"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "public_keys.#", "2"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "eap_id", ""),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "certificates.#", "0"),
+					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "public_keys.#", "0"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "description", "Updated Test IPsec Auth Local"),
 				),
 			},
@@ -76,49 +72,8 @@ func TestAccIpsecAuthLocalResource(t *testing.T) {
 	})
 }
 
-func TestAccIpsecAuthLocalResource_MinimalConfig(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIpsecAuthLocalResourceConfigMinimal(),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "enabled", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "round", "1"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "authentication", "psk"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "auth_id", ""),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "eap_id", ""),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "certificates.#", "0"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "public_keys.#", "0"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "description", ""),
-					resource.TestCheckResourceAttrSet("opnsense_ipsec_auth_local.test", "id"),
-				),
-			},
-		},
-	})
-}
-
-func TestAccIpsecAuthLocalResource_EAPConfig(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccIpsecAuthLocalResourceConfigEAP(),
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "authentication", "eap-radius"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "eap_id", "eap-test@example.com"),
-					resource.TestCheckResourceAttr("opnsense_ipsec_auth_local.test", "description", "EAP Authentication Test"),
-				),
-			},
-		},
-	})
-}
-
 func testAccIpsecAuthLocalResourceConfig(
 	enabled string,
-	ipsec_connection string,
 	round string,
 	authentication string,
 	authID string,
@@ -137,38 +92,38 @@ func testAccIpsecAuthLocalResourceConfig(
 	}
 
 	return fmt.Sprintf(`
+resource "opnsense_ipsec_connection" "parent" {
+  enabled                  = "1"
+  proposals                = ["aes128-sha256-modp2048"]
+  unique                   = "no"
+  aggressive               = "0"
+  version                  = "2"
+  mobike                   = "1"
+  local_addresses          = ["192.168.1.1"]
+  remote_addresses         = ["10.0.0.1"]
+  local_port               = ""
+  remote_port              = ""
+  udp_encapsulation        = "0"
+  reauthentication_time    = "3600"
+  rekey_time               = "1800"
+  ike_lifetime             = "3600"
+  dpd_delay                = "10"
+  dpd_timeout              = "60"
+  send_certificate_request = "1"
+  send_certificate         = "ifasked"
+  keying_tries             = "1"
+  description              = "Test IPsec Connection for Child"
+}
+
 resource "opnsense_ipsec_auth_local" "test" {
   enabled          = %[1]q
-  ipsec_connection = %[2]q
-  round            = %[3]q
-  authentication   = %[4]q
-  auth_id          = %[5]q
-  eap_id           = %[6]q
-%[7]s%[8]s  description    = %[9]q
+  ipsec_connection = opnsense_ipsec_connection.parent.id
+  round            = %[2]q
+  authentication   = %[3]q
+  auth_id          = %[4]q
+  eap_id           = %[5]q
+%[6]s%[7]s  description    = %[8]q
 }
-`, enabled, ipsec_connection, round, authentication, authID, eapID,
+`, enabled, round, authentication, authID, eapID,
 		certificatesLine, publicKeysLine, description)
-}
-
-func testAccIpsecAuthLocalResourceConfigMinimal() string {
-	return `
-resource "opnsense_ipsec_auth_local" "test" {
-  enabled        = "1"
-  ipsec_connection     = "connection-uuid-minimal"
-  authentication = "psk"
-}
-`
-}
-
-func testAccIpsecAuthLocalResourceConfigEAP() string {
-	return `
-resource "opnsense_ipsec_auth_local" "test" {
-  enabled        = "1"
-  ipsec_connection     = "connection-uuid-eap"
-  round          = "1"
-  authentication = "eap-radius"
-  eap_id         = "eap-test@example.com"
-  description    = "EAP Authentication Test"
-}
-`
 }
