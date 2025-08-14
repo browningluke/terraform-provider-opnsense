@@ -74,6 +74,9 @@ func (p *testOPNsenseProvider) Resources(ctx context.Context) []func() resource.
 		NewIpsecPskResource,
 		NewIpsecConnectionResource,
 		NewIpsecVtiResource,
+		NewIpsecAuthLocalResource,
+		NewIpsecAuthRemoteResource,
+		NewIpsecChildResource,
 	}
 }
 
