@@ -22,7 +22,7 @@ resource "opnsense_ipsec_connection" "example" {
   description              = "Example IPsec Connection"
 }
 
-resource "opnsense_ipsec_auth_local" "example" {
+resource "opnsense_ipsec_auth_remote" "example" {
   enabled          = "1"
   ipsec_connection = opnsense_ipsec_connection.example.id
   round            = "0"
