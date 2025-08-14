@@ -2,6 +2,10 @@ package provider
 
 import (
 	"context"
+	"os"
+	"strconv"
+	"terraform-provider-opnsense/internal/service"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -11,9 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"os"
-	"strconv"
-	"terraform-provider-opnsense/internal/service"
 )
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
@@ -301,6 +302,10 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		service.NewKeaSubnetResource,
 		service.NewKeaPeerResource,
 		service.NewKeaReservationResource,
+		// IPsec
+		service.NewIpsecPskResource,
+		service.NewIpsecConnectionResource,
+		service.NewIpsecVtiResource,
 	}
 }
 
