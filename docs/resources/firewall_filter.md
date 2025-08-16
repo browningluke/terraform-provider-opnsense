@@ -121,7 +121,7 @@ Optional:
 
 - `invert` (Boolean) Use this option to invert the sense of the match. Defaults to `false`.
 - `net` (String) Specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
-- `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `""`.
+- `port` (String) Destination port number, well known name (imap, imaps, http, https, ...) or alias name, for ranges use a dash. Defaults to `""`.
 
 
 <a id="nestedatt--source"></a>
