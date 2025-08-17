@@ -277,6 +277,8 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		// Interfaces
 		service.NewInterfacesVlanResource,
+		service.NewInterfacesVipResource,
+		service.NewInterfacesAssignResource,
 		// Routes
 		service.NewRouteResource,
 		// Unbound
