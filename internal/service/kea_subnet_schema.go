@@ -72,7 +72,7 @@ func KeaSubnetResourceSchema() schema.Schema {
 				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
 			},
 			"match_client_id": schema.BoolAttribute{
-				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations.",
+				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(true),
@@ -205,7 +205,7 @@ func KeaSubnetDataSourceSchema() dschema.Schema {
 				ElementType:         types.StringType,
 			},
 			"match_client_id": dschema.BoolAttribute{
-				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations.",
+				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.",
 				Computed:            true,
 			},
 			"auto_collect": dschema.BoolAttribute{

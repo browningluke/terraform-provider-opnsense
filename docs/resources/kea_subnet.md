@@ -24,6 +24,8 @@ resource "opnsense_kea_subnet" "example" {
 
   next_server = "10.8.0.1"
 
+  match_client_id = false
+
   auto_collect = false
 
   static_routes = [
@@ -91,6 +93,7 @@ resource "opnsense_kea_subnet" "example" {
 - `dns_servers` (Set of String) DNS servers to offer to the clients. Defaults to `[]`.
 - `domain_name` (String) Domain name to offer to the client, set to this firewall's domain name when left empty. Defaults to `""`.
 - `domain_search` (Set of String) Set of Domain Names to be used by the client to locate not-fully-qualified domain names. Defaults to `[]`.
+- `match_client_id` (Boolean) By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.
 - `next_server` (String) Next server IP address. Defaults to `""`.
 - `ntp_servers` (Set of String) Set of IP addresses indicating NTP (RFC 5905) servers available to the client. Defaults to `[]`.
 - `pools` (Set of String) Set of pools in range or subnet format (e.g. `"192.168.0.100 - 192.168.0.200"` , `"192.0.2.64/26"`). Defaults to `[]`.

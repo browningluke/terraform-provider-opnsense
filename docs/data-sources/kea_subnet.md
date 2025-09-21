@@ -26,6 +26,7 @@ Configure DHCP subnets for Kea.
 - `description` (String) Optional description here for your reference (not parsed).
 - `dns_servers` (Set of String) DNS servers to offer to the clients.
 - `domain_search` (Set of String) Set of Domain Names to be used by the client to locate not-fully-qualified domain names.
+- `match_client_id` (Boolean) By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.
 - `next_server` (String) Next server IP address.
 - `ntp_servers` (Set of String) Set of IP addresses indicating NTP (RFC 5905) servers available to the client.
 - `pools` (Set of String) Set of pools in range or subnet format (e.g. `"192.168.0.100 - 192.168.0.200"` , `"192.0.2.64/26"`).
