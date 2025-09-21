@@ -295,6 +295,7 @@ func convertKeaSubnetSchemaToStruct(d *KeaSubnetResourceModel) (*kea.Subnet, err
 		Subnet:                d.Subnet.ValueString(),
 		NextServer:            d.NextServer.ValueString(),
 		Pools:                 tools.SetToString(d.Pools, "\n"),
+		MatchClientId:         tools.BoolToString(d.MatchClientId.ValueBool()),
 		OptionDataAutoCollect: tools.BoolToString(d.AutoCollect.ValueBool()),
 		OptionData: kea.OptionData{
 			DomainNameServers: tools.SetToStringSlice(d.DomainNameServers),
@@ -315,6 +316,7 @@ func convertKeaSubnetStructToSchema(d *kea.Subnet) (*KeaSubnetResourceModel, err
 	model := &KeaSubnetResourceModel{
 		Subnet:            types.StringValue(d.Subnet),
 		Pools:             tools.StringSliceToSet(strings.Split(d.Pools, "\n")),
+		MatchClientId:     types.BoolValue(tools.StringToBool(d.MatchClientId)),
 		AutoCollect:       types.BoolValue(tools.StringToBool(d.OptionDataAutoCollect)),
 		Routers:           tools.StringSliceToSet(d.OptionData.Routers),
 		DomainNameServers: tools.StringSliceToSet(d.OptionData.DomainNameServers),
