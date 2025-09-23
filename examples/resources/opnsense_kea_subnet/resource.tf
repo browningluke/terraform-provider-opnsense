@@ -10,6 +10,8 @@ resource "opnsense_kea_subnet" "example" {
 
   next_server = "10.8.0.1"
 
+  match_client_id = false
+
   auto_collect = false
 
   static_routes = [

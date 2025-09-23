@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"strings"
+	"terraform-provider-opnsense/internal/tools"
+
 	"github.com/browningluke/opnsense-go/pkg/kea"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -12,14 +15,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"strings"
-	"terraform-provider-opnsense/internal/tools"
 )
 
 // KeaSubnetResourceModel describes the resource data model.
 type KeaSubnetResourceModel struct {
 	Subnet types.String `tfsdk:"subnet"`
 	Pools  types.Set    `tfsdk:"pools"`
+
+	MatchClientId types.Bool `tfsdk:"match_client_id"`
 
 	AutoCollect types.Bool `tfsdk:"auto_collect"`
 
@@ -67,6 +70,12 @@ func KeaSubnetResourceSchema() schema.Schema {
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
+			},
+			"match_client_id": schema.BoolAttribute{
+				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
 			},
 			"auto_collect": schema.BoolAttribute{
 				MarkdownDescription: "Automatically update option data from the GUI for relevant attributes. When set, values for `routers`, `dns_servers` and `ntp_servers` will be ignored. Defaults to `true`.",
@@ -195,6 +204,10 @@ func KeaSubnetDataSourceSchema() dschema.Schema {
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
+			"match_client_id": dschema.BoolAttribute{
+				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.",
+				Computed:            true,
+			},
 			"auto_collect": dschema.BoolAttribute{
 				MarkdownDescription: "Automatically update option data from the GUI for relevant attributes. When set, values for `routers`, `dns_servers` and `ntp_servers` will be ignored.",
 				Computed:            true,
@@ -282,6 +295,7 @@ func convertKeaSubnetSchemaToStruct(d *KeaSubnetResourceModel) (*kea.Subnet, err
 		Subnet:                d.Subnet.ValueString(),
 		NextServer:            d.NextServer.ValueString(),
 		Pools:                 tools.SetToString(d.Pools, "\n"),
+		MatchClientId:         tools.BoolToString(d.MatchClientId.ValueBool()),
 		OptionDataAutoCollect: tools.BoolToString(d.AutoCollect.ValueBool()),
 		OptionData: kea.OptionData{
 			DomainNameServers: tools.SetToStringSlice(d.DomainNameServers),
@@ -302,6 +316,7 @@ func convertKeaSubnetStructToSchema(d *kea.Subnet) (*KeaSubnetResourceModel, err
 	model := &KeaSubnetResourceModel{
 		Subnet:            types.StringValue(d.Subnet),
 		Pools:             tools.StringSliceToSet(strings.Split(d.Pools, "\n")),
+		MatchClientId:     types.BoolValue(tools.StringToBool(d.MatchClientId)),
 		AutoCollect:       types.BoolValue(tools.StringToBool(d.OptionDataAutoCollect)),
 		Routers:           tools.StringSliceToSet(d.OptionData.Routers),
 		DomainNameServers: tools.StringSliceToSet(d.OptionData.DomainNameServers),
