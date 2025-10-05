@@ -54,7 +54,7 @@ resource "opnsense_firewall_nat_one_to_one" "example_three" {
   }
 
   nat_reflection = "default"
-  description = "Example tree"
+  description = "Example three"
 }
 ```
 
