@@ -277,6 +277,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 	return []func() resource.Resource{
 		// Interfaces
 		service.NewInterfacesVlanResource,
+		service.NewInterfacesVipResource,
 		// Routes
 		service.NewRouteResource,
 		// Unbound
@@ -316,6 +317,7 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 	return []func() datasource.DataSource{
 		// Interfaces
 		service.NewInterfacesVlanDataSource,
+		service.NewInterfacesVipDataSource,
 		service.NewInterfaceDataSource,
 		service.NewInterfaceAllDataSource,
 		// Routes
