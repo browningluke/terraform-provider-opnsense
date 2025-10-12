@@ -1,18 +1,19 @@
-package service
+package diagnostics
 
 import (
 	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/diagnostics"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-type InterfaceAllDataSourceModel struct {
+type interfaceAllDataSourceModel struct {
 	Interfaces types.List `tfsdk:"interfaces"`
 }
 
-func InterfaceAllDataSourceSchema() schema.Schema {
+func interfaceAllDataSourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "InterfacesAll can be used to get a list of all configurations of OPNsense interfaces. Allows for custom filtering.",
 
@@ -20,7 +21,7 @@ func InterfaceAllDataSourceSchema() schema.Schema {
 			"interfaces": schema.ListNestedAttribute{
 				MarkdownDescription: "A list of all interfaces present in OPNsense.",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: InterfaceDataSourceSchema().Attributes,
+					Attributes: interfaceDataSourceSchema().Attributes,
 				},
 				Computed: true,
 			},
@@ -28,8 +29,8 @@ func InterfaceAllDataSourceSchema() schema.Schema {
 	}
 }
 
-func convertAllInterfaceConfigStructToSchema(d []diagnostics.Interface) (*InterfaceAllDataSourceModel, error) {
-	var interfaces []InterfaceDataSourceModel
+func convertAllInterfaceConfigStructToSchema(d []diagnostics.Interface) (*interfaceAllDataSourceModel, error) {
+	var interfaces []interfaceDataSourceModel
 	for _, iface := range d {
 		toSchema, err := convertInterfaceConfigStructToSchema(&iface)
 		if err != nil {
@@ -57,7 +58,7 @@ func convertAllInterfaceConfigStructToSchema(d []diagnostics.Interface) (*Interf
 		)
 	}
 
-	model := &InterfaceAllDataSourceModel{
+	model := &interfaceAllDataSourceModel{
 		Interfaces: v,
 	}
 

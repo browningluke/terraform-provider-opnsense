@@ -1,15 +1,16 @@
-package service
+package diagnostics
 
 import (
 	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/diagnostics"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-type InterfaceDataSourceModel struct {
+type interfaceDataSourceModel struct {
 	Device     types.String `tfsdk:"device"`
 	Media      types.String `tfsdk:"media"`
 	MediaRaw   types.String `tfsdk:"media_raw"`
@@ -28,13 +29,13 @@ type InterfaceDataSourceModel struct {
 	Ipv6 types.List `tfsdk:"ipv6"`
 }
 
-type Ipv4Model struct {
+type ipv4Model struct {
 	Ipaddr     types.String `tfsdk:"ipaddr"`
 	SubnetBits types.Int64  `tfsdk:"subnetbits"`
 	Tunnel     types.Bool   `tfsdk:"tunnel"`
 }
 
-type Ipv6Model struct {
+type ipv6Model struct {
 	Ipaddr     types.String `tfsdk:"ipaddr"`
 	SubnetBits types.Int64  `tfsdk:"subnetbits"`
 	Tunnel     types.Bool   `tfsdk:"tunnel"`
@@ -95,7 +96,7 @@ var ipv6AttrTypes = map[string]attr.Type{
 	"tentative":  types.BoolType,
 }
 
-func InterfaceDataSourceSchema() schema.Schema {
+func interfaceDataSourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Interfaces can be used to get configurations of OPNsense interfaces.",
 
@@ -209,8 +210,8 @@ func InterfaceDataSourceSchema() schema.Schema {
 	}
 }
 
-func convertInterfaceConfigStructToSchema(d *diagnostics.Interface) (*InterfaceDataSourceModel, error) {
-	model := &InterfaceDataSourceModel{
+func convertInterfaceConfigStructToSchema(d *diagnostics.Interface) (*interfaceDataSourceModel, error) {
+	model := &interfaceDataSourceModel{
 		Device:         types.StringValue(d.Device),
 		Media:          types.StringValue(d.Media),
 		MediaRaw:       types.StringValue(d.MediaRaw),
@@ -226,18 +227,18 @@ func convertInterfaceConfigStructToSchema(d *diagnostics.Interface) (*InterfaceD
 	}
 
 	// Creating an empty slice results in `[]` rather than `null` if OPNsense API returned an empty list.
-	ipv4s := []Ipv4Model{}
+	ipv4s := []ipv4Model{}
 	for _, elem := range d.Ipv4 {
-		ipv4s = append(ipv4s, Ipv4Model{
+		ipv4s = append(ipv4s, ipv4Model{
 			Ipaddr:     types.StringValue(elem.IpAddr),
 			SubnetBits: types.Int64Value(elem.SubnetBits),
 			Tunnel:     types.BoolValue(elem.Tunnel),
 		})
 	}
 
-	ipv6s := []Ipv6Model{}
+	ipv6s := []ipv6Model{}
 	for _, elem := range d.Ipv6 {
-		ipv6s = append(ipv6s, Ipv6Model{
+		ipv6s = append(ipv6s, ipv6Model{
 			Ipaddr:     types.StringValue(elem.IpAddr),
 			SubnetBits: types.Int64Value(elem.SubnetBits),
 			Tunnel:     types.BoolValue(elem.Tunnel),

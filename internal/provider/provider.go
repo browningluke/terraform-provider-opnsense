@@ -7,11 +7,6 @@ import (
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/diagnostics"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/firewall"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/interfaces"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/ipsec"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/routes"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/wireguard"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -279,80 +274,27 @@ func (p *opnsenseProvider) Configure(ctx context.Context, req provider.Configure
 }
 
 func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		// Interfaces
-		service.NewInterfacesVlanResource,
-		service.NewInterfacesVipResource,
-		// Routes
-		service.NewRouteResource,
-		// Unbound
-		service.NewUnboundHostOverrideResource,
-		service.NewUnboundHostAliasResource,
-		service.NewUnboundDomainOverrideResource,
-		service.NewUnboundForwardResource,
-		// Wireguard
-		service.NewWireguardServerResource,
-		service.NewWireguardClientResource,
-		// Quagga
-		service.NewQuaggaBGPNeighborResource,
-		service.NewQuaggaBGPASPathResource,
-		service.NewQuaggaBGPPrefixListResource,
-		service.NewQuaggaBGPCommunityListResource,
-		service.NewQuaggaBGPRouteMapResource,
-		// Firewall
-		service.NewFirewallFilterResource,
-		service.NewFirewallNATResource,
-		service.NewFirewallNATOneToOneResource,
-		service.NewFirewallAliasResource,
-		service.NewFirewallCategoryResource,
-		// Kea
-		service.NewKeaSubnetResource,
-		service.NewKeaPeerResource,
-		service.NewKeaReservationResource,
-		// IPsec
-		service.NewIpsecPskResource,
-		service.NewIpsecConnectionResource,
-		service.NewIpsecVtiResource,
-		service.NewIpsecChildResource,
-		service.NewIpsecAuthLocalResource,
-		service.NewIpsecAuthRemoteResource,
+	controllers := [][]func() resource.Resource{
+		diagnostics.Resources(ctx),
 	}
+
+	var resources []func() resource.Resource
+	for _, s := range controllers {
+		resources = append(resources, s...)
+	}
+	return resources
 }
 
 func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		// Interfaces
-		service.NewInterfacesVlanDataSource,
-		service.NewInterfacesVipDataSource,
-		service.NewInterfaceDataSource,
-		service.NewInterfaceAllDataSource,
-		// Routes
-		service.NewRouteDataSource,
-		// Unbound
-		service.NewUnboundHostOverrideDataSource,
-		service.NewUnboundHostAliasDataSource,
-		service.NewUnboundDomainOverrideDataSource,
-		service.NewUnboundForwardDataSource,
-		// Wireguard
-		service.NewWireguardServerDataSource,
-		service.NewWireguardClientDataSource,
-		// Quagga
-		service.NewQuaggaBGPNeighborDataSource,
-		service.NewQuaggaBGPASPathDataSource,
-		service.NewQuaggaBGPPrefixListDataSource,
-		service.NewQuaggaBGPCommunityListDataSource,
-		service.NewQuaggaBGPRouteMapDataSource,
-		// Firewall
-		service.NewFirewallFilterDataSource,
-		service.NewFirewallNATDataSource,
-		service.NewFirewallNATOneToOneDataSource,
-		service.NewFirewallAliasDataSource,
-		service.NewFirewallCategoryDataSource,
-		// Kea
-		service.NewKeaSubnetDataSource,
-		service.NewKeaPeerDataSource,
-		service.NewKeaReservationDataSource,
+	controllers := [][]func() datasource.DataSource{
+		diagnostics.DataSources(ctx),
 	}
+
+	var dataSources []func() datasource.DataSource
+	for _, s := range controllers {
+		dataSources = append(dataSources, s...)
+	}
+	return dataSources
 }
 
 func NewProvider(ctx context.Context) (provider.Provider, error) {

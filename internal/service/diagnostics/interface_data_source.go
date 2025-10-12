@@ -1,34 +1,36 @@
-package service
+package diagnostics
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &InterfaceAllDataSource{}
+var _ datasource.DataSource = &interfaceDataSource{}
+var _ datasource.DataSourceWithConfigure = &interfaceDataSource{}
 
-func NewInterfaceAllDataSource() datasource.DataSource {
-	return &InterfaceAllDataSource{}
+func newInterfaceDataSource() datasource.DataSource {
+	return &interfaceDataSource{}
 }
 
-// InterfaceAllDataSource defines the data source implementation.
-type InterfaceAllDataSource struct {
+// interfaceDataSource defines the data source implementation.
+type interfaceDataSource struct {
 	client opnsense.Client
 }
 
-func (d *InterfaceAllDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_interface_all"
+func (d *interfaceDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_interface"
 }
 
-func (d *InterfaceAllDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = InterfaceAllDataSourceSchema()
+func (d *interfaceDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = interfaceDataSourceSchema()
 }
 
-func (d *InterfaceAllDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *interfaceDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *InterfaceAllDataSource) Configure(ctx context.Context, req datasource.C
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *InterfaceAllDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *InterfaceAllDataSourceModel
+func (d *interfaceDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *interfaceDataSourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -56,8 +58,8 @@ func (d *InterfaceAllDataSource) Read(ctx context.Context, req datasource.ReadRe
 		return
 	}
 
-	// Get resources from OPNsense API
-	resources, err := d.client.Diagnostics().GetInterfaceAll(ctx)
+	// Get resource from OPNsense API
+	resource, err := d.client.Diagnostics().GetInterface(ctx, data.Device.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read interface, got error: %s", err))
@@ -65,7 +67,7 @@ func (d *InterfaceAllDataSource) Read(ctx context.Context, req datasource.ReadRe
 	}
 
 	// Convert OPNsense struct to TF schema
-	model, err := convertAllInterfaceConfigStructToSchema(resources)
+	model, err := convertInterfaceConfigStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read interface, got error: %s", err))
