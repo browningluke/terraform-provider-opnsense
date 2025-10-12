@@ -1,4 +1,4 @@
-module terraform-provider-opnsense
+module github.com/browningluke/terraform-provider-opnsense
 
 go 1.23.0
 
