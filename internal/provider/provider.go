@@ -4,9 +4,14 @@ import (
 	"context"
 	"os"
 	"strconv"
-	"terraform-provider-opnsense/internal/service"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/diagnostics"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/interfaces"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/ipsec"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/routes"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/wireguard"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -18,10 +23,10 @@ import (
 )
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
-var _ provider.Provider = &OPNsenseProvider{}
+var _ provider.Provider = &opnsenseProvider{}
 
 // OPNsenseProvider defines the provider implementation.
-type OPNsenseProvider struct {
+type opnsenseProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
@@ -39,12 +44,12 @@ type OPNsenseProviderModel struct {
 	MaxRetries    types.Int64  `tfsdk:"retries"`
 }
 
-func (p *OPNsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *opnsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "opnsense"
 	resp.Version = p.version
 }
 
-func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *opnsenseProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"uri": schema.StringAttribute{
@@ -91,7 +96,7 @@ func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaReques
 	}
 }
 
-func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *opnsenseProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	// Get data from config
 	var data OPNsenseProviderModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -273,7 +278,7 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 	resp.ResourceData = client
 }
 
-func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
+func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		// Interfaces
 		service.NewInterfacesVlanResource,
@@ -314,7 +319,7 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 	}
 }
 
-func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Interfaces
 		service.NewInterfacesVlanDataSource,
@@ -350,10 +355,6 @@ func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.
 	}
 }
 
-func New(version string) func() provider.Provider {
-	return func() provider.Provider {
-		return &OPNsenseProvider{
-			version: version,
-		}
-	}
+func NewProvider(ctx context.Context) (provider.Provider, error) {
+	return &opnsenseProvider{}, nil
 }
