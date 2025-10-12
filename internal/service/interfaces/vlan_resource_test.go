@@ -1,20 +1,21 @@
-package service
+package interfaces_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccInterfacesVlanResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccInterfacesVlanResourceConfig(100, "High VLAN ID test", 4, "vtnet0"),
+				Config: testAccVlanResourceConfig(100, "High VLAN ID test", 4, "vtnet0"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "tag", "100"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "description", "High VLAN ID test"),
@@ -31,7 +32,7 @@ func TestAccInterfacesVlanResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccInterfacesVlanResourceConfig(100, "Updated VLAN 100", 6, "vtnet0"),
+				Config: testAccVlanResourceConfig(100, "Updated VLAN 100", 6, "vtnet0"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "tag", "100"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "description", "Updated VLAN 100"),
@@ -46,11 +47,11 @@ func TestAccInterfacesVlanResource(t *testing.T) {
 
 func TestAccInterfacesVlanResource_HighVlanId(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccInterfacesVlanResourceConfig(4093, "High VLAN ID test", 6, "vtnet0"),
+				Config: testAccVlanResourceConfig(4093, "High VLAN ID test", 6, "vtnet0"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "tag", "4093"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "description", "High VLAN ID test"),
@@ -62,7 +63,7 @@ func TestAccInterfacesVlanResource_HighVlanId(t *testing.T) {
 	})
 }
 
-func testAccInterfacesVlanResourceConfig(tag int, description string, priority int, parent string) string {
+func testAccVlanResourceConfig(tag int, description string, priority int, parent string) string {
 	return fmt.Sprintf(`
 resource "opnsense_interfaces_vlan" "test" {
   tag         = %[1]d

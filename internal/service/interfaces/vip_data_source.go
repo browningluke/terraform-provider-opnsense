@@ -1,4 +1,4 @@
-package service
+package interfaces
 
 import (
 	"context"
@@ -10,26 +10,27 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &InterfacesVipDataSource{}
+var _ datasource.DataSource = &vipDataSource{}
+var _ datasource.DataSourceWithConfigure = &vipDataSource{}
 
-func NewInterfacesVipDataSource() datasource.DataSource {
-	return &InterfacesVipDataSource{}
+func newVipDataSource() datasource.DataSource {
+	return &vipDataSource{}
 }
 
-// InterfacesVipDataSource defines the data source implementation.
-type InterfacesVipDataSource struct {
+// vipDataSource defines the data source implementation.
+type vipDataSource struct {
 	client opnsense.Client
 }
 
-func (d *InterfacesVipDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *vipDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_interfaces_vip"
 }
 
-func (d *InterfacesVipDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = InterfacesVipDataSourceSchema()
+func (d *vipDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = vipDataSourceSchema()
 }
 
-func (d *InterfacesVipDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *vipDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -47,8 +48,8 @@ func (d *InterfacesVipDataSource) Configure(ctx context.Context, req datasource.
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *InterfacesVipDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *InterfacesVipResourceModel
+func (d *vipDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *vipResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -66,7 +67,7 @@ func (d *InterfacesVipDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertInterfacesVipStructToSchema(resource)
+	resourceModel, err := convertVipStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read vip, got error: %s", err))

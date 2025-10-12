@@ -1,8 +1,9 @@
-package service
+package interfaces
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -12,11 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// InterfacesVlanResourceModel describes the resource data model.
-type InterfacesVlanResourceModel struct {
+// vlanResourceModel describes the resource data model.
+type vlanResourceModel struct {
 	Description types.String `tfsdk:"description"`
 	Tag         types.Int64  `tfsdk:"tag"`
 	Priority    types.Int64  `tfsdk:"priority"`
@@ -26,7 +26,7 @@ type InterfacesVlanResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func InterfacesVlanResourceSchema() schema.Schema {
+func vlanResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "VLANs (Virtual LANs) can be used to segment a single physical network into multiple virtual networks.",
 
@@ -75,7 +75,7 @@ func InterfacesVlanResourceSchema() schema.Schema {
 	}
 }
 
-func InterfacesVlanDataSourceSchema() dschema.Schema {
+func vlanDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "VLANs (Virtual LANs) can be used to segment a single physical network into multiple virtual networks.",
 
@@ -108,7 +108,7 @@ func InterfacesVlanDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertInterfacesVlanSchemaToStruct(d *InterfacesVlanResourceModel) (*interfaces.Vlan, error) {
+func convertVlanSchemaToStruct(d *vlanResourceModel) (*interfaces.Vlan, error) {
 	return &interfaces.Vlan{
 		Description: d.Description.ValueString(),
 		Tag:         tools.Int64ToString(d.Tag.ValueInt64()),
@@ -118,8 +118,8 @@ func convertInterfacesVlanSchemaToStruct(d *InterfacesVlanResourceModel) (*inter
 	}, nil
 }
 
-func convertInterfacesVlanStructToSchema(d *interfaces.Vlan) (*InterfacesVlanResourceModel, error) {
-	return &InterfacesVlanResourceModel{
+func convertVlanStructToSchema(d *interfaces.Vlan) (*vlanResourceModel, error) {
+	return &vlanResourceModel{
 		Description: tools.StringOrNull(d.Description),
 		Tag:         tools.StringToInt64Null(d.Tag),
 		Priority:    tools.StringToInt64Null(d.Priority.String()),

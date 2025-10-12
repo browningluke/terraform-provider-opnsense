@@ -1,11 +1,11 @@
-package service
+package interfaces
 
 import (
 	"regexp"
-	"terraform-provider-opnsense/internal/tools"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// InterfacesVipResourceModel describes the resource data model.
-type InterfacesVipResourceModel struct {
+// vipResourceModel describes the resource data model.
+type vipResourceModel struct {
 	Mode        types.String `tfsdk:"mode"`
 	Interface   types.String `tfsdk:"interface"`
 	Network     types.String `tfsdk:"network"`
@@ -36,7 +36,7 @@ var cidrValidator = stringvalidator.RegexMatches(
 	"must be a valid IPv4 or IPv6 CIDR (e.g. 192.168.0.0/24, 2001:db8::/64)",
 )
 
-func InterfacesVipResourceSchema() schema.Schema {
+func vipResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Virtual IPs allow an OPNsense firewall to assign multiple IP addresses to the same network interface.",
 
@@ -85,7 +85,7 @@ func InterfacesVipResourceSchema() schema.Schema {
 	}
 }
 
-func InterfacesVipDataSourceSchema() dschema.Schema {
+func vipDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Virtual IPs allow an OPNsense firewall to assign multiple IP addresses to the same network interface.",
 
@@ -118,7 +118,7 @@ func InterfacesVipDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertInterfacesVipSchemaToStruct(d *InterfacesVipResourceModel) (*interfaces.Vip, error) {
+func convertVipSchemaToStruct(d *vipResourceModel) (*interfaces.Vip, error) {
 	return &interfaces.Vip{
 		Description: d.Description.ValueString(),
 		Mode:        api.SelectedMap(d.Mode.ValueString()),
@@ -128,8 +128,8 @@ func convertInterfacesVipSchemaToStruct(d *InterfacesVipResourceModel) (*interfa
 	}, nil
 }
 
-func convertInterfacesVipStructToSchema(d *interfaces.Vip) (*InterfacesVipResourceModel, error) {
-	return &InterfacesVipResourceModel{
+func convertVipStructToSchema(d *interfaces.Vip) (*vipResourceModel, error) {
+	return &vipResourceModel{
 		Mode:        types.StringValue(d.Mode.String()),
 		Interface:   types.StringValue(d.Interface.String()),
 		Network:     types.StringValue(d.Network),

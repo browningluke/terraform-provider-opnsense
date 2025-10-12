@@ -1,20 +1,21 @@
-package service
+package interfaces_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccInterfacesVipProxyArpResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccInterfacesVipResourceConfig("proxyarp", "Proxy ARP VIP test", "wan", "192.168.2.22/32"),
+				Config: testAccVipResourceConfig("proxyarp", "Proxy ARP VIP test", "wan", "192.168.2.22/32"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "mode", "proxyarp"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "description", "Proxy ARP VIP test"),
@@ -31,7 +32,7 @@ func TestAccInterfacesVipProxyArpResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccInterfacesVipResourceConfig("proxyarp", "Updated Proxy ARP VIP", "wan", "192.168.2.23/32"),
+				Config: testAccVipResourceConfig("proxyarp", "Updated Proxy ARP VIP", "wan", "192.168.2.23/32"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "mode", "proxyarp"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "description", "Updated Proxy ARP VIP"),
@@ -46,12 +47,12 @@ func TestAccInterfacesVipProxyArpResource(t *testing.T) {
 
 func TestAccInterfacesVipIpAliasResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccInterfacesVipResourceConfig("ipalias", "IP Alias VIP test", "wan", "192.168.2.24/32"),
+				Config: testAccVipResourceConfig("ipalias", "IP Alias VIP test", "wan", "192.168.2.24/32"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "mode", "ipalias"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "description", "IP Alias VIP test"),
@@ -68,7 +69,7 @@ func TestAccInterfacesVipIpAliasResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccInterfacesVipResourceConfig("ipalias", "Updated IP Alias VIP", "wan", "192.168.2.25/32"),
+				Config: testAccVipResourceConfig("ipalias", "Updated IP Alias VIP", "wan", "192.168.2.25/32"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "mode", "ipalias"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vip.test", "description", "Updated IP Alias VIP"),
@@ -81,7 +82,7 @@ func TestAccInterfacesVipIpAliasResource(t *testing.T) {
 	})
 }
 
-func testAccInterfacesVipResourceConfig(mode, description, interf, network string) string {
+func testAccVipResourceConfig(mode, description, interf, network string) string {
 	return fmt.Sprintf(`
 resource "opnsense_interfaces_vip" "test" {
   mode         = %[1]q

@@ -1,8 +1,9 @@
-package service
+package interfaces
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -10,26 +11,27 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &InterfacesVlanDataSource{}
+var _ datasource.DataSource = &vlanDataSource{}
+var _ datasource.DataSourceWithConfigure = &vlanDataSource{}
 
-func NewInterfacesVlanDataSource() datasource.DataSource {
-	return &InterfacesVlanDataSource{}
+func newVlanDataSource() datasource.DataSource {
+	return &vlanDataSource{}
 }
 
-// InterfacesVlanDataSource defines the data source implementation.
-type InterfacesVlanDataSource struct {
+// vlanDataSource defines the data source implementation.
+type vlanDataSource struct {
 	client opnsense.Client
 }
 
-func (d *InterfacesVlanDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *vlanDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_interfaces_vlan"
 }
 
-func (d *InterfacesVlanDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = InterfacesVlanDataSourceSchema()
+func (d *vlanDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = vlanDataSourceSchema()
 }
 
-func (d *InterfacesVlanDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *vlanDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -47,8 +49,8 @@ func (d *InterfacesVlanDataSource) Configure(ctx context.Context, req datasource
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *InterfacesVlanDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *InterfacesVlanResourceModel
+func (d *vlanDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *vlanResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -66,7 +68,7 @@ func (d *InterfacesVlanDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertInterfacesVlanStructToSchema(resource)
+	resourceModel, err := convertVlanStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read vlan, got error: %s", err))
