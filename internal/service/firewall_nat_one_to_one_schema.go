@@ -162,8 +162,8 @@ func FirewallNATOneToOneResourceSchema() schema.Schema {
 				Optional:            true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[a-zA-Z0-9 .]*$`),
-						"must only contain only alphanumeric characters, spaces or `.`",
+						regexp.MustCompile(`^[a-zA-Z0-9 .-]*$`),
+						"must only contain only alphanumeric characters, spaces, `.`  or `-`",
 					),
 					stringvalidator.LengthBetween(1, 255),
 				},

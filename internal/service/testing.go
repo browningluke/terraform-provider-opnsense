@@ -68,6 +68,7 @@ func (p *testOPNsenseProvider) Configure(ctx context.Context, req provider.Confi
 func (p *testOPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewFirewallAliasResource,
+		NewFirewallNATOneToOneResource,
 		NewRouteResource,
 		NewUnboundHostOverrideResource,
 		NewInterfacesVlanResource,
