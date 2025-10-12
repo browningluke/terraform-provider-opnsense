@@ -14,13 +14,13 @@ func TestAccFirewallNatOneToOneResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccFirewallNatOneToOneResourceConfig(false, false, "10.10.10.22/32", "nat", "__lan_network", false, "default", "Tesging NAT One-to-One"),
+				Config: testAccFirewallNatOneToOneResourceConfig(false, false, "10.10.10.22/32", "nat", "192.168.3.22/32", false, "default", "Tesging NAT One-to-One"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "enabled", "false"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "log", "false"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "external_net", "10.10.10.22/32"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "type", "nat"),
-					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "source.net", "__lan_network"),
+					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "source.net", "192.168.3.22/32"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "source.invert", "false"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "nat_reflection", "default"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_one_to_one.test", "description", "Tesging NAT One-to-One"),

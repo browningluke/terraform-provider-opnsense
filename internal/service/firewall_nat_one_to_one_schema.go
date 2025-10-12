@@ -160,13 +160,6 @@ func FirewallNATOneToOneResourceSchema() schema.Schema {
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 0 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.",
 				Optional:            true,
-				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[a-zA-Z0-9 .-]*$`),
-						"must only contain only alphanumeric characters, spaces, `.`  or `-`",
-					),
-					stringvalidator.LengthBetween(1, 255),
-				},
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
