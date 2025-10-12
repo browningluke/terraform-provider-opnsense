@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"regexp"
 	"terraform-provider-opnsense/internal/tools"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -27,11 +26,6 @@ type firewallLocationOneToOne struct {
 	Net    types.String `tfsdk:"net"`
 	Invert types.Bool   `tfsdk:"invert"`
 }
-
-var ipOrCidrValidator = stringvalidator.RegexMatches(
-	regexp.MustCompile(`^(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?|([0-9a-fA-F:]+)(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?)$`),
-	"must be a valid IPv4 or IPv6 address or CIDR (e.g. 192.168.0.1, 192.168.0.0/24, 2001:db8::1, 2001:db8::/64)",
-)
 
 // FirewallNATOneToOneResourceModel describes the resource data model.
 type FirewallNATOneToOneResourceModel struct {
