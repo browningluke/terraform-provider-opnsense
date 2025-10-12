@@ -10,6 +10,7 @@ import (
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/firewall"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/interfaces"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/ipsec"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/routes"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -282,6 +283,7 @@ func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		firewall.Resources(ctx),
 		interfaces.Resources(ctx),
 		ipsec.Resources(ctx),
+		routes.Resources(ctx),
 	}
 
 	var resources []func() resource.Resource
@@ -297,6 +299,7 @@ func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		firewall.DataSources(ctx),
 		interfaces.DataSources(ctx),
 		ipsec.DataSources(ctx),
+		routes.DataSources(ctx),
 	}
 
 	var dataSources []func() datasource.DataSource

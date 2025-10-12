@@ -1,19 +1,19 @@
-package service
+package routes
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/routes"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// RouteResourceModel describes the resource data model.
-type RouteResourceModel struct {
+// routeResourceModel describes the resource data model.
+type routeResourceModel struct {
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	Description types.String `tfsdk:"description"`
 	Gateway     types.String `tfsdk:"gateway"`
@@ -22,7 +22,7 @@ type RouteResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func RouteResourceSchema() schema.Schema {
+func routeResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Routes can be used to teach your firewall which path it should take when forwarding packets to a specific network.",
 
@@ -56,7 +56,7 @@ func RouteResourceSchema() schema.Schema {
 	}
 }
 
-func RouteDataSourceSchema() dschema.Schema {
+func routeDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Routes can be used to teach your firewall which path it should take when forwarding packets to a specific network.",
 
@@ -85,7 +85,7 @@ func RouteDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertRouteSchemaToStruct(d *RouteResourceModel) (*routes.Route, error) {
+func convertRouteSchemaToStruct(d *routeResourceModel) (*routes.Route, error) {
 	return &routes.Route{
 		Disabled:    tools.BoolToString(!d.Enabled.ValueBool()),
 		Description: d.Description.ValueString(),
@@ -94,8 +94,8 @@ func convertRouteSchemaToStruct(d *RouteResourceModel) (*routes.Route, error) {
 	}, nil
 }
 
-func convertRouteStructToSchema(d *routes.Route) (*RouteResourceModel, error) {
-	return &RouteResourceModel{
+func convertRouteStructToSchema(d *routes.Route) (*routeResourceModel, error) {
+	return &routeResourceModel{
 		Enabled:     types.BoolValue(!tools.StringToBool(d.Disabled)),
 		Description: tools.StringOrNull(d.Description),
 		Gateway:     types.StringValue(d.Gateway.String()),

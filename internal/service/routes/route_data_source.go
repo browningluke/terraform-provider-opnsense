@@ -1,34 +1,36 @@
-package service
+package routes
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &RouteDataSource{}
+var _ datasource.DataSource = &routeDataSource{}
+var _ datasource.DataSourceWithConfigure = &routeDataSource{}
 
-func NewRouteDataSource() datasource.DataSource {
-	return &RouteDataSource{}
+func newRouteDataSource() datasource.DataSource {
+	return &routeDataSource{}
 }
 
-// RouteDataSource defines the data source implementation.
-type RouteDataSource struct {
+// routeDataSource defines the data source implementation.
+type routeDataSource struct {
 	client opnsense.Client
 }
 
-func (d *RouteDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *routeDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_route"
 }
 
-func (d *RouteDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = RouteDataSourceSchema()
+func (d *routeDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = routeDataSourceSchema()
 }
 
-func (d *RouteDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *routeDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *RouteDataSource) Configure(ctx context.Context, req datasource.Configur
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *RouteDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *RouteResourceModel
+func (d *routeDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *routeResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
