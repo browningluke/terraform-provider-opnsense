@@ -1,11 +1,10 @@
 package interfaces
 
 import (
-	"regexp"
-
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
+	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -25,16 +24,6 @@ type vipResourceModel struct {
 	Description types.String `tfsdk:"description"`
 	Id          types.String `tfsdk:"id"`
 }
-
-var ipOrCidrValidator = stringvalidator.RegexMatches(
-	regexp.MustCompile(`^(([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?|([0-9a-fA-F:]+)(\/([0-9]|[1-9][0-9]|1[0-1][0-9]|12[0-8]))?)$`),
-	"must be a valid IPv4 or IPv6 address or CIDR (e.g. 192.168.0.1, 192.168.0.0/24, 2001:db8::1, 2001:db8::/64)",
-)
-
-var cidrValidator = stringvalidator.RegexMatches(
-	regexp.MustCompile(`^(([0-9]{1,3}\.){3}[0-9]{1,3}\/(3[0-2]|[1-2]?[0-9]))$|^(([0-9a-fA-F:]+)\/(12[0-8]|1[0-1][0-9]|[1-9]?[0-9]))$`),
-	"must be a valid IPv4 or IPv6 CIDR (e.g. 192.168.0.0/24, 2001:db8::/64)",
-)
 
 func vipResourceSchema() schema.Schema {
 	return schema.Schema{
@@ -60,14 +49,14 @@ func vipResourceSchema() schema.Schema {
 				MarkdownDescription: "Provide an address and subnet to use. (e.g 192.168.0.1/24)",
 				Required:            true,
 				Validators: []validator.String{
-					cidrValidator,
+					validators.CIDR(),
 				},
 			},
 			"gateway": schema.StringAttribute{
 				MarkdownDescription: "For some interface types a gateway is required to configure an IP Alias (ppp/pppoe/tun), leave this field empty for all other interface types.",
 				Optional:            true,
 				Validators: []validator.String{
-					ipOrCidrValidator,
+					validators.IpOrCIDR(),
 				},
 			},
 			"description": schema.StringAttribute{
