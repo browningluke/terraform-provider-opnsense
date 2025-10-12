@@ -1,21 +1,22 @@
-package service
+package ipsec_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIpsecConnectionResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccIpsecConnectionResourceConfig(
+				Config: testAccConnectionResourceConfig(
 					"1",                                    // enabled
 					[]string{"aes128-sha256-modp2048"},     // proposals
 					"no",                                   // unique
@@ -66,7 +67,7 @@ func TestAccIpsecConnectionResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccIpsecConnectionResourceConfig(
+				Config: testAccConnectionResourceConfig(
 					"1", // enabled
 					[]string{"aes256-sha256-modp2048", "aes128-sha256-modp2048"}, // proposals - updated
 					"no",                                   // unique
@@ -115,11 +116,11 @@ func TestAccIpsecConnectionResource(t *testing.T) {
 
 // func TestAccIpsecConnectionResource_MinimalConfig(t *testing.T) {
 // 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { testAccPreCheck(t) },
-// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+// 		PreCheck:                 func() { acctest.AccPreCheck(t) },
+// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 // 		Steps: []resource.TestStep{
 // 			{
-// 				Config: testAccIpsecConnectionResourceConfigMinimal(),
+// 				Config: testAccConnectionResourceConfigMinimal(),
 // 				Check: resource.ComposeAggregateTestCheckFunc(
 // 					resource.TestCheckResourceAttr("opnsense_ipsec_connection.test", "enabled", "1"),
 // 					resource.TestCheckResourceAttr("opnsense_ipsec_connection.test", "proposals.#", "1"),
@@ -137,11 +138,11 @@ func TestAccIpsecConnectionResource(t *testing.T) {
 
 // func TestAccIpsecConnectionResource_IKEv1(t *testing.T) {
 // 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { testAccPreCheck(t) },
-// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+// 		PreCheck:                 func() { acctest.AccPreCheck(t) },
+// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 // 		Steps: []resource.TestStep{
 // 			{
-// 				Config: testAccIpsecConnectionResourceConfigIKEv1(),
+// 				Config: testAccConnectionResourceConfigIKEv1(),
 // 				Check: resource.ComposeAggregateTestCheckFunc(
 // 					resource.TestCheckResourceAttr("opnsense_ipsec_connection.test", "enabled", "1"),
 // 					resource.TestCheckResourceAttr("opnsense_ipsec_connection.test", "version", "1"),
@@ -155,11 +156,11 @@ func TestAccIpsecConnectionResource(t *testing.T) {
 
 // func TestAccIpsecConnectionResource_MultipleAddresses(t *testing.T) {
 // 	resource.Test(t, resource.TestCase{
-// 		PreCheck:                 func() { testAccPreCheck(t) },
-// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+// 		PreCheck:                 func() { acctest.AccPreCheck(t) },
+// 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 // 		Steps: []resource.TestStep{
 // 			{
-// 				Config: testAccIpsecConnectionResourceConfigMultipleAddresses(),
+// 				Config: testAccConnectionResourceConfigMultipleAddresses(),
 // 				Check: resource.ComposeAggregateTestCheckFunc(
 // 					resource.TestCheckResourceAttr("opnsense_ipsec_connection.test", "local_addresses.#", "3"),
 // 					resource.TestCheckResourceAttr("opnsense_ipsec_connection.test", "remote_addresses.#", "2"),
@@ -174,7 +175,7 @@ func TestAccIpsecConnectionResource(t *testing.T) {
 // 	})
 // }
 
-func testAccIpsecConnectionResourceConfig(
+func testAccConnectionResourceConfig(
 	enabled string,
 	proposals []string,
 	unique string,
@@ -230,7 +231,7 @@ resource "opnsense_ipsec_connection" "test" {
 	return rval
 }
 
-func testAccIpsecConnectionResourceConfigMinimal() string {
+func testAccConnectionResourceConfigMinimal() string {
 	return `
 resource "opnsense_ipsec_connection" "test" {
   enabled                = "1"
@@ -257,7 +258,7 @@ resource "opnsense_ipsec_connection" "test" {
 `
 }
 
-func testAccIpsecConnectionResourceConfigIKEv1() string {
+func testAccConnectionResourceConfigIKEv1() string {
 	return `
 resource "opnsense_ipsec_connection" "test" {
   enabled                = "1"
@@ -284,7 +285,7 @@ resource "opnsense_ipsec_connection" "test" {
 `
 }
 
-func testAccIpsecConnectionResourceConfigMultipleAddresses() string {
+func testAccConnectionResourceConfigMultipleAddresses() string {
 	return `
 resource "opnsense_ipsec_connection" "test" {
   enabled                = "1"

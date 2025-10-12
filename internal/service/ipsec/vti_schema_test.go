@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"testing"
@@ -11,12 +11,12 @@ import (
 func TestConvertIpsecVtiSchemaToStruct(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *IpsecVtiResourceModel
+		input    *vtiResourceModel
 		expected *ipsec.IPsecVTI
 	}{
 		{
 			name: "basic_conversion",
-			input: &IpsecVtiResourceModel{
+			input: &vtiResourceModel{
 				Enabled:         types.StringValue("1"),
 				RequestID:       types.StringValue("1234"),
 				LocalIP:         types.StringValue("192.168.1.10"),
@@ -42,7 +42,7 @@ func TestConvertIpsecVtiSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "minimal_required_fields",
-			input: &IpsecVtiResourceModel{
+			input: &vtiResourceModel{
 				Enabled:         types.StringValue("1"),
 				RequestID:       types.StringValue("100"),
 				LocalIP:         types.StringValue("172.16.1.1"),
@@ -68,7 +68,7 @@ func TestConvertIpsecVtiSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "disabled_vti",
-			input: &IpsecVtiResourceModel{
+			input: &vtiResourceModel{
 				Enabled:         types.StringValue("0"),
 				RequestID:       types.StringValue("9999"),
 				LocalIP:         types.StringValue("10.10.10.1"),
@@ -96,7 +96,7 @@ func TestConvertIpsecVtiSchemaToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecVtiSchemaToStruct(tt.input)
+			result, err := convertVtiSchemaToStruct(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.RequestID, result.RequestID)
@@ -115,7 +115,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *ipsec.IPsecVTI
-		expected *IpsecVtiResourceModel
+		expected *vtiResourceModel
 	}{
 		{
 			name: "basic_conversion",
@@ -130,7 +130,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 				TunnelRemoteIP2: "10.60.1.2",
 				Description:     "Converted VTI",
 			},
-			expected: &IpsecVtiResourceModel{
+			expected: &vtiResourceModel{
 				Enabled:         types.StringValue("1"),
 				RequestID:       types.StringValue("5678"),
 				LocalIP:         types.StringValue("192.168.50.1"),
@@ -155,7 +155,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 				TunnelRemoteIP2: "",
 				Description:     "",
 			},
-			expected: &IpsecVtiResourceModel{
+			expected: &vtiResourceModel{
 				Enabled:         types.StringValue("0"),
 				RequestID:       types.StringValue("120"),
 				LocalIP:         types.StringValue("172.16.100.1"),
@@ -171,7 +171,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecVtiStructToSchema(tt.input)
+			result, err := convertVtiStructToSchema(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.RequestID, result.RequestID)
@@ -188,7 +188,7 @@ func TestConvertIpsecVtiStructToSchema(t *testing.T) {
 
 func TestConvertIpsecVtiRoundTrip(t *testing.T) {
 	// Test that schema -> struct -> schema conversion preserves data
-	original := &IpsecVtiResourceModel{
+	original := &vtiResourceModel{
 		Enabled:         types.StringValue("1"),
 		RequestID:       types.StringValue("12345"),
 		LocalIP:         types.StringValue("192.168.1.100"),
@@ -202,11 +202,11 @@ func TestConvertIpsecVtiRoundTrip(t *testing.T) {
 	}
 
 	// Convert to struct
-	vtiStruct, err := convertIpsecVtiSchemaToStruct(original)
+	vtiStruct, err := convertVtiSchemaToStruct(original)
 	assert.NoError(t, err)
 
 	// Convert back to schema
-	result, err := convertIpsecVtiStructToSchema(vtiStruct)
+	result, err := convertVtiStructToSchema(vtiStruct)
 	assert.NoError(t, err)
 
 	// Verify data is preserved (excluding ID which is not part of the struct)
@@ -222,7 +222,7 @@ func TestConvertIpsecVtiRoundTrip(t *testing.T) {
 }
 
 func TestIpsecVtiSchemaValidation(t *testing.T) {
-	schema := IpsecVtiResourceSchema()
+	schema := vtiResourceSchema()
 
 	// Verify required fields
 	requiredFields := []string{"local_ip", "remote_ip", "tunnel_local_ip", "tunnel_remote_ip", "request_id"}
@@ -259,7 +259,7 @@ func TestIpsecVtiSchemaValidation(t *testing.T) {
 }
 
 func TestIpsecVtiDataSourceSchema(t *testing.T) {
-	schema := IpsecVtiDataSourceSchema()
+	schema := vtiDataSourceSchema()
 
 	// Verify all fields are computed except id
 	allFields := []string{"enabled", "request_id", "local_ip", "remote_ip", "tunnel_local_ip", "tunnel_remote_ip", "tunnel_local_ip2", "tunnel_remote_ip2", "description"}

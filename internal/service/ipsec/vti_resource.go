@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpsecVtiResource{}
-var _ resource.ResourceWithImportState = &IpsecVtiResource{}
+var _ resource.Resource = &vtiResource{}
+var _ resource.ResourceWithConfigure = &vtiResource{}
+var _ resource.ResourceWithImportState = &vtiResource{}
 
-func NewIpsecVtiResource() resource.Resource {
-	return &IpsecVtiResource{}
+func newVtiResource() resource.Resource {
+	return &vtiResource{}
 }
 
-// IpsecVtiResource defines the resource implementation.
-type IpsecVtiResource struct {
+// vtiResource defines the resource implementation.
+type vtiResource struct {
 	client opnsense.Client
 }
 
-func (r *IpsecVtiResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *vtiResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ipsec_vti"
 }
 
-func (r *IpsecVtiResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = IpsecVtiResourceSchema()
+func (r *vtiResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = vtiResourceSchema()
 }
 
-func (r *IpsecVtiResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *vtiResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -53,8 +54,8 @@ func (r *IpsecVtiResource) Configure(ctx context.Context, req resource.Configure
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *IpsecVtiResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *IpsecVtiResourceModel
+func (r *vtiResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *vtiResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -64,7 +65,7 @@ func (r *IpsecVtiResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	// Convert TF schema OPNsense struct
-	vti, err := convertIpsecVtiSchemaToStruct(data)
+	vti, err := convertVtiSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse vti, got error: %s", err))
@@ -89,8 +90,8 @@ func (r *IpsecVtiResource) Create(ctx context.Context, req resource.CreateReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecVtiResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *IpsecVtiResourceModel
+func (r *vtiResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *vtiResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -115,7 +116,7 @@ func (r *IpsecVtiResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	// Convert OPNsense struct to TF schema
-	vtiModel, err := convertIpsecVtiStructToSchema(vti)
+	vtiModel, err := convertVtiStructToSchema(vti)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read ipsec vti, got error: %s", err))
@@ -129,8 +130,8 @@ func (r *IpsecVtiResource) Read(ctx context.Context, req resource.ReadRequest, r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &vtiModel)...)
 }
 
-func (r *IpsecVtiResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *IpsecVtiResourceModel
+func (r *vtiResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *vtiResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -140,7 +141,7 @@ func (r *IpsecVtiResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	// Convert TF schema OPNsense struct
-	vti, err := convertIpsecVtiSchemaToStruct(data)
+	vti, err := convertVtiSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse vti, got error: %s", err))
@@ -159,8 +160,8 @@ func (r *IpsecVtiResource) Update(ctx context.Context, req resource.UpdateReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecVtiResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *IpsecVtiResourceModel
+func (r *vtiResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *vtiResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -178,6 +179,6 @@ func (r *IpsecVtiResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-func (r *IpsecVtiResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *vtiResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

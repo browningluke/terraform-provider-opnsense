@@ -1,21 +1,22 @@
-package service
+package ipsec_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIpsecChildResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccIpsecChildResourceConfig(
+				Config: testAccChildResourceConfig(
 					"1",                                // enabled
 					"connection-uuid-123",              // connection
 					[]string{"aes128-sha256-modp2048"}, // proposals
@@ -60,7 +61,7 @@ func TestAccIpsecChildResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccIpsecChildResourceConfig(
+				Config: testAccChildResourceConfig(
 					"1",                   // enabled
 					"connection-uuid-123", // connection
 					[]string{"aes256-sha256-modp2048", "aes128-sha256-modp2048"}, // proposals - updated
@@ -97,7 +98,7 @@ func TestAccIpsecChildResource(t *testing.T) {
 	})
 }
 
-func testAccIpsecChildResourceConfig(
+func testAccChildResourceConfig(
 	enabled string,
 	ipsec_connection string,
 	proposals []string,

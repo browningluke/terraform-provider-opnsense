@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"testing"
@@ -13,12 +13,12 @@ import (
 func TestConvertIpsecAuthLocalSchemaToStruct(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *IpsecAuthLocalResourceModel
+		input    *authLocalResourceModel
 		expected *ipsec.IPsecAuthLocal
 	}{
 		{
 			name: "basic PSK conversion",
-			input: &IpsecAuthLocalResourceModel{
+			input: &authLocalResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Round:           types.StringValue("1"),
@@ -44,7 +44,7 @@ func TestConvertIpsecAuthLocalSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "public key with certificates",
-			input: &IpsecAuthLocalResourceModel{
+			input: &authLocalResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Round:           types.StringValue("1"),
@@ -79,7 +79,7 @@ func TestConvertIpsecAuthLocalSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "EAP authentication",
-			input: &IpsecAuthLocalResourceModel{
+			input: &authLocalResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-789"),
 				Round:           types.StringValue("2"),
@@ -106,7 +106,7 @@ func TestConvertIpsecAuthLocalSchemaToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecAuthLocalSchemaToStruct(tt.input)
+			result, err := convertAuthLocalSchemaToStruct(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.Round, result.Round)
@@ -122,7 +122,7 @@ func TestConvertIpsecAuthLocalStructToSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *ipsec.IPsecAuthLocal
-		expected *IpsecAuthLocalResourceModel
+		expected *authLocalResourceModel
 	}{
 		{
 			name: "basic PSK conversion",
@@ -137,7 +137,7 @@ func TestConvertIpsecAuthLocalStructToSchema(t *testing.T) {
 				PublicKeys:     api.SelectedMapList([]string{}),
 				Description:    "Test Auth Local PSK",
 			},
-			expected: &IpsecAuthLocalResourceModel{
+			expected: &authLocalResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Round:           types.StringValue("1"),
@@ -167,7 +167,7 @@ func TestConvertIpsecAuthLocalStructToSchema(t *testing.T) {
 				}),
 				Description: "Test Auth Local Certificate",
 			},
-			expected: &IpsecAuthLocalResourceModel{
+			expected: &authLocalResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Round:           types.StringValue("1"),
@@ -197,7 +197,7 @@ func TestConvertIpsecAuthLocalStructToSchema(t *testing.T) {
 				PublicKeys:     api.SelectedMapList([]string{}),
 				Description:    "Test Auth Local EAP",
 			},
-			expected: &IpsecAuthLocalResourceModel{
+			expected: &authLocalResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-789"),
 				Round:           types.StringValue("2"),
@@ -213,7 +213,7 @@ func TestConvertIpsecAuthLocalStructToSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecAuthLocalStructToSchema(tt.input)
+			result, err := convertAuthLocalStructToSchema(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.Round, result.Round)

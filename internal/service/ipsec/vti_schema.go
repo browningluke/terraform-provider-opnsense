@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/ipsec"
@@ -10,8 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// IpsecVtiResourceModel describes the resource data model.
-type IpsecVtiResourceModel struct {
+// vtiResourceModel describes the resource data model.
+type vtiResourceModel struct {
 	Enabled         types.String `tfsdk:"enabled"`
 	RequestID       types.String `tfsdk:"request_id"`
 	LocalIP         types.String `tfsdk:"local_ip"`
@@ -25,7 +25,7 @@ type IpsecVtiResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func IpsecVtiResourceSchema() schema.Schema {
+func vtiResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "IPsec Virtual Tunnel Interfaces (VTIs) are used by routed IPsec VPN connections.",
 
@@ -85,7 +85,7 @@ func IpsecVtiResourceSchema() schema.Schema {
 	}
 }
 
-func IpsecVtiDataSourceSchema() dschema.Schema {
+func vtiDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "IPsec Virtual Tunnel Interfaces (VTIs) are used by routed IPsec VPN connections.",
 
@@ -134,7 +134,7 @@ func IpsecVtiDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertIpsecVtiSchemaToStruct(d *IpsecVtiResourceModel) (*ipsec.IPsecVTI, error) {
+func convertVtiSchemaToStruct(d *vtiResourceModel) (*ipsec.IPsecVTI, error) {
 	return &ipsec.IPsecVTI{
 		Enabled:         d.Enabled.ValueString(),
 		RequestID:       d.RequestID.ValueString(),
@@ -148,8 +148,8 @@ func convertIpsecVtiSchemaToStruct(d *IpsecVtiResourceModel) (*ipsec.IPsecVTI, e
 	}, nil
 }
 
-func convertIpsecVtiStructToSchema(d *ipsec.IPsecVTI) (*IpsecVtiResourceModel, error) {
-	return &IpsecVtiResourceModel{
+func convertVtiStructToSchema(d *ipsec.IPsecVTI) (*vtiResourceModel, error) {
+	return &vtiResourceModel{
 		Enabled:         types.StringValue(d.Enabled),
 		RequestID:       types.StringValue(d.RequestID),
 		LocalIP:         types.StringValue(d.LocalIP),

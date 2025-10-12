@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// IpsecAuthLocalResourceModel describes the resource data model.
-type IpsecAuthLocalResourceModel struct {
+// authLocalResourceModel describes the resource data model.
+type authLocalResourceModel struct {
 	Enabled         types.String `tfsdk:"enabled"`
 	IPsecConnection types.String `tfsdk:"ipsec_connection"`
 	Round           types.String `tfsdk:"round"`
@@ -30,7 +30,7 @@ type IpsecAuthLocalResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func IpsecAuthLocalResourceSchema() schema.Schema {
+func authLocalResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "IPsec AuthLocal Resources are used for phase 1 authentication of IPsec VPN connections.",
 
@@ -90,7 +90,7 @@ func IpsecAuthLocalResourceSchema() schema.Schema {
 	}
 }
 
-func IpsecAuthLocalDataSourceSchema() dschema.Schema {
+func authLocalDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "IPsec AuthLocal Resources are used for phase 1 authentication of IPsec VPN connections.",
 
@@ -141,7 +141,7 @@ func IpsecAuthLocalDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertIpsecAuthLocalSchemaToStruct(d *IpsecAuthLocalResourceModel) (*ipsec.IPsecAuthLocal, error) {
+func convertAuthLocalSchemaToStruct(d *authLocalResourceModel) (*ipsec.IPsecAuthLocal, error) {
 	var certificatesList []string
 	d.Certificates.ElementsAs(context.Background(), &certificatesList, false)
 	sort.Strings(certificatesList)
@@ -163,7 +163,7 @@ func convertIpsecAuthLocalSchemaToStruct(d *IpsecAuthLocalResourceModel) (*ipsec
 	}, nil
 }
 
-func convertIpsecAuthLocalStructToSchema(d *ipsec.IPsecAuthLocal) (*IpsecAuthLocalResourceModel, error) {
+func convertAuthLocalStructToSchema(d *ipsec.IPsecAuthLocal) (*authLocalResourceModel, error) {
 	// Convert Set fields
 	certificates, diag := types.SetValueFrom(context.TODO(), types.StringType, d.Certificates)
 	if diag.HasError() {
@@ -174,7 +174,7 @@ func convertIpsecAuthLocalStructToSchema(d *ipsec.IPsecAuthLocal) (*IpsecAuthLoc
 		return nil, fmt.Errorf("error converting public keys: %v", diag)
 	}
 
-	return &IpsecAuthLocalResourceModel{
+	return &authLocalResourceModel{
 		Enabled:         types.StringValue(d.Enabled),
 		IPsecConnection: types.StringValue(d.Connection.String()),
 		Round:           types.StringValue(d.Round),

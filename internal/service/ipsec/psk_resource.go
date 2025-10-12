@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpsecPskResource{}
-var _ resource.ResourceWithImportState = &IpsecPskResource{}
+var _ resource.Resource = &pskResource{}
+var _ resource.ResourceWithConfigure = &pskResource{}
+var _ resource.ResourceWithImportState = &pskResource{}
 
-func NewIpsecPskResource() resource.Resource {
-	return &IpsecPskResource{}
+func newPskResource() resource.Resource {
+	return &pskResource{}
 }
 
-// IpsecPskResource defines the resource implementation.
-type IpsecPskResource struct {
+// pskResource defines the resource implementation.
+type pskResource struct {
 	client opnsense.Client
 }
 
-func (r *IpsecPskResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *pskResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ipsec_psk"
 }
 
-func (r *IpsecPskResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = IpsecPskResourceSchema()
+func (r *pskResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = pskResourceSchema()
 }
 
-func (r *IpsecPskResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *pskResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -53,8 +54,8 @@ func (r *IpsecPskResource) Configure(ctx context.Context, req resource.Configure
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *IpsecPskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *IpsecPskResourceModel
+func (r *pskResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *pskResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -64,7 +65,7 @@ func (r *IpsecPskResource) Create(ctx context.Context, req resource.CreateReques
 	}
 
 	// Convert TF schema OPNsense struct
-	psk, err := convertIpsecPskSchemaToStruct(data)
+	psk, err := convertPskSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse psk, got error: %s", err))
@@ -89,8 +90,8 @@ func (r *IpsecPskResource) Create(ctx context.Context, req resource.CreateReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecPskResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *IpsecPskResourceModel
+func (r *pskResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *pskResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -115,7 +116,7 @@ func (r *IpsecPskResource) Read(ctx context.Context, req resource.ReadRequest, r
 	}
 
 	// Convert OPNsense struct to TF schema
-	pskModel, err := convertIpsecPskStructToSchema(psk)
+	pskModel, err := convertPskStructToSchema(psk)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read ipsec psk, got error: %s", err))
@@ -129,8 +130,8 @@ func (r *IpsecPskResource) Read(ctx context.Context, req resource.ReadRequest, r
 	resp.Diagnostics.Append(resp.State.Set(ctx, &pskModel)...)
 }
 
-func (r *IpsecPskResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *IpsecPskResourceModel
+func (r *pskResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *pskResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -140,7 +141,7 @@ func (r *IpsecPskResource) Update(ctx context.Context, req resource.UpdateReques
 	}
 
 	// Convert TF schema OPNsense struct
-	psk, err := convertIpsecPskSchemaToStruct(data)
+	psk, err := convertPskSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse psk, got error: %s", err))
@@ -159,8 +160,8 @@ func (r *IpsecPskResource) Update(ctx context.Context, req resource.UpdateReques
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecPskResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *IpsecPskResourceModel
+func (r *pskResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *pskResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -178,6 +179,6 @@ func (r *IpsecPskResource) Delete(ctx context.Context, req resource.DeleteReques
 	}
 }
 
-func (r *IpsecPskResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *pskResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

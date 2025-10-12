@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpsecConnectionResource{}
-var _ resource.ResourceWithImportState = &IpsecConnectionResource{}
+var _ resource.Resource = &connectionResource{}
+var _ resource.ResourceWithConfigure = &connectionResource{}
+var _ resource.ResourceWithImportState = &connectionResource{}
 
-func NewIpsecConnectionResource() resource.Resource {
-	return &IpsecConnectionResource{}
+func newConnectionResource() resource.Resource {
+	return &connectionResource{}
 }
 
-// IpsecConnectionResource defines the resource implementation.
-type IpsecConnectionResource struct {
+// connectionResource defines the resource implementation.
+type connectionResource struct {
 	client opnsense.Client
 }
 
-func (r *IpsecConnectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *connectionResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ipsec_connection"
 }
 
-func (r *IpsecConnectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = IpsecConnectionResourceSchema()
+func (r *connectionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = connectionResourceSchema()
 }
 
-func (r *IpsecConnectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *connectionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -53,8 +54,8 @@ func (r *IpsecConnectionResource) Configure(ctx context.Context, req resource.Co
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *IpsecConnectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *IpsecConnectionResourceModel
+func (r *connectionResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *connectionResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -64,7 +65,7 @@ func (r *IpsecConnectionResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Convert TF schema OPNsense struct
-	connection, err := convertIpsecConnectionSchemaToStruct(data)
+	connection, err := convertConnectionSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec connection, got error: %s", err))
@@ -91,8 +92,8 @@ func (r *IpsecConnectionResource) Create(ctx context.Context, req resource.Creat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecConnectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *IpsecConnectionResourceModel
+func (r *connectionResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *connectionResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -117,7 +118,7 @@ func (r *IpsecConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	// Convert OPNsense struct to TF schema
-	connectionModel, err := convertIpsecConnectionStructToSchema(connection)
+	connectionModel, err := convertConnectionStructToSchema(connection)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read ipsec connection, got error: %s", err))
@@ -131,8 +132,8 @@ func (r *IpsecConnectionResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &connectionModel)...)
 }
 
-func (r *IpsecConnectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *IpsecConnectionResourceModel
+func (r *connectionResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *connectionResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -142,7 +143,7 @@ func (r *IpsecConnectionResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Convert TF schema OPNsense struct
-	connection, err := convertIpsecConnectionSchemaToStruct(data)
+	connection, err := convertConnectionSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec connection, got error: %s", err))
@@ -161,8 +162,8 @@ func (r *IpsecConnectionResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecConnectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *IpsecConnectionResourceModel
+func (r *connectionResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *connectionResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -180,6 +181,6 @@ func (r *IpsecConnectionResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *IpsecConnectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *connectionResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

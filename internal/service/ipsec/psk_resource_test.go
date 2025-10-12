@@ -1,20 +1,21 @@
-package service
+package ipsec_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIpsecPskResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccIpsecPskResourceConfig("user1@example.com", "peer1@example.com", "supersecretkey123", "PSK", "Test PSK for VPN"),
+				Config: testAccPskResourceConfig("user1@example.com", "peer1@example.com", "supersecretkey123", "PSK", "Test PSK for VPN"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_local", "user1@example.com"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_remote", "peer1@example.com"),
@@ -32,7 +33,7 @@ func TestAccIpsecPskResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccIpsecPskResourceConfig("user1@example.com", "peer1@example.com", "newsupersecretkey456", "PSK", "Updated PSK for VPN"),
+				Config: testAccPskResourceConfig("user1@example.com", "peer1@example.com", "newsupersecretkey456", "PSK", "Updated PSK for VPN"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_local", "user1@example.com"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_remote", "peer1@example.com"),
@@ -48,11 +49,11 @@ func TestAccIpsecPskResource(t *testing.T) {
 
 func TestAccIpsecPskResource_MinimalConfig(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpsecPskResourceConfigMinimal("testuser", "testpeer", "minimalsecretkey"),
+				Config: testAccPskResourceConfigMinimal("testuser", "testpeer", "minimalsecretkey"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_local", "testuser"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_remote", "testpeer"),
@@ -68,11 +69,11 @@ func TestAccIpsecPskResource_MinimalConfig(t *testing.T) {
 
 func TestAccIpsecPskResource_IPAddresses(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpsecPskResourceConfig("192.168.1.10", "10.0.0.5", "ipbasedpskkey", "PSK", "IP-based PSK"),
+				Config: testAccPskResourceConfig("192.168.1.10", "10.0.0.5", "ipbasedpskkey", "PSK", "IP-based PSK"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_local", "192.168.1.10"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_remote", "10.0.0.5"),
@@ -88,11 +89,11 @@ func TestAccIpsecPskResource_IPAddresses(t *testing.T) {
 func TestAccIpsecPskResource_LongKey(t *testing.T) {
 	longKey := "verylongsecretkeywiththisislongerthanusualbutshouldbefinetohandle123456789"
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpsecPskResourceConfig("local@domain.com", "remote@domain.com", longKey, "PSK", "Long key test"),
+				Config: testAccPskResourceConfig("local@domain.com", "remote@domain.com", longKey, "PSK", "Long key test"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_local", "local@domain.com"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_remote", "remote@domain.com"),
@@ -107,11 +108,11 @@ func TestAccIpsecPskResource_LongKey(t *testing.T) {
 
 func TestAccIpsecPskResource_SpecialCharacters(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpsecPskResourceConfig("useralphanumeric123", "peeralphanumeric456", "key!@#$%^&*()_+-=", "PSK", "Special chars test - & more"),
+				Config: testAccPskResourceConfig("useralphanumeric123", "peeralphanumeric456", "key!@#$%^&*()_+-=", "PSK", "Special chars test - & more"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_local", "useralphanumeric123"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_psk.test", "identity_remote", "peeralphanumeric456"),
@@ -124,7 +125,7 @@ func TestAccIpsecPskResource_SpecialCharacters(t *testing.T) {
 	})
 }
 
-func testAccIpsecPskResourceConfig(identityLocal, identityRemote, preSharedKey, pskType, description string) string {
+func testAccPskResourceConfig(identityLocal, identityRemote, preSharedKey, pskType, description string) string {
 	return fmt.Sprintf(`
 resource "opnsense_ipsec_psk" "test" {
   identity_local  = %[1]q
@@ -136,7 +137,7 @@ resource "opnsense_ipsec_psk" "test" {
 `, identityLocal, identityRemote, preSharedKey, pskType, description)
 }
 
-func testAccIpsecPskResourceConfigMinimal(identityLocal, identityRemote, preSharedKey string) string {
+func testAccPskResourceConfigMinimal(identityLocal, identityRemote, preSharedKey string) string {
 	return fmt.Sprintf(`
 resource "opnsense_ipsec_psk" "test" {
   identity_local  = %[1]q

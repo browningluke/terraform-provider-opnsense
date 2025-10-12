@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpsecAuthRemoteResource{}
-var _ resource.ResourceWithImportState = &IpsecAuthRemoteResource{}
+var _ resource.Resource = &authRemoteResource{}
+var _ resource.ResourceWithConfigure = &authRemoteResource{}
+var _ resource.ResourceWithImportState = &authRemoteResource{}
 
-func NewIpsecAuthRemoteResource() resource.Resource {
-	return &IpsecAuthRemoteResource{}
+func newAuthRemoteResource() resource.Resource {
+	return &authRemoteResource{}
 }
 
-// IpsecAuthRemoteResource defines the resource implementation.
-type IpsecAuthRemoteResource struct {
+// authRemoteResource defines the resource implementation.
+type authRemoteResource struct {
 	client opnsense.Client
 }
 
-func (r *IpsecAuthRemoteResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *authRemoteResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ipsec_auth_remote"
 }
 
-func (r *IpsecAuthRemoteResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = IpsecAuthRemoteResourceSchema()
+func (r *authRemoteResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = authRemoteResourceSchema()
 }
 
-func (r *IpsecAuthRemoteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *authRemoteResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -53,8 +54,8 @@ func (r *IpsecAuthRemoteResource) Configure(ctx context.Context, req resource.Co
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *IpsecAuthRemoteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *IpsecAuthRemoteResourceModel
+func (r *authRemoteResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *authRemoteResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -64,7 +65,7 @@ func (r *IpsecAuthRemoteResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Convert TF schema to OPNsense struct
-	authRemote, err := convertIpsecAuthRemoteSchemaToStruct(data)
+	authRemote, err := convertAuthRemoteSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec auth remote, got error: %s", err))
@@ -89,8 +90,8 @@ func (r *IpsecAuthRemoteResource) Create(ctx context.Context, req resource.Creat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecAuthRemoteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *IpsecAuthRemoteResourceModel
+func (r *authRemoteResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *authRemoteResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -115,7 +116,7 @@ func (r *IpsecAuthRemoteResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	// Convert OPNsense struct to TF schema
-	authRemoteModel, err := convertIpsecAuthRemoteStructToSchema(authRemote)
+	authRemoteModel, err := convertAuthRemoteStructToSchema(authRemote)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read ipsec auth remote, got error: %s", err))
@@ -129,8 +130,8 @@ func (r *IpsecAuthRemoteResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &authRemoteModel)...)
 }
 
-func (r *IpsecAuthRemoteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *IpsecAuthRemoteResourceModel
+func (r *authRemoteResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *authRemoteResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -140,7 +141,7 @@ func (r *IpsecAuthRemoteResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Convert TF schema to OPNsense struct
-	authRemote, err := convertIpsecAuthRemoteSchemaToStruct(data)
+	authRemote, err := convertAuthRemoteSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec auth remote, got error: %s", err))
@@ -159,8 +160,8 @@ func (r *IpsecAuthRemoteResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecAuthRemoteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *IpsecAuthRemoteResourceModel
+func (r *authRemoteResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *authRemoteResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -178,6 +179,6 @@ func (r *IpsecAuthRemoteResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *IpsecAuthRemoteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *authRemoteResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

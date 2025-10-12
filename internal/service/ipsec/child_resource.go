@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpsecChildResource{}
-var _ resource.ResourceWithImportState = &IpsecChildResource{}
+var _ resource.Resource = &childResource{}
+var _ resource.ResourceWithConfigure = &childResource{}
+var _ resource.ResourceWithImportState = &childResource{}
 
-func NewIpsecChildResource() resource.Resource {
-	return &IpsecChildResource{}
+func newChildResource() resource.Resource {
+	return &childResource{}
 }
 
-// IpsecChildResource defines the resource implementation.
-type IpsecChildResource struct {
+// childResource defines the resource implementation.
+type childResource struct {
 	client opnsense.Client
 }
 
-func (r *IpsecChildResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *childResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ipsec_child"
 }
 
-func (r *IpsecChildResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = IpsecChildResourceSchema()
+func (r *childResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = childResourceSchema()
 }
 
-func (r *IpsecChildResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *childResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -53,8 +54,8 @@ func (r *IpsecChildResource) Configure(ctx context.Context, req resource.Configu
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *IpsecChildResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *IpsecChildResourceModel
+func (r *childResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *childResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -64,7 +65,7 @@ func (r *IpsecChildResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	// Convert TF schema to OPNsense struct
-	child, err := convertIpsecChildSchemaToStruct(data)
+	child, err := convertChildSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec child, got error: %s", err))
@@ -89,8 +90,8 @@ func (r *IpsecChildResource) Create(ctx context.Context, req resource.CreateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecChildResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *IpsecChildResourceModel
+func (r *childResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *childResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -115,7 +116,7 @@ func (r *IpsecChildResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	// Convert OPNsense struct to TF schema
-	childModel, err := convertIpsecChildStructToSchema(child)
+	childModel, err := convertChildStructToSchema(child)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read ipsec child, got error: %s", err))
@@ -129,8 +130,8 @@ func (r *IpsecChildResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(resp.State.Set(ctx, &childModel)...)
 }
 
-func (r *IpsecChildResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *IpsecChildResourceModel
+func (r *childResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *childResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -140,7 +141,7 @@ func (r *IpsecChildResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	// Convert TF schema to OPNsense struct
-	child, err := convertIpsecChildSchemaToStruct(data)
+	child, err := convertChildSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec child, got error: %s", err))
@@ -159,8 +160,8 @@ func (r *IpsecChildResource) Update(ctx context.Context, req resource.UpdateRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecChildResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *IpsecChildResourceModel
+func (r *childResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *childResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -178,6 +179,6 @@ func (r *IpsecChildResource) Delete(ctx context.Context, req resource.DeleteRequ
 	}
 }
 
-func (r *IpsecChildResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *childResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

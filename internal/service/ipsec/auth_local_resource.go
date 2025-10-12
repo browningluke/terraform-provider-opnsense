@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &IpsecAuthLocalResource{}
-var _ resource.ResourceWithImportState = &IpsecAuthLocalResource{}
+var _ resource.Resource = &authLocalResource{}
+var _ resource.ResourceWithConfigure = &authLocalResource{}
+var _ resource.ResourceWithImportState = &authLocalResource{}
 
-func NewIpsecAuthLocalResource() resource.Resource {
-	return &IpsecAuthLocalResource{}
+func newAuthLocalResource() resource.Resource {
+	return &authLocalResource{}
 }
 
-// IpsecAuthLocalResource defines the resource implementation.
-type IpsecAuthLocalResource struct {
+// authLocalResource defines the resource implementation.
+type authLocalResource struct {
 	client opnsense.Client
 }
 
-func (r *IpsecAuthLocalResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *authLocalResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ipsec_auth_local"
 }
 
-func (r *IpsecAuthLocalResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = IpsecAuthLocalResourceSchema()
+func (r *authLocalResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = authLocalResourceSchema()
 }
 
-func (r *IpsecAuthLocalResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *authLocalResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -53,8 +54,8 @@ func (r *IpsecAuthLocalResource) Configure(ctx context.Context, req resource.Con
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *IpsecAuthLocalResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *IpsecAuthLocalResourceModel
+func (r *authLocalResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *authLocalResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -64,7 +65,7 @@ func (r *IpsecAuthLocalResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Convert TF schema to OPNsense struct
-	authLocal, err := convertIpsecAuthLocalSchemaToStruct(data)
+	authLocal, err := convertAuthLocalSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec auth local, got error: %s", err))
@@ -89,8 +90,8 @@ func (r *IpsecAuthLocalResource) Create(ctx context.Context, req resource.Create
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecAuthLocalResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *IpsecAuthLocalResourceModel
+func (r *authLocalResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *authLocalResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -115,7 +116,7 @@ func (r *IpsecAuthLocalResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Convert OPNsense struct to TF schema
-	authLocalModel, err := convertIpsecAuthLocalStructToSchema(authLocal)
+	authLocalModel, err := convertAuthLocalStructToSchema(authLocal)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read ipsec auth local, got error: %s", err))
@@ -129,8 +130,8 @@ func (r *IpsecAuthLocalResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &authLocalModel)...)
 }
 
-func (r *IpsecAuthLocalResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *IpsecAuthLocalResourceModel
+func (r *authLocalResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *authLocalResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -140,7 +141,7 @@ func (r *IpsecAuthLocalResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Convert TF schema to OPNsense struct
-	authLocal, err := convertIpsecAuthLocalSchemaToStruct(data)
+	authLocal, err := convertAuthLocalSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse ipsec auth local, got error: %s", err))
@@ -159,8 +160,8 @@ func (r *IpsecAuthLocalResource) Update(ctx context.Context, req resource.Update
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *IpsecAuthLocalResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *IpsecAuthLocalResourceModel
+func (r *authLocalResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *authLocalResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -178,6 +179,6 @@ func (r *IpsecAuthLocalResource) Delete(ctx context.Context, req resource.Delete
 	}
 }
 
-func (r *IpsecAuthLocalResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *authLocalResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

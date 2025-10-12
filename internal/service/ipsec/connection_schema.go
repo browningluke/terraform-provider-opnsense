@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// IpsecConnectionResourceModel describes the resource data model.
-type IpsecConnectionResourceModel struct {
+// connectionResourceModel describes the resource data model.
+type connectionResourceModel struct {
 	Enabled                types.String `tfsdk:"enabled"`
 	Proposals              types.Set    `tfsdk:"proposals"`
 	Unique                 types.String `tfsdk:"unique"`
@@ -41,7 +41,7 @@ type IpsecConnectionResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func IpsecConnectionResourceSchema() schema.Schema {
+func connectionResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "IPsec Connections are used for establishing secure communication channels.",
 
@@ -145,7 +145,7 @@ func IpsecConnectionResourceSchema() schema.Schema {
 	}
 }
 
-func IpsecConnectionDataSourceSchema() dschema.Schema {
+func connectionDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "IPsec connections are used for establishing secure VPN tunnels.",
 
@@ -246,7 +246,7 @@ func IpsecConnectionDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertIpsecConnectionSchemaToStruct(d *IpsecConnectionResourceModel) (*ipsec.IPsecConnection, error) {
+func convertConnectionSchemaToStruct(d *connectionResourceModel) (*ipsec.IPsecConnection, error) {
 	// Convert lists to string slices
 	var proposalsList []string
 	d.Proposals.ElementsAs(context.Background(), &proposalsList, false)
@@ -298,7 +298,7 @@ func convertIpsecConnectionSchemaToStruct(d *IpsecConnectionResourceModel) (*ips
 	}, nil
 }
 
-func convertIpsecConnectionStructToSchema(d *ipsec.IPsecConnection) (*IpsecConnectionResourceModel, error) {
+func convertConnectionStructToSchema(d *ipsec.IPsecConnection) (*connectionResourceModel, error) {
 	// Convert list fields
 	sort.Strings(d.Proposals)
 	proposals, diag := types.SetValueFrom(context.TODO(), types.StringType, d.Proposals)
@@ -320,7 +320,7 @@ func convertIpsecConnectionStructToSchema(d *ipsec.IPsecConnection) (*IpsecConne
 	if diag.HasError() {
 		return nil, fmt.Errorf("error converting IP pools: %v", diag)
 	}
-	return &IpsecConnectionResourceModel{
+	return &connectionResourceModel{
 		Enabled:                types.StringValue(d.Enabled),
 		Proposals:              proposals,
 		Unique:                 types.StringValue(d.Unique.String()),

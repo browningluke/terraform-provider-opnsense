@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// IpsecPskResourceModel describes the resource data model.
-type IpsecPskResourceModel struct {
+// pskResourceModel describes the resource data model.
+type pskResourceModel struct {
 	IdentityLocal  types.String `tfsdk:"identity_local"`
 	IdentityRemote types.String `tfsdk:"identity_remote"`
 	PreSharedKey   types.String `tfsdk:"pre_shared_key"`
@@ -22,7 +22,7 @@ type IpsecPskResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func IpsecPskResourceSchema() schema.Schema {
+func pskResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "IPsec Pre-Shared Keys (PSKs) are used for authenticating IPsec VPN connections.",
 
@@ -62,7 +62,7 @@ func IpsecPskResourceSchema() schema.Schema {
 	}
 }
 
-func IpsecPskDataSourceSchema() dschema.Schema {
+func pskDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "IPsec Pre-Shared Keys (PSKs) are used for authenticating IPsec VPN connections.",
 
@@ -95,7 +95,7 @@ func IpsecPskDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertIpsecPskSchemaToStruct(d *IpsecPskResourceModel) (*ipsec.IPsecPSK, error) {
+func convertPskSchemaToStruct(d *pskResourceModel) (*ipsec.IPsecPSK, error) {
 	return &ipsec.IPsecPSK{
 		IdentityLocal:  d.IdentityLocal.ValueString(),
 		IdentityRemote: d.IdentityRemote.ValueString(),
@@ -105,8 +105,8 @@ func convertIpsecPskSchemaToStruct(d *IpsecPskResourceModel) (*ipsec.IPsecPSK, e
 	}, nil
 }
 
-func convertIpsecPskStructToSchema(d *ipsec.IPsecPSK) (*IpsecPskResourceModel, error) {
-	return &IpsecPskResourceModel{
+func convertPskStructToSchema(d *ipsec.IPsecPSK) (*pskResourceModel, error) {
+	return &pskResourceModel{
 		IdentityLocal:  types.StringValue(d.IdentityLocal),
 		IdentityRemote: types.StringValue(d.IdentityRemote),
 		PreSharedKey:   types.StringValue(d.PreSharedKey),

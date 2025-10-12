@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"testing"
@@ -13,12 +13,12 @@ import (
 func TestConvertIpsecConnectionSchemaToStruct(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *IpsecConnectionResourceModel
+		input    *connectionResourceModel
 		expected *ipsec.IPsecConnection
 	}{
 		{
 			name: "basic conversion",
-			input: &IpsecConnectionResourceModel{
+			input: &connectionResourceModel{
 				Enabled:                types.StringValue("1"),
 				Proposals:              types.SetValueMust(types.StringType, []attr.Value{types.StringValue("aes128-sha256-modp2048")}),
 				Unique:                 types.StringValue("no"),
@@ -68,7 +68,7 @@ func TestConvertIpsecConnectionSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "multiple addresses and proposals",
-			input: &IpsecConnectionResourceModel{
+			input: &connectionResourceModel{
 				Enabled: types.StringValue("1"),
 				Proposals: types.SetValueMust(types.StringType, []attr.Value{
 					types.StringValue("aes256-sha256-modp2048"),
@@ -137,7 +137,7 @@ func TestConvertIpsecConnectionSchemaToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecConnectionSchemaToStruct(tt.input)
+			result, err := convertConnectionSchemaToStruct(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.Aggressive, result.Aggressive)
@@ -160,7 +160,7 @@ func TestConvertIpsecConnectionStructToSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *ipsec.IPsecConnection
-		expected *IpsecConnectionResourceModel
+		expected *connectionResourceModel
 	}{
 		{
 			name: "basic conversion",
@@ -187,7 +187,7 @@ func TestConvertIpsecConnectionStructToSchema(t *testing.T) {
 				KeyingTries:            "1",
 				Description:            "Test Connection",
 			},
-			expected: &IpsecConnectionResourceModel{
+			expected: &connectionResourceModel{
 				Enabled:                types.StringValue("1"),
 				Proposals:              types.SetValueMust(types.StringType, []attr.Value{types.StringValue("aes128-sha256-modp2048")}),
 				Unique:                 types.StringValue("no"),
@@ -215,7 +215,7 @@ func TestConvertIpsecConnectionStructToSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecConnectionStructToSchema(tt.input)
+			result, err := convertConnectionStructToSchema(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.Aggressive, result.Aggressive)

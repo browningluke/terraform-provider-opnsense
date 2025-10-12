@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"testing"
@@ -13,12 +13,12 @@ import (
 func TestConvertIpsecChildSchemaToStruct(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *IpsecChildResourceModel
+		input    *childResourceModel
 		expected *ipsec.IPsecChild
 	}{
 		{
 			name: "basic conversion",
-			input: &IpsecChildResourceModel{
+			input: &childResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Proposals:       types.SetValueMust(types.StringType, []attr.Value{types.StringValue("aes128-sha256-modp2048")}),
@@ -54,7 +54,7 @@ func TestConvertIpsecChildSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "multiple proposals and networks",
-			input: &IpsecChildResourceModel{
+			input: &childResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Proposals: types.SetValueMust(types.StringType, []attr.Value{
@@ -109,7 +109,7 @@ func TestConvertIpsecChildSchemaToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecChildSchemaToStruct(tt.input)
+			result, err := convertChildSchemaToStruct(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.SHA256_96, result.SHA256_96)
@@ -126,7 +126,7 @@ func TestConvertIpsecChildStructToSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *ipsec.IPsecChild
-		expected *IpsecChildResourceModel
+		expected *childResourceModel
 	}{
 		{
 			name: "basic conversion",
@@ -146,7 +146,7 @@ func TestConvertIpsecChildStructToSchema(t *testing.T) {
 				RekeyTime:       "0",
 				Description:     "Test IPsec Child",
 			},
-			expected: &IpsecChildResourceModel{
+			expected: &childResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Proposals:       types.SetValueMust(types.StringType, []attr.Value{types.StringValue("aes128-sha256-modp2048")}),
@@ -190,7 +190,7 @@ func TestConvertIpsecChildStructToSchema(t *testing.T) {
 				RekeyTime:   "3600",
 				Description: "Complex Test Child",
 			},
-			expected: &IpsecChildResourceModel{
+			expected: &childResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Proposals: types.SetValueMust(types.StringType, []attr.Value{
@@ -220,7 +220,7 @@ func TestConvertIpsecChildStructToSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecChildStructToSchema(tt.input)
+			result, err := convertChildStructToSchema(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.SHA256_96, result.SHA256_96)

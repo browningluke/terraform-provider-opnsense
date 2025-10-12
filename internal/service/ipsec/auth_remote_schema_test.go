@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"testing"
@@ -13,12 +13,12 @@ import (
 func TestConvertIpsecAuthRemoteSchemaToStruct(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *IpsecAuthRemoteResourceModel
+		input    *authRemoteResourceModel
 		expected *ipsec.IPsecAuthRemote
 	}{
 		{
 			name: "basic PSK conversion",
-			input: &IpsecAuthRemoteResourceModel{
+			input: &authRemoteResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Round:           types.StringValue("1"),
@@ -44,7 +44,7 @@ func TestConvertIpsecAuthRemoteSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "public key with certificates",
-			input: &IpsecAuthRemoteResourceModel{
+			input: &authRemoteResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Round:           types.StringValue("1"),
@@ -79,7 +79,7 @@ func TestConvertIpsecAuthRemoteSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "EAP authentication",
-			input: &IpsecAuthRemoteResourceModel{
+			input: &authRemoteResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-789"),
 				Round:           types.StringValue("2"),
@@ -106,7 +106,7 @@ func TestConvertIpsecAuthRemoteSchemaToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecAuthRemoteSchemaToStruct(tt.input)
+			result, err := convertAuthRemoteSchemaToStruct(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.Round, result.Round)
@@ -122,7 +122,7 @@ func TestConvertIpsecAuthRemoteStructToSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *ipsec.IPsecAuthRemote
-		expected *IpsecAuthRemoteResourceModel
+		expected *authRemoteResourceModel
 	}{
 		{
 			name: "basic PSK conversion",
@@ -137,7 +137,7 @@ func TestConvertIpsecAuthRemoteStructToSchema(t *testing.T) {
 				PublicKeys:     api.SelectedMapList([]string{}),
 				Description:    "Test Auth Remote PSK",
 			},
-			expected: &IpsecAuthRemoteResourceModel{
+			expected: &authRemoteResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-123"),
 				Round:           types.StringValue("1"),
@@ -167,7 +167,7 @@ func TestConvertIpsecAuthRemoteStructToSchema(t *testing.T) {
 				}),
 				Description: "Test Auth Remote Certificate",
 			},
-			expected: &IpsecAuthRemoteResourceModel{
+			expected: &authRemoteResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-456"),
 				Round:           types.StringValue("1"),
@@ -197,7 +197,7 @@ func TestConvertIpsecAuthRemoteStructToSchema(t *testing.T) {
 				PublicKeys:     api.SelectedMapList([]string{}),
 				Description:    "Test Auth Remote EAP",
 			},
-			expected: &IpsecAuthRemoteResourceModel{
+			expected: &authRemoteResourceModel{
 				Enabled:         types.StringValue("1"),
 				IPsecConnection: types.StringValue("connection-uuid-789"),
 				Round:           types.StringValue("2"),
@@ -213,7 +213,7 @@ func TestConvertIpsecAuthRemoteStructToSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecAuthRemoteStructToSchema(tt.input)
+			result, err := convertAuthRemoteStructToSchema(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.Enabled, result.Enabled)
 			assert.Equal(t, tt.expected.Round, result.Round)

@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// IpsecChildResourceModel describes the resource data model.
-type IpsecChildResourceModel struct {
+// childResourceModel describes the resource data model.
+type childResourceModel struct {
 	Enabled         types.String `tfsdk:"enabled"`
 	IPsecConnection types.String `tfsdk:"ipsec_connection"`
 	Proposals       types.Set    `tfsdk:"proposals"`
@@ -35,7 +35,7 @@ type IpsecChildResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func IpsecChildResourceSchema() schema.Schema {
+func childResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "IPsec Child Resources are used for phase 2 of IPsec VPN connections.",
 
@@ -128,7 +128,7 @@ func IpsecChildResourceSchema() schema.Schema {
 	}
 }
 
-func IpsecChildDataSourceSchema() dschema.Schema {
+func childDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "IPsec Child Resources are used for phase 2 of IPsec VPN connections.",
 
@@ -200,7 +200,7 @@ func IpsecChildDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertIpsecChildSchemaToStruct(d *IpsecChildResourceModel) (*ipsec.IPsecChild, error) {
+func convertChildSchemaToStruct(d *childResourceModel) (*ipsec.IPsecChild, error) {
 	// Convert lists to string slices
 	var proposalsList []string
 	d.Proposals.ElementsAs(context.Background(), &proposalsList, false)
@@ -232,7 +232,7 @@ func convertIpsecChildSchemaToStruct(d *IpsecChildResourceModel) (*ipsec.IPsecCh
 	}, nil
 }
 
-func convertIpsecChildStructToSchema(d *ipsec.IPsecChild) (*IpsecChildResourceModel, error) {
+func convertChildStructToSchema(d *ipsec.IPsecChild) (*childResourceModel, error) {
 	// Convert List fields
 	sort.Strings(d.Proposals)
 	proposals, diag := types.SetValueFrom(context.TODO(), types.StringType, d.Proposals)
@@ -250,7 +250,7 @@ func convertIpsecChildStructToSchema(d *ipsec.IPsecChild) (*IpsecChildResourceMo
 		return nil, fmt.Errorf("error converting remote networks: %v", diag)
 	}
 
-	return &IpsecChildResourceModel{
+	return &childResourceModel{
 		Enabled:         types.StringValue(d.Enabled),
 		IPsecConnection: types.StringValue(d.Connection.String()),
 		Proposals:       proposals,

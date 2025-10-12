@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"testing"
@@ -12,12 +12,12 @@ import (
 func TestConvertIpsecPskSchemaToStruct(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    *IpsecPskResourceModel
+		input    *pskResourceModel
 		expected *ipsec.IPsecPSK
 	}{
 		{
 			name: "basic conversion",
-			input: &IpsecPskResourceModel{
+			input: &pskResourceModel{
 				IdentityLocal:  types.StringValue("local@example.com"),
 				IdentityRemote: types.StringValue("remote@example.com"),
 				PreSharedKey:   types.StringValue("secretkey123"),
@@ -35,7 +35,7 @@ func TestConvertIpsecPskSchemaToStruct(t *testing.T) {
 		},
 		{
 			name: "minimal conversion",
-			input: &IpsecPskResourceModel{
+			input: &pskResourceModel{
 				IdentityLocal:  types.StringValue("user1"),
 				IdentityRemote: types.StringValue("user2"),
 				PreSharedKey:   types.StringValue("key123"),
@@ -54,7 +54,7 @@ func TestConvertIpsecPskSchemaToStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecPskSchemaToStruct(tt.input)
+			result, err := convertPskSchemaToStruct(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.IdentityLocal, result.IdentityLocal)
 			assert.Equal(t, tt.expected.IdentityRemote, result.IdentityRemote)
@@ -69,7 +69,7 @@ func TestConvertIpsecPskStructToSchema(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    *ipsec.IPsecPSK
-		expected *IpsecPskResourceModel
+		expected *pskResourceModel
 	}{
 		{
 			name: "basic conversion",
@@ -80,7 +80,7 @@ func TestConvertIpsecPskStructToSchema(t *testing.T) {
 				Type:           api.SelectedMap("PSK"),
 				Description:    "Test PSK",
 			},
-			expected: &IpsecPskResourceModel{
+			expected: &pskResourceModel{
 				IdentityLocal:  types.StringValue("local@example.com"),
 				IdentityRemote: types.StringValue("remote@example.com"),
 				PreSharedKey:   types.StringValue("secretkey123"),
@@ -97,7 +97,7 @@ func TestConvertIpsecPskStructToSchema(t *testing.T) {
 				Type:           api.SelectedMap("PSK"),
 				Description:    "",
 			},
-			expected: &IpsecPskResourceModel{
+			expected: &pskResourceModel{
 				IdentityLocal:  types.StringValue("user1"),
 				IdentityRemote: types.StringValue("user2"),
 				PreSharedKey:   types.StringValue("key123"),
@@ -109,7 +109,7 @@ func TestConvertIpsecPskStructToSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result, err := convertIpsecPskStructToSchema(tt.input)
+			result, err := convertPskStructToSchema(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expected.IdentityLocal, result.IdentityLocal)
 			assert.Equal(t, tt.expected.IdentityRemote, result.IdentityRemote)

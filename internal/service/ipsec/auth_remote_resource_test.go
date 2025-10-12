@@ -1,21 +1,22 @@
-package service
+package ipsec_test
 
 import (
 	"fmt"
 	"strings"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIpsecAuthRemoteResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccIpsecAuthRemoteResourceConfig(
+				Config: testAccAuthRemoteResourceConfig(
 					"1",                      // enabled
 					"0",                      // round
 					"psk",                    // authentication
@@ -46,7 +47,7 @@ func TestAccIpsecAuthRemoteResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccIpsecAuthRemoteResourceConfig(
+				Config: testAccAuthRemoteResourceConfig(
 					"1",                              // enabled
 					"0",                              // round - updated
 					"psk",                            // authentication - updated
@@ -73,7 +74,7 @@ func TestAccIpsecAuthRemoteResource(t *testing.T) {
 	})
 }
 
-func testAccIpsecAuthRemoteResourceConfig(
+func testAccAuthRemoteResourceConfig(
 	enabled string,
 	round string,
 	authentication string,

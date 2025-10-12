@@ -1,20 +1,21 @@
-package service
+package ipsec_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccIpsecVtiResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccIpsecVtiResourceConfig(
+				Config: testAccVtiResourceConfig(
 					"1",              // enabled
 					"1234",           // request_id
 					"2.3.4.5",        // local_ip
@@ -46,7 +47,7 @@ func TestAccIpsecVtiResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccIpsecVtiResourceConfig(
+				Config: testAccVtiResourceConfig(
 					"1",                      // enabled
 					"5678",                   // request_id - updated
 					"10.20.30.40",            // local_ip - updated
@@ -76,11 +77,11 @@ func TestAccIpsecVtiResource(t *testing.T) {
 
 func TestAccIpsecVtiResource_MinimalConfig(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpsecVtiResourceConfigMinimal(),
+				Config: testAccVtiResourceConfigMinimal(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_vti.test", "enabled", "1"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_vti.test", "local_ip", "192.168.1.10"),
@@ -97,11 +98,11 @@ func TestAccIpsecVtiResource_MinimalConfig(t *testing.T) {
 
 func TestAccIpsecVtiResource_WithOptionalFields(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccIpsecVtiResourceConfigWithOptionals(),
+				Config: testAccVtiResourceConfigWithOptionals(),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_ipsec_vti.test", "enabled", "0"),
 					resource.TestCheckResourceAttr("opnsense_ipsec_vti.test", "request_id", "9999"),
@@ -118,7 +119,7 @@ func TestAccIpsecVtiResource_WithOptionalFields(t *testing.T) {
 	})
 }
 
-func testAccIpsecVtiResourceConfig(
+func testAccVtiResourceConfig(
 	enabled string,
 	requestId string,
 	localIP string,
@@ -144,7 +145,7 @@ resource "opnsense_ipsec_vti" "test" {
 `, enabled, requestId, localIP, remoteIP, tunnelLocalIP, tunnelRemoteIP, tunnelLocalIP2, tunnelRemoteIP2, description)
 }
 
-func testAccIpsecVtiResourceConfigMinimal() string {
+func testAccVtiResourceConfigMinimal() string {
 	return `
 resource "opnsense_ipsec_vti" "test" {
   local_ip         = "192.168.1.10"
@@ -156,7 +157,7 @@ resource "opnsense_ipsec_vti" "test" {
 `
 }
 
-func testAccIpsecVtiResourceConfigWithOptionals() string {
+func testAccVtiResourceConfigWithOptionals() string {
 	return `
 resource "opnsense_ipsec_vti" "test" {
   enabled           = "0"

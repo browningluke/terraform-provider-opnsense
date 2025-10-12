@@ -1,4 +1,4 @@
-package service
+package ipsec
 
 import (
 	"context"
@@ -15,8 +15,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// IpsecAuthRemoteResourceModel describes the resource data model.
-type IpsecAuthRemoteResourceModel struct {
+// authRemoteResourceModel describes the resource data model.
+type authRemoteResourceModel struct {
 	Enabled         types.String `tfsdk:"enabled"`
 	IPsecConnection types.String `tfsdk:"ipsec_connection"`
 	Round           types.String `tfsdk:"round"`
@@ -30,7 +30,7 @@ type IpsecAuthRemoteResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func IpsecAuthRemoteResourceSchema() schema.Schema {
+func authRemoteResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "IPsec AuthRemote Resources are used for phase 1 authentication of IPsec VPN connections.",
 
@@ -90,7 +90,7 @@ func IpsecAuthRemoteResourceSchema() schema.Schema {
 	}
 }
 
-func IpsecAuthRemoteDataSourceSchema() dschema.Schema {
+func authRemoteDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "IPsec AuthRemote Resources are used for phase 1 authentication of IPsec VPN connections.",
 
@@ -141,7 +141,7 @@ func IpsecAuthRemoteDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertIpsecAuthRemoteSchemaToStruct(d *IpsecAuthRemoteResourceModel) (*ipsec.IPsecAuthRemote, error) {
+func convertAuthRemoteSchemaToStruct(d *authRemoteResourceModel) (*ipsec.IPsecAuthRemote, error) {
 	var certificatesList []string
 	d.Certificates.ElementsAs(context.Background(), &certificatesList, false)
 	sort.Strings(certificatesList)
@@ -163,7 +163,7 @@ func convertIpsecAuthRemoteSchemaToStruct(d *IpsecAuthRemoteResourceModel) (*ips
 	}, nil
 }
 
-func convertIpsecAuthRemoteStructToSchema(d *ipsec.IPsecAuthRemote) (*IpsecAuthRemoteResourceModel, error) {
+func convertAuthRemoteStructToSchema(d *ipsec.IPsecAuthRemote) (*authRemoteResourceModel, error) {
 	// Convert Set fields
 	certificates, diag := types.SetValueFrom(context.TODO(), types.StringType, d.Certificates)
 	if diag.HasError() {
@@ -174,7 +174,7 @@ func convertIpsecAuthRemoteStructToSchema(d *ipsec.IPsecAuthRemote) (*IpsecAuthR
 		return nil, fmt.Errorf("error converting public keys: %v", diag)
 	}
 
-	return &IpsecAuthRemoteResourceModel{
+	return &authRemoteResourceModel{
 		Enabled:         types.StringValue(d.Enabled),
 		IPsecConnection: types.StringValue(d.Connection.String()),
 		Round:           types.StringValue(d.Round),
