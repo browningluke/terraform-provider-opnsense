@@ -1,4 +1,4 @@
-package service
+package firewall
 
 import (
 	"context"
@@ -10,26 +10,27 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &FirewallNATOneToOneDataSource{}
+var _ datasource.DataSource = &natOneToOneDataSource{}
+var _ datasource.DataSourceWithConfigure = &natOneToOneDataSource{}
 
-func NewFirewallNATOneToOneDataSource() datasource.DataSource {
-	return &FirewallNATOneToOneDataSource{}
+func newNATOneToOneDataSource() datasource.DataSource {
+	return &natOneToOneDataSource{}
 }
 
-// FirewallNATOneToOneDataSource defines the data source implementation.
-type FirewallNATOneToOneDataSource struct {
+// natOneToOneDataSource defines the data source implementation.
+type natOneToOneDataSource struct {
 	client opnsense.Client
 }
 
-func (d *FirewallNATOneToOneDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *natOneToOneDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_firewall_nat_one_to_one"
 }
 
-func (d *FirewallNATOneToOneDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = FirewallNATOneToOneDataSourceSchema()
+func (d *natOneToOneDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = natOneToOneDataSourceSchema()
 }
 
-func (d *FirewallNATOneToOneDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *natOneToOneDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -47,8 +48,8 @@ func (d *FirewallNATOneToOneDataSource) Configure(ctx context.Context, req datas
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *FirewallNATOneToOneDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *FirewallNATOneToOneResourceModel
+func (d *natOneToOneDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *natOneToOneResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -66,7 +67,7 @@ func (d *FirewallNATOneToOneDataSource) Read(ctx context.Context, req datasource
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertFirewallNATOneToOneStructToSchema(resourceStruct)
+	resourceModel, err := convertNATOneToOneStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read firewall nat 1:1, got error: %s", err))

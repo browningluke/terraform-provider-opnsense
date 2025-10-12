@@ -1,34 +1,36 @@
-package service
+package firewall
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &FirewallAliasDataSource{}
+var _ datasource.DataSource = &aliasDataSource{}
+var _ datasource.DataSourceWithConfigure = &aliasDataSource{}
 
-func NewFirewallAliasDataSource() datasource.DataSource {
-	return &FirewallAliasDataSource{}
+func newAliasDataSource() datasource.DataSource {
+	return &aliasDataSource{}
 }
 
-// FirewallAliasDataSource defines the data source implementation.
-type FirewallAliasDataSource struct {
+// aliasDataSource defines the data source implementation.
+type aliasDataSource struct {
 	client opnsense.Client
 }
 
-func (d *FirewallAliasDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *aliasDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_firewall_alias"
 }
 
-func (d *FirewallAliasDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = FirewallAliasDataSourceSchema()
+func (d *aliasDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = aliasDataSourceSchema()
 }
 
-func (d *FirewallAliasDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *aliasDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *FirewallAliasDataSource) Configure(ctx context.Context, req datasource.
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *FirewallAliasDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *FirewallAliasResourceModel
+func (d *aliasDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *aliasResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -65,7 +67,7 @@ func (d *FirewallAliasDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertFirewallAliasStructToSchema(resourceStruct)
+	resourceModel, err := convertAliasStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read firewall alias, got error: %s", err))

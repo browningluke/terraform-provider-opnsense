@@ -1,12 +1,12 @@
-package service
+package firewall
 
 import (
 	"context"
 	"regexp"
-	"terraform-provider-opnsense/internal/tools"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -33,8 +33,8 @@ var ipOrCidrValidator = stringvalidator.RegexMatches(
 	"must be a valid IPv4 or IPv6 address or CIDR (e.g. 192.168.0.1, 192.168.0.0/24, 2001:db8::1, 2001:db8::/64)",
 )
 
-// FirewallNATOneToOneResourceModel describes the resource data model.
-type FirewallNATOneToOneResourceModel struct {
+// natOneToOneResourceModel describes the resource data model.
+type natOneToOneResourceModel struct {
 	Enabled       types.Bool                `tfsdk:"enabled"`
 	Log           types.Bool                `tfsdk:"log"`
 	Sequence      types.Int64               `tfsdk:"sequence"`
@@ -49,7 +49,7 @@ type FirewallNATOneToOneResourceModel struct {
 	Id            types.String              `tfsdk:"id"`
 }
 
-func FirewallNATOneToOneResourceSchema() schema.Schema {
+func natOneToOneResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "1:1 NAT maps a public IP or subnet to an internal private IP or subnet. All traffic to the public address is forwarded to the internal host or network. Unlike port forwarding, it exposes the full internal system, useful for servers behind a firewall. BINAT rules enable bidirectional translation for consistent incoming and outgoing connections.",
 
@@ -172,7 +172,7 @@ func FirewallNATOneToOneResourceSchema() schema.Schema {
 	}
 }
 
-func FirewallNATOneToOneDataSourceSchema() dschema.Schema {
+func natOneToOneDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "1:1 NAT maps a public IP or subnet to an internal private IP or subnet. All traffic to the public address is forwarded to the internal host or network. Unlike port forwarding, it exposes the full internal system, useful for servers behind a firewall. BINAT rules enable bidirectional translation for consistent incoming and outgoing connections.",
 
@@ -248,7 +248,7 @@ func FirewallNATOneToOneDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertFirewallNATOneToOneSchemaToStruct(d *FirewallNATOneToOneResourceModel) (*firewall.NatOneToOne, error) {
+func convertNATOneToOneSchemaToStruct(d *natOneToOneResourceModel) (*firewall.NatOneToOne, error) {
 
 	// Parse 'Categories'
 	var categoriesList []string
@@ -277,7 +277,7 @@ func convertFirewallNATOneToOneSchemaToStruct(d *FirewallNATOneToOneResourceMode
 	}, nil
 }
 
-func convertFirewallNATOneToOneStructToSchema(d *firewall.NatOneToOne) (*FirewallNATOneToOneResourceModel, error) {
+func convertNATOneToOneStructToSchema(d *firewall.NatOneToOne) (*natOneToOneResourceModel, error) {
 
 	// map API "" → Terraform "default"
 	natReflection := d.NatReflection.String()
@@ -285,7 +285,7 @@ func convertFirewallNATOneToOneStructToSchema(d *firewall.NatOneToOne) (*Firewal
 		natReflection = "default"
 	}
 
-	model := &FirewallNATOneToOneResourceModel{
+	model := &natOneToOneResourceModel{
 		Enabled:   types.BoolValue(tools.StringToBool(d.Enabled)),
 		Log:       types.BoolValue(tools.StringToBool(d.Log)),
 		Sequence:  tools.StringToInt64Null(d.Sequence),

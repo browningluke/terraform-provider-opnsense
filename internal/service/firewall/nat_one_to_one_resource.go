@@ -1,9 +1,10 @@
-package service
+package firewall
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &FirewallCategoryResource{}
-var _ resource.ResourceWithImportState = &FirewallCategoryResource{}
+var _ resource.Resource = &natOneToOneResource{}
+var _ resource.ResourceWithConfigure = &natOneToOneResource{}
+var _ resource.ResourceWithImportState = &natOneToOneResource{}
 
-func NewFirewallCategoryResource() resource.Resource {
-	return &FirewallCategoryResource{}
+func newNATOneToOneResource() resource.Resource {
+	return &natOneToOneResource{}
 }
 
-// FirewallCategoryResource defines the resource implementation.
-type FirewallCategoryResource struct {
+// natOneToOneResource defines the resource implementation.
+type natOneToOneResource struct {
 	client opnsense.Client
 }
 
-func (r *FirewallCategoryResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_firewall_category"
+func (r *natOneToOneResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_firewall_nat_one_to_one"
 }
 
-func (r *FirewallCategoryResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = FirewallCategoryResourceSchema()
+func (r *natOneToOneResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = natOneToOneResourceSchema()
 }
 
-func (r *FirewallCategoryResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *natOneToOneResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *FirewallCategoryResource) Configure(ctx context.Context, req resource.C
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *FirewallCategoryResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *FirewallCategoryResourceModel
+func (r *natOneToOneResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *natOneToOneResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,15 +65,15 @@ func (r *FirewallCategoryResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Convert TF schema OPNsense struct
-	resourceStruct, err := convertFirewallCategorySchemaToStruct(data)
+	domainOverride, err := convertNATOneToOneSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to parse firwall category, got error: %s", err))
+			fmt.Sprintf("Unable to parse firwall nat 1:1, got error: %s", err))
 		return
 	}
 
-	// Add firewall category to unbound
-	id, err := r.client.Firewall().AddCategory(ctx, resourceStruct)
+	// Add firewall nat 1:1 to unbound
+	id, err := r.client.Firewall().AddNatOneToOne(ctx, domainOverride)
 	if err != nil {
 		if id != "" {
 			// Tag new resource with ID from OPNsense
@@ -82,7 +84,7 @@ func (r *FirewallCategoryResource) Create(ctx context.Context, req resource.Crea
 		}
 
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to create firewall category, got error: %s", err))
+			fmt.Sprintf("Unable to create firewall  1:1, got error: %s", err))
 		return
 	}
 
@@ -96,8 +98,8 @@ func (r *FirewallCategoryResource) Create(ctx context.Context, req resource.Crea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *FirewallCategoryResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *FirewallCategoryResourceModel
+func (r *natOneToOneResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *natOneToOneResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -106,26 +108,26 @@ func (r *FirewallCategoryResource) Read(ctx context.Context, req resource.ReadRe
 		return
 	}
 
-	// Get firewall category from OPNsense unbound API
-	resourceStruct, err := r.client.Firewall().GetCategory(ctx, data.Id.ValueString())
+	// Get firewall nat 1:1 from OPNsense unbound API
+	resourceStruct, err := r.client.Firewall().GetNatOneToOne(ctx, data.Id.ValueString())
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
-			tflog.Warn(ctx, fmt.Sprintf("firewall category not present in remote, removing from state"))
+			tflog.Warn(ctx, fmt.Sprintf("firewall nat 1:1 not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
 		}
 
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read firewall category, got error: %s", err))
+			fmt.Sprintf("Unable to read firewall nat 1:1, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertFirewallCategoryStructToSchema(resourceStruct)
+	resourceModel, err := convertNATOneToOneStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read firewall category, got error: %s", err))
+			fmt.Sprintf("Unable to read firewall nat 1:1, got error: %s", err))
 		return
 	}
 
@@ -136,8 +138,8 @@ func (r *FirewallCategoryResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, &resourceModel)...)
 }
 
-func (r *FirewallCategoryResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *FirewallCategoryResourceModel
+func (r *natOneToOneResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *natOneToOneResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -147,18 +149,18 @@ func (r *FirewallCategoryResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	// Convert TF schema OPNsense struct
-	resourceStruct, err := convertFirewallCategorySchemaToStruct(data)
+	domainOverride, err := convertNATOneToOneSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to parse firewall category, got error: %s", err))
+			fmt.Sprintf("Unable to parse firewall nat 1:1, got error: %s", err))
 		return
 	}
 
-	// Update firewall category in unbound
-	err = r.client.Firewall().UpdateCategory(ctx, data.Id.ValueString(), resourceStruct)
+	// Update firewall nat 1:1 in unbound
+	err = r.client.Firewall().UpdateNatOneToOne(ctx, data.Id.ValueString(), domainOverride)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to create firewall category, got error: %s", err))
+			fmt.Sprintf("Unable to create firewall nat 1:1, got error: %s", err))
 		return
 	}
 
@@ -166,8 +168,8 @@ func (r *FirewallCategoryResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *FirewallCategoryResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *FirewallCategoryResourceModel
+func (r *natOneToOneResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *natOneToOneResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -176,15 +178,15 @@ func (r *FirewallCategoryResource) Delete(ctx context.Context, req resource.Dele
 		return
 	}
 
-	err := r.client.Firewall().DeleteCategory(ctx, data.Id.ValueString())
+	err := r.client.Firewall().DeleteNatOneToOne(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to delete firewall category, got error: %s", err))
+			fmt.Sprintf("Unable to delete firewall nat 1:1, got error: %s", err))
 		return
 	}
 }
 
-func (r *FirewallCategoryResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *natOneToOneResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

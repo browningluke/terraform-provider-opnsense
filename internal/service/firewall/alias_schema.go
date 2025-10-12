@@ -1,9 +1,11 @@
-package service
+package firewall
 
 import (
 	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -17,11 +19,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// FirewallAliasResourceModel describes the resource data model.
-type FirewallAliasResourceModel struct {
+// aliasResourceModel describes the resource data model.
+type aliasResourceModel struct {
 	Enabled types.Bool   `tfsdk:"enabled"`
 	Name    types.String `tfsdk:"name"`
 	Type    types.String `tfsdk:"type"`
@@ -40,7 +41,7 @@ type FirewallAliasResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func FirewallAliasResourceSchema() schema.Schema {
+func aliasResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Aliases are named lists of networks, hosts or ports that can be used as one entity by selecting the alias name in the various supported sections of the firewall. These aliases are particularly useful to condense firewall rules and minimize changes.",
 
@@ -124,7 +125,7 @@ func FirewallAliasResourceSchema() schema.Schema {
 	}
 }
 
-func FirewallAliasDataSourceSchema() dschema.Schema {
+func aliasDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Aliases are named lists of networks, hosts or ports that can be used as one entity by selecting the alias name in the various supported sections of the firewall. These aliases are particularly useful to condense firewall rules and minimize changes.",
 
@@ -179,7 +180,7 @@ func FirewallAliasDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertFirewallAliasSchemaToStruct(d *FirewallAliasResourceModel) (*firewall.Alias, error) {
+func convertAliasSchemaToStruct(d *aliasResourceModel) (*firewall.Alias, error) {
 	// Parse 'Content'
 	var contentList []string
 	d.Content.ElementsAs(context.Background(), &contentList, false)
@@ -202,8 +203,8 @@ func convertFirewallAliasSchemaToStruct(d *FirewallAliasResourceModel) (*firewal
 	}, nil
 }
 
-func convertFirewallAliasStructToSchema(d *firewall.Alias) (*FirewallAliasResourceModel, error) {
-	model := &FirewallAliasResourceModel{
+func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) {
+	model := &aliasResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Name:        types.StringValue(d.Name),
 		Type:        types.StringValue(d.Type.String()),

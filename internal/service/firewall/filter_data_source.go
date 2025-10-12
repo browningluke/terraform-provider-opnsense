@@ -1,34 +1,36 @@
-package service
+package firewall
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &FirewallNATDataSource{}
+var _ datasource.DataSource = &filterDataSource{}
+var _ datasource.DataSourceWithConfigure = &filterDataSource{}
 
-func NewFirewallNATDataSource() datasource.DataSource {
-	return &FirewallNATDataSource{}
+func newFilterDataSource() datasource.DataSource {
+	return &filterDataSource{}
 }
 
-// FirewallNATDataSource defines the data source implementation.
-type FirewallNATDataSource struct {
+// filterDataSource defines the data source implementation.
+type filterDataSource struct {
 	client opnsense.Client
 }
 
-func (d *FirewallNATDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_firewall_nat"
+func (d *filterDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_firewall_filter"
 }
 
-func (d *FirewallNATDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = FirewallNATDataSourceSchema()
+func (d *filterDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = filterDataSourceSchema()
 }
 
-func (d *FirewallNATDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *filterDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *FirewallNATDataSource) Configure(ctx context.Context, req datasource.Co
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *FirewallNATDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *FirewallNATResourceModel
+func (d *filterDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *filterResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -56,19 +58,19 @@ func (d *FirewallNATDataSource) Read(ctx context.Context, req datasource.ReadReq
 		return
 	}
 
-	// Get firewall nat from OPNsense unbound API
-	resourceStruct, err := d.client.Firewall().GetNAT(ctx, data.Id.ValueString())
+	// Get firewall filter from OPNsense unbound API
+	resourceStruct, err := d.client.Firewall().GetFilter(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read firewall nat, got error: %s", err))
+			fmt.Sprintf("Unable to read firewall filter, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertFirewallNATStructToSchema(resourceStruct)
+	resourceModel, err := convertFilterStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read firewall nat, got error: %s", err))
+			fmt.Sprintf("Unable to read firewall filter, got error: %s", err))
 		return
 	}
 

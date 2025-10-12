@@ -1,16 +1,17 @@
-package service
+package firewall
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccFirewallNatOneToOneResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
@@ -55,8 +56,8 @@ func TestAccFirewallNatOneToOneResource(t *testing.T) {
 
 func TestAccFirewallNatOneToOneBinatResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{

@@ -1,19 +1,20 @@
-package service
+package firewall_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
 func TestAccFirewallAliasResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirewallAliasResourceConfig("testalias", "Test alias description", "host", "192.168.1.100"),
+				Config: testAccAliasResourceConfig("testalias", "Test alias description", "host", "192.168.1.100"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "name", "testalias"),
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "Test alias description"),
@@ -29,7 +30,7 @@ func TestAccFirewallAliasResource(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccFirewallAliasResourceConfig("testaliasupdated", "Updated alias description", "host", "192.168.1.101"),
+				Config: testAccAliasResourceConfig("testaliasupdated", "Updated alias description", "host", "192.168.1.101"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "name", "testaliasupdated"),
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "Updated alias description"),
@@ -45,11 +46,11 @@ func TestAccFirewallAliasResource(t *testing.T) {
 
 func TestAccFirewallAliasResource_MultipleHosts(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirewallAliasResourceConfigMultiple("multihostalias", "Multiple hosts", "host"),
+				Config: testAccAliasResourceConfigMultiple("multihostalias", "Multiple hosts", "host"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "name", "multihostalias"),
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "Multiple hosts"),
@@ -66,11 +67,11 @@ func TestAccFirewallAliasResource_MultipleHosts(t *testing.T) {
 
 func TestAccFirewallAliasResource_Network(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirewallAliasResourceConfig("networkalias", "Network alias", "network", "192.168.1.0/24"),
+				Config: testAccAliasResourceConfig("networkalias", "Network alias", "network", "192.168.1.0/24"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "name", "networkalias"),
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "Network alias"),
@@ -85,11 +86,11 @@ func TestAccFirewallAliasResource_Network(t *testing.T) {
 
 func TestAccFirewallAliasResource_Port(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccFirewallAliasResourceConfig("portalias", "Port alias", "port", "80"),
+				Config: testAccAliasResourceConfig("portalias", "Port alias", "port", "80"),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "name", "portalias"),
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "Port alias"),
@@ -102,7 +103,7 @@ func TestAccFirewallAliasResource_Port(t *testing.T) {
 	})
 }
 
-func testAccFirewallAliasResourceConfig(name, description, aliasType, content string) string {
+func testAccAliasResourceConfig(name, description, aliasType, content string) string {
 	return fmt.Sprintf(`
 resource "opnsense_firewall_alias" "test" {
   name        = %[1]q
@@ -113,7 +114,7 @@ resource "opnsense_firewall_alias" "test" {
 `, name, description, aliasType, content)
 }
 
-func testAccFirewallAliasResourceConfigMultiple(name, description, aliasType string) string {
+func testAccAliasResourceConfigMultiple(name, description, aliasType string) string {
 	return fmt.Sprintf(`
 resource "opnsense_firewall_alias" "test" {
   name        = %[1]q

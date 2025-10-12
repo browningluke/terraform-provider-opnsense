@@ -1,8 +1,11 @@
-package service
+package firewall
 
 import (
+	"regexp"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,8 +18,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"regexp"
-	"terraform-provider-opnsense/internal/tools"
 )
 
 type firewallTarget struct {
@@ -24,8 +25,8 @@ type firewallTarget struct {
 	Port types.String `tfsdk:"port"`
 }
 
-// FirewallNATResourceModel describes the resource data model.
-type FirewallNATResourceModel struct {
+// natResourceModel describes the resource data model.
+type natResourceModel struct {
 	Enabled    types.Bool `tfsdk:"enabled"`
 	DisableNAT types.Bool `tfsdk:"disable_nat"`
 
@@ -45,7 +46,7 @@ type FirewallNATResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func FirewallNATResourceSchema() schema.Schema {
+func natResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Network Address Translation (abbreviated to NAT) is a way to separate external and internal networks (WANs and LANs), and to share an external IP between clients on the internal network.",
 
@@ -216,7 +217,7 @@ func FirewallNATResourceSchema() schema.Schema {
 	}
 }
 
-func FirewallNATDataSourceSchema() dschema.Schema {
+func natDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Network Address Translation (abbreviated to NAT) is a way to separate external and internal networks (WANs and LANs), and to share an external IP between clients on the internal network.",
 
@@ -308,7 +309,7 @@ func FirewallNATDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertFirewallNATSchemaToStruct(d *FirewallNATResourceModel) (*firewall.NAT, error) {
+func convertNATSchemaToStruct(d *natResourceModel) (*firewall.NAT, error) {
 	return &firewall.NAT{
 		Enabled:           tools.BoolToString(d.Enabled.ValueBool()),
 		DisableNAT:        tools.BoolToString(d.DisableNAT.ValueBool()),
@@ -329,8 +330,8 @@ func convertFirewallNATSchemaToStruct(d *FirewallNATResourceModel) (*firewall.NA
 	}, nil
 }
 
-func convertFirewallNATStructToSchema(d *firewall.NAT) (*FirewallNATResourceModel, error) {
-	return &FirewallNATResourceModel{
+func convertNATStructToSchema(d *firewall.NAT) (*natResourceModel, error) {
+	return &natResourceModel{
 		Enabled:    types.BoolValue(tools.StringToBool(d.Enabled)),
 		DisableNAT: types.BoolValue(tools.StringToBool(d.DisableNAT)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),

@@ -1,9 +1,12 @@
-package service
+package firewall
 
 import (
 	"context"
+	"regexp"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -18,8 +21,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"regexp"
-	"terraform-provider-opnsense/internal/tools"
 )
 
 type firewallLocation struct {
@@ -28,8 +29,8 @@ type firewallLocation struct {
 	Invert types.Bool   `tfsdk:"invert"`
 }
 
-// FirewallFilterResourceModel describes the resource data model.
-type FirewallFilterResourceModel struct {
+// filterResourceModel describes the resource data model.
+type filterResourceModel struct {
 	Enabled  types.Bool   `tfsdk:"enabled"`
 	Sequence types.Int64  `tfsdk:"sequence"`
 	Action   types.String `tfsdk:"action"`
@@ -52,7 +53,7 @@ type FirewallFilterResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func FirewallFilterResourceSchema() schema.Schema {
+func filterResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded",
 
@@ -221,7 +222,7 @@ func FirewallFilterResourceSchema() schema.Schema {
 	}
 }
 
-func FirewallFilterDataSourceSchema() dschema.Schema {
+func filterDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded",
 
@@ -320,7 +321,7 @@ func FirewallFilterDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertFirewallFilterSchemaToStruct(d *FirewallFilterResourceModel) (*firewall.Filter, error) {
+func convertFilterSchemaToStruct(d *filterResourceModel) (*firewall.Filter, error) {
 	// Parse 'Interface'
 	var interfaceList []string
 	d.Interface.ElementsAs(context.Background(), &interfaceList, false)
@@ -346,8 +347,8 @@ func convertFirewallFilterSchemaToStruct(d *FirewallFilterResourceModel) (*firew
 	}, nil
 }
 
-func convertFirewallFilterStructToSchema(d *firewall.Filter) (*FirewallFilterResourceModel, error) {
-	model := &FirewallFilterResourceModel{
+func convertFilterStructToSchema(d *firewall.Filter) (*filterResourceModel, error) {
+	model := &filterResourceModel{
 		Enabled:    types.BoolValue(tools.StringToBool(d.Enabled)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),
 		Action:     types.StringValue(d.Action.String()),

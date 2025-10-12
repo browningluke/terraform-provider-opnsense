@@ -1,9 +1,10 @@
-package service
+package firewall
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &FirewallAliasResource{}
-var _ resource.ResourceWithImportState = &FirewallAliasResource{}
+var _ resource.Resource = &aliasResource{}
+var _ resource.ResourceWithConfigure = &aliasResource{}
+var _ resource.ResourceWithImportState = &aliasResource{}
 
-func NewFirewallAliasResource() resource.Resource {
-	return &FirewallAliasResource{}
+func newAliasResource() resource.Resource {
+	return &aliasResource{}
 }
 
-// FirewallAliasResource defines the resource implementation.
-type FirewallAliasResource struct {
+// aliasResource defines the resource implementation.
+type aliasResource struct {
 	client opnsense.Client
 }
 
-func (r *FirewallAliasResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *aliasResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_firewall_alias"
 }
 
-func (r *FirewallAliasResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = FirewallAliasResourceSchema()
+func (r *aliasResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = aliasResourceSchema()
 }
 
-func (r *FirewallAliasResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *aliasResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *FirewallAliasResource) Configure(ctx context.Context, req resource.Conf
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *FirewallAliasResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *FirewallAliasResourceModel
+func (r *aliasResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *aliasResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *FirewallAliasResource) Create(ctx context.Context, req resource.CreateR
 	}
 
 	// Convert TF schema OPNsense struct
-	resourceStruct, err := convertFirewallAliasSchemaToStruct(data)
+	resourceStruct, err := convertAliasSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse firwall alias, got error: %s", err))
@@ -96,8 +98,8 @@ func (r *FirewallAliasResource) Create(ctx context.Context, req resource.CreateR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *FirewallAliasResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *FirewallAliasResourceModel
+func (r *aliasResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *aliasResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -122,7 +124,7 @@ func (r *FirewallAliasResource) Read(ctx context.Context, req resource.ReadReque
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertFirewallAliasStructToSchema(resourceStruct)
+	resourceModel, err := convertAliasStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read firewall alias, got error: %s", err))
@@ -136,8 +138,8 @@ func (r *FirewallAliasResource) Read(ctx context.Context, req resource.ReadReque
 	resp.Diagnostics.Append(resp.State.Set(ctx, &resourceModel)...)
 }
 
-func (r *FirewallAliasResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *FirewallAliasResourceModel
+func (r *aliasResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *aliasResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -147,7 +149,7 @@ func (r *FirewallAliasResource) Update(ctx context.Context, req resource.UpdateR
 	}
 
 	// Convert TF schema OPNsense struct
-	resourceStruct, err := convertFirewallAliasSchemaToStruct(data)
+	resourceStruct, err := convertAliasSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse firewall alias, got error: %s", err))
@@ -166,8 +168,8 @@ func (r *FirewallAliasResource) Update(ctx context.Context, req resource.UpdateR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *FirewallAliasResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *FirewallAliasResourceModel
+func (r *aliasResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *aliasResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -185,6 +187,6 @@ func (r *FirewallAliasResource) Delete(ctx context.Context, req resource.DeleteR
 	}
 }
 
-func (r *FirewallAliasResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *aliasResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

@@ -1,7 +1,8 @@
-package service
+package firewall
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -9,11 +10,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// FirewallCategoryResourceModel describes the resource data model.
-type FirewallCategoryResourceModel struct {
+// categoryResourceModel describes the resource data model.
+type categoryResourceModel struct {
 	Automatic types.Bool   `tfsdk:"auto"`
 	Name      types.String `tfsdk:"name"`
 	Color     types.String `tfsdk:"color"`
@@ -21,7 +21,7 @@ type FirewallCategoryResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func FirewallCategoryResourceSchema() schema.Schema {
+func categoryResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "To ease maintenance of larger rulesets, OPNsense includes categories for the firewall. Each rule can contain one or more categories.",
 
@@ -53,7 +53,7 @@ func FirewallCategoryResourceSchema() schema.Schema {
 	}
 }
 
-func FirewallCategoryDataSourceSchema() dschema.Schema {
+func categoryDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "To ease maintenance of larger rulesets, OPNsense includes categories for the firewall. Each rule can contain one or more categories.",
 
@@ -78,7 +78,7 @@ func FirewallCategoryDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertFirewallCategorySchemaToStruct(d *FirewallCategoryResourceModel) (*firewall.Category, error) {
+func convertCategorySchemaToStruct(d *categoryResourceModel) (*firewall.Category, error) {
 	return &firewall.Category{
 		Automatic: tools.BoolToString(d.Automatic.ValueBool()),
 		Name:      d.Name.ValueString(),
@@ -86,8 +86,8 @@ func convertFirewallCategorySchemaToStruct(d *FirewallCategoryResourceModel) (*f
 	}, nil
 }
 
-func convertFirewallCategoryStructToSchema(d *firewall.Category) (*FirewallCategoryResourceModel, error) {
-	return &FirewallCategoryResourceModel{
+func convertCategoryStructToSchema(d *firewall.Category) (*categoryResourceModel, error) {
+	return &categoryResourceModel{
 		Automatic: types.BoolValue(tools.StringToBool(d.Automatic)),
 		Name:      types.StringValue(d.Name),
 		Color:     types.StringValue(d.Color),

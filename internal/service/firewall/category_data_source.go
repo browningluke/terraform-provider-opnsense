@@ -1,34 +1,36 @@
-package service
+package firewall
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &FirewallCategoryDataSource{}
+var _ datasource.DataSource = &categoryDataSource{}
+var _ datasource.DataSourceWithConfigure = &categoryDataSource{}
 
-func NewFirewallCategoryDataSource() datasource.DataSource {
-	return &FirewallCategoryDataSource{}
+func newCategoryDataSource() datasource.DataSource {
+	return &categoryDataSource{}
 }
 
-// FirewallCategoryDataSource defines the data source implementation.
-type FirewallCategoryDataSource struct {
+// categoryDataSource defines the data source implementation.
+type categoryDataSource struct {
 	client opnsense.Client
 }
 
-func (d *FirewallCategoryDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *categoryDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_firewall_category"
 }
 
-func (d *FirewallCategoryDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = FirewallCategoryDataSourceSchema()
+func (d *categoryDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = categoryDataSourceSchema()
 }
 
-func (d *FirewallCategoryDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *categoryDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *FirewallCategoryDataSource) Configure(ctx context.Context, req datasour
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *FirewallCategoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *FirewallCategoryResourceModel
+func (d *categoryDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *categoryResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -65,7 +67,7 @@ func (d *FirewallCategoryDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertFirewallCategoryStructToSchema(resourceStruct)
+	resourceModel, err := convertCategoryStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read firewall category, got error: %s", err))
