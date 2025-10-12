@@ -1,28 +1,25 @@
-package provider
+package provider_test
 
 import (
+	"context"
+	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-	"opnsense": providerserver.NewProtocol6WithError(New("test")()),
-}
-
 func TestProvider(t *testing.T) {
-	provider := New("test")()
-	if provider == nil {
+	opnsense, err := provider.NewProvider(context.Background())
+	if opnsense == nil || err != nil {
 		t.Fatal("provider.New() returned nil")
 	}
 }
 
 func TestProvider_Configure(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccProviderConfig,
