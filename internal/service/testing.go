@@ -71,6 +71,7 @@ func (p *testOPNsenseProvider) Resources(ctx context.Context) []func() resource.
 		NewRouteResource,
 		NewUnboundHostOverrideResource,
 		NewInterfacesVlanResource,
+		NewInterfacesVipResource,
 		NewIpsecPskResource,
 		NewIpsecConnectionResource,
 		NewIpsecVtiResource,
