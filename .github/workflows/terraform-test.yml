@@ -1,11 +1,31 @@
 name: Run terraform tests
+
 on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - 'examples/**'
+      - 'scripts/**'
+      - 'templates/**'
+      - 'README.md'
+      - '.github/**'
+
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - 'examples/**'
+      - 'scripts/**'
+      - 'templates/**'
+      - 'README.md'
+      - '.github/**'
+
+permissions:
+  contents: read
+
 env:
   OPNSENSE_VERSION: "25.7"
   OPNSENSE_URL: "https://files.bsd.ac/opnsense-qemu/opnsense-25.7.qcow2"
@@ -13,21 +33,22 @@ env:
   OPNSENSE_SSH_PORT: 8022
   OPNSENSE_WEB_PORT: 8443
   TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
       - name: Build provider
         run: |
           go build -o terraform-provider-opnsense
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: terraform-provider-opnsense
           path: terraform-provider-opnsense
@@ -40,7 +61,7 @@ jobs:
           mkdir -p opnsense-images
       - name: Download OPNsense image
         run: |
-          curl -L $OPNSENSE_URL -o opnsense-images/opnsense.qcow2
+          curl -L "$OPNSENSE_URL" -o opnsense-images/opnsense.qcow2
       - name: Verify OPNsense image
         run: |
           echo "$OPNSENSE_SHA1  opnsense-images/opnsense.qcow2" | sha1sum -c -
@@ -52,16 +73,16 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    needs: 
+    needs:
       - build
       - opnsense-image
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
       - name: Install terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
       - name: Download OPNsense image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
         with:
           name: opnsense-image
       - name: Move OPNsense image
@@ -97,20 +118,22 @@ jobs:
           -chardev socket,path=/tmp/qemu-virtserialport.sock,server=on,wait=off,id=qvsp0 \
           -device virtserialport,chardev=qvsp0,name=org.qemu.guest_agent.0 \
           -nographic &
-          QEMU_PID=$!
-          echo "qemu-pid=${QEMU_PID}" >> $GITHUB_OUTPUT
+          QEMU_PID="$!"
+          echo "qemu-pid=${QEMU_PID}" >> "$GITHUB_OUTPUT"
           sleep 180 # Wait for the VM to boot
           [ -d "/proc/${QEMU_PID}" ] || (echo "QEMU process not found" && exit 1)
       - name: Create API key
         id: apikey
         run: |
-          python3 scripts/create-apikey.py 2> $GITHUB_OUTPUT
+          python3 scripts/create-apikey.py 2> "$GITHUB_OUTPUT"
       - name: Setup env vars for tests
         run: |
-          echo "OPNSENSE_API_KEY=${{ steps.apikey.outputs.key }}" >> $GITHUB_ENV
-          echo "OPNSENSE_API_SECRET=${{ steps.apikey.outputs.secret }}" >> $GITHUB_ENV
-          echo "OPNSENSE_URI=https://localhost:${{ env.OPNSENSE_WEB_PORT }}" >> $GITHUB_ENV
-          echo "OPNSENSE_ALLOW_INSECURE=true" >> $GITHUB_ENV
+          {
+            echo "OPNSENSE_API_KEY=${{ steps.apikey.outputs.key }}";
+            echo "OPNSENSE_API_SECRET=${{ steps.apikey.outputs.secret }}";
+            echo "OPNSENSE_URI=https://localhost:${{ env.OPNSENSE_WEB_PORT }}";
+            echo "OPNSENSE_ALLOW_INSECURE=true";
+          } >> "$GITHUB_ENV"
       - name: Run terraform tests
         run: |
           env TF_ACC=1 go test -v -p 1 ./...
