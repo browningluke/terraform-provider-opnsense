@@ -104,7 +104,7 @@ resource "opnsense_firewall_filter" "example_three" {
 - `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `enabled` (Boolean) Enable this firewall filter rule. Defaults to `true`.
 - `gateway` (String) Leave as `""` to use the system routing table. Or choose a gateway to utilize policy based routing. Defaults to `""`.
-- `ip_protocol` (String) Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`. Defaults to `inet`.
+- `ip_protocol` (String) Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`, `inet46`. Defaults to `inet`.
 - `log` (Boolean) Log packets that are handled by this rule. Defaults to `false`.
 - `quick` (Boolean) If a packet matches a rule specifying quick, then that rule is considered the last matching rule and the specified action is taken. When a rule does not have quick enabled, the last matching rule wins. Defaults to `true`.
 - `sequence` (Number) Specify the order of this filter rule. Defaults to `1`.

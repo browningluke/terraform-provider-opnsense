@@ -64,7 +64,7 @@ resource "opnsense_firewall_alias" "example_two" {
 - `description` (String) Optional description here for your reference (not parsed).
 - `enabled` (Boolean) Enable this firewall alias. Defaults to `true`.
 - `interface` (String) Choose on which interface this alias applies. Only applies (and must be set) when `type = "dynipv6host"`. Defaults to `""`.
-- `ip_protocol` (String) Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = "asn"`, `type = "geoip"`, or `type = "external"`. Defaults to `IPv4`.
+- `ip_protocol` (Set of String) Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = "asn"`, `type = "geoip"`, or `type = "external"`. Defaults to `["IPv4"]`.
 - `stats` (Boolean) Whether to maintain a set of counters for each table entry.
 - `update_freq` (Number) The frequency that the list will be refreshed, in days (e.g. for 30 hours, enter `1.25`). Only applies (and must be set) when `type = "urltable"`. Defaults to `-1`.
 
