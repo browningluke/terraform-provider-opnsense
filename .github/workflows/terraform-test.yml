@@ -4,9 +4,24 @@ on:
   push:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - 'examples/**'
+      - 'scripts/**'
+      - 'templates/**'
+      - 'README.md'
+      - '.github/**'
+
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - 'docs/**'
+      - 'examples/**'
+      - 'scripts/**'
+      - 'templates/**'
+      - 'README.md'
+      - '.github/**'
 
 permissions:
   contents: read
