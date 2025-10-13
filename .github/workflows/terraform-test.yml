@@ -8,6 +8,9 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 env:
   OPNSENSE_VERSION: "25.7"
   OPNSENSE_URL: "https://files.bsd.ac/opnsense-qemu/opnsense-25.7.qcow2"
