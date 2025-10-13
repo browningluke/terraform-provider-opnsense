@@ -23,7 +23,7 @@ Aliases are named lists of networks, hosts or ports that can be used as one enti
 - `description` (String) Optional description here for your reference (not parsed).
 - `enabled` (Boolean) Enable this firewall alias.
 - `interface` (String) Choose on which interface this alias applies. Only applies (and must be set) when `type = "dynipv6host"`.
-- `ip_protocol` (String) Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = "asn"`, `type = "geoip"`, or `type = "external"`.
+- `ip_protocol` (Set of String) Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = "asn"`, `type = "geoip"`, or `type = "external"`.
 - `name` (String) The name must start with a letter or single underscore, be less than 32 characters and only consist of alphanumeric characters or underscores. Aliases can be nested using this name.
 - `stats` (Boolean) Whether to maintain a set of counters for each table entry.
 - `type` (String) The type of alias.
