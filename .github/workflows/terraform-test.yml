@@ -61,7 +61,7 @@ jobs:
           mkdir -p opnsense-images
       - name: Download OPNsense image
         run: |
-          curl -L $OPNSENSE_URL -o opnsense-images/opnsense.qcow2
+          curl -L "$OPNSENSE_URL" -o opnsense-images/opnsense.qcow2
       - name: Verify OPNsense image
         run: |
           echo "$OPNSENSE_SHA1  opnsense-images/opnsense.qcow2" | sha1sum -c -
@@ -118,14 +118,14 @@ jobs:
           -chardev socket,path=/tmp/qemu-virtserialport.sock,server=on,wait=off,id=qvsp0 \
           -device virtserialport,chardev=qvsp0,name=org.qemu.guest_agent.0 \
           -nographic &
-          QEMU_PID=$!
-          echo "qemu-pid=${QEMU_PID}" >> $GITHUB_OUTPUT
+          QEMU_PID="$!"
+          echo "qemu-pid=${QEMU_PID}" >> "$GITHUB_OUTPUT"
           sleep 180 # Wait for the VM to boot
           [ -d "/proc/${QEMU_PID}" ] || (echo "QEMU process not found" && exit 1)
       - name: Create API key
         id: apikey
         run: |
-          python3 scripts/create-apikey.py 2> $GITHUB_OUTPUT
+          python3 scripts/create-apikey.py 2> "$GITHUB_OUTPUT"
       - name: Setup env vars for tests
         run: |
           {
@@ -133,7 +133,7 @@ jobs:
             echo "OPNSENSE_API_SECRET=${{ steps.apikey.outputs.secret }}";
             echo "OPNSENSE_URI=https://localhost:${{ env.OPNSENSE_WEB_PORT }}";
             echo "OPNSENSE_ALLOW_INSECURE=true";
-          } >> $GITHUB_ENV
+          } >> "$GITHUB_ENV"
       - name: Run terraform tests
         run: |
           env TF_ACC=1 go test -v -p 1 ./...
