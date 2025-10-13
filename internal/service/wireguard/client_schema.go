@@ -1,8 +1,10 @@
-package service
+package wireguard
 
 import (
 	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/wireguard"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,11 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// WireguardClientResourceModel describes the resource data model.
-type WireguardClientResourceModel struct {
+// clientResourceModel describes the resource data model.
+type clientResourceModel struct {
 	Enabled       types.Bool   `tfsdk:"enabled"`
 	Name          types.String `tfsdk:"name"`
 	PublicKey     types.String `tfsdk:"public_key"`
@@ -30,7 +31,7 @@ type WireguardClientResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func wireguardClientResourceSchema() schema.Schema {
+func clientResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Client resources can be used to setup Wireguard clients.",
 
@@ -93,7 +94,7 @@ func wireguardClientResourceSchema() schema.Schema {
 	}
 }
 
-func WireguardClientDataSourceSchema() dschema.Schema {
+func clientDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Client resources can be used to setup Wireguard clients.",
 
@@ -140,7 +141,7 @@ func WireguardClientDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertWireguardClientSchemaToStruct(d *WireguardClientResourceModel) (*wireguard.Client, error) {
+func convertClientSchemaToStruct(d *clientResourceModel) (*wireguard.Client, error) {
 	// Parse 'TunnelAddress'
 	var tunnelAddressList []string
 	d.TunnelAddress.ElementsAs(context.Background(), &tunnelAddressList, false)
@@ -157,8 +158,8 @@ func convertWireguardClientSchemaToStruct(d *WireguardClientResourceModel) (*wir
 	}, nil
 }
 
-func convertWireguardClientStructToSchema(d *wireguard.Client) (*WireguardClientResourceModel, error) {
-	model := &WireguardClientResourceModel{
+func convertClientStructToSchema(d *wireguard.Client) (*clientResourceModel, error) {
+	model := &clientResourceModel{
 		Enabled:       types.BoolValue(tools.StringToBool(d.Enabled)),
 		Name:          types.StringValue(d.Name),
 		PublicKey:     types.StringValue(d.PublicKey),

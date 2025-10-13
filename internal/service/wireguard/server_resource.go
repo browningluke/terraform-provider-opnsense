@@ -1,9 +1,10 @@
-package service
+package wireguard
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &WireguardServerResource{}
-var _ resource.ResourceWithImportState = &WireguardServerResource{}
+var _ resource.Resource = &serverResource{}
+var _ resource.ResourceWithConfigure = &serverResource{}
+var _ resource.ResourceWithImportState = &serverResource{}
 
-func NewWireguardServerResource() resource.Resource {
-	return &WireguardServerResource{}
+func newServerResource() resource.Resource {
+	return &serverResource{}
 }
 
-// WireguardServerResource defines the resource implementation.
-type WireguardServerResource struct {
+// serverResource defines the resource implementation.
+type serverResource struct {
 	client opnsense.Client
 }
 
-func (r *WireguardServerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *serverResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_wireguard_server"
 }
 
-func (r *WireguardServerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = wireguardServerResourceSchema()
+func (r *serverResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = serverResourceSchema()
 }
 
-func (r *WireguardServerResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *serverResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *WireguardServerResource) Configure(ctx context.Context, req resource.Co
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *WireguardServerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *WireguardServerResourceModel
+func (r *serverResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *serverResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *WireguardServerResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Convert TF schema OPNsense struct
-	wgServer, err := convertWireguardServerSchemaToStruct(data)
+	wgServer, err := convertServerSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse wg server, got error: %s", err))
@@ -99,7 +101,7 @@ func (r *WireguardServerResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Convert OPNsense struct to TF schema
-	wgServerModel, err := convertWireguardServerStructToSchema(wgServerCreated)
+	wgServerModel, err := convertServerStructToSchema(wgServerCreated)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read wg server, got error: %s", err))
@@ -116,8 +118,8 @@ func (r *WireguardServerResource) Create(ctx context.Context, req resource.Creat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *WireguardServerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *WireguardServerResourceModel
+func (r *serverResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *serverResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -142,7 +144,7 @@ func (r *WireguardServerResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	// Convert OPNsense struct to TF schema
-	wgServerModel, err := convertWireguardServerStructToSchema(wgServer)
+	wgServerModel, err := convertServerStructToSchema(wgServer)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read wg server, got error: %s", err))
@@ -156,8 +158,8 @@ func (r *WireguardServerResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &wgServerModel)...)
 }
 
-func (r *WireguardServerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *WireguardServerResourceModel
+func (r *serverResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *serverResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -167,7 +169,7 @@ func (r *WireguardServerResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Convert TF schema OPNsense struct
-	wgServer, err := convertWireguardServerSchemaToStruct(data)
+	wgServer, err := convertServerSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse wg server, got error: %s", err))
@@ -186,8 +188,8 @@ func (r *WireguardServerResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *WireguardServerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *WireguardServerResourceModel
+func (r *serverResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *serverResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -205,6 +207,6 @@ func (r *WireguardServerResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *WireguardServerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *serverResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

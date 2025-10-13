@@ -1,34 +1,36 @@
-package service
+package wireguard
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &WireguardServerDataSource{}
+var _ datasource.DataSource = &clientDataSource{}
+var _ datasource.DataSourceWithConfigure = &clientDataSource{}
 
-func NewWireguardServerDataSource() datasource.DataSource {
-	return &WireguardServerDataSource{}
+func newClientDataSource() datasource.DataSource {
+	return &clientDataSource{}
 }
 
-// WireguardServerDataSource defines the data source implementation.
-type WireguardServerDataSource struct {
+// clientDataSource defines the data source implementation.
+type clientDataSource struct {
 	client opnsense.Client
 }
 
-func (d *WireguardServerDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_wireguard_server"
+func (d *clientDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_wireguard_client"
 }
 
-func (d *WireguardServerDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = WireguardServerDataSourceSchema()
+func (d *clientDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = clientDataSourceSchema()
 }
 
-func (d *WireguardServerDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *clientDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *WireguardServerDataSource) Configure(ctx context.Context, req datasourc
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *WireguardServerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *WireguardServerResourceModel
+func (d *clientDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *clientResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *WireguardServerDataSource) Read(ctx context.Context, req datasource.Rea
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Wireguard().GetServer(ctx, data.Id.ValueString())
+	resource, err := d.client.Wireguard().GetClient(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read wg server, got error: %s", err))
+			fmt.Sprintf("Unable to read wg client, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertWireguardServerStructToSchema(resource)
+	resourceModel, err := convertClientStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read wg server, got error: %s", err))
+			fmt.Sprintf("Unable to read wg client, got error: %s", err))
 		return
 	}
 

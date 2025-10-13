@@ -1,8 +1,10 @@
-package service
+package wireguard
 
 import (
 	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/wireguard"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -15,11 +17,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// WireguardServerResourceModel describes the resource data model.
-type WireguardServerResourceModel struct {
+// serverResourceModel describes the resource data model.
+type serverResourceModel struct {
 	Enabled       types.Bool   `tfsdk:"enabled"`
 	Name          types.String `tfsdk:"name"`
 	PublicKey     types.String `tfsdk:"public_key"`
@@ -36,7 +37,7 @@ type WireguardServerResourceModel struct {
 	Instance types.String `tfsdk:"instance"`
 }
 
-func wireguardServerResourceSchema() schema.Schema {
+func serverResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Server resources can be used to setup Wireguard servers.",
 
@@ -128,7 +129,7 @@ func wireguardServerResourceSchema() schema.Schema {
 	}
 }
 
-func WireguardServerDataSourceSchema() dschema.Schema {
+func serverDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Server resources can be used to setup Wireguard servers.",
 
@@ -194,7 +195,7 @@ func WireguardServerDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertWireguardServerSchemaToStruct(d *WireguardServerResourceModel) (*wireguard.Server, error) {
+func convertServerSchemaToStruct(d *serverResourceModel) (*wireguard.Server, error) {
 	// Parse 'DNS'
 	var dnsList []string
 	d.DNS.ElementsAs(context.Background(), &dnsList, false)
@@ -223,8 +224,8 @@ func convertWireguardServerSchemaToStruct(d *WireguardServerResourceModel) (*wir
 	}, nil
 }
 
-func convertWireguardServerStructToSchema(d *wireguard.Server) (*WireguardServerResourceModel, error) {
-	model := &WireguardServerResourceModel{
+func convertServerStructToSchema(d *wireguard.Server) (*serverResourceModel, error) {
+	model := &serverResourceModel{
 		Enabled:       types.BoolValue(tools.StringToBool(d.Enabled)),
 		Name:          types.StringValue(d.Name),
 		PublicKey:     types.StringValue(d.PublicKey),
