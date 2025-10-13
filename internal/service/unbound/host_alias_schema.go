@@ -1,19 +1,19 @@
-package service
+package unbound
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/unbound"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// UnboundHostAliasResourceModel describes the resource data model.
-type UnboundHostAliasResourceModel struct {
+// hostAliasResourceModel describes the resource data model.
+type hostAliasResourceModel struct {
 	Override    types.String `tfsdk:"override"`
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	Hostname    types.String `tfsdk:"hostname"`
@@ -23,7 +23,7 @@ type UnboundHostAliasResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func unboundHostAliasResourceSchema() schema.Schema {
+func hostAliasResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Host aliases can be used to create alternative names for a Host",
 
@@ -64,7 +64,7 @@ func unboundHostAliasResourceSchema() schema.Schema {
 	}
 }
 
-func UnboundHostAliasDataSourceSchema() dschema.Schema {
+func hostAliasDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Host aliases can be used to create alternative names for a Host.",
 
@@ -97,7 +97,7 @@ func UnboundHostAliasDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*unbound.HostAlias, error) {
+func convertHostAliasSchemaToStruct(d *hostAliasResourceModel) (*unbound.HostAlias, error) {
 	return &unbound.HostAlias{
 		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Host:        api.SelectedMap(d.Override.ValueString()),
@@ -107,8 +107,8 @@ func convertUnboundHostAliasSchemaToStruct(d *UnboundHostAliasResourceModel) (*u
 	}, nil
 }
 
-func convertUnboundHostAliasStructToSchema(d *unbound.HostAlias) (*UnboundHostAliasResourceModel, error) {
-	return &UnboundHostAliasResourceModel{
+func convertHostAliasStructToSchema(d *unbound.HostAlias) (*hostAliasResourceModel, error) {
+	return &hostAliasResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Hostname:    types.StringValue(d.Hostname),
 		Domain:      types.StringValue(d.Domain),

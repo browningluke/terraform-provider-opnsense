@@ -1,34 +1,36 @@
-package service
+package unbound
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &UnboundHostOverrideDataSource{}
+var _ datasource.DataSource = &forwardDataSource{}
+var _ datasource.DataSourceWithConfigure = &forwardDataSource{}
 
-func NewUnboundHostOverrideDataSource() datasource.DataSource {
-	return &UnboundHostOverrideDataSource{}
+func newForwardDataSource() datasource.DataSource {
+	return &forwardDataSource{}
 }
 
-// UnboundHostOverrideDataSource defines the data source implementation.
-type UnboundHostOverrideDataSource struct {
+// forwardDataSource defines the data source implementation.
+type forwardDataSource struct {
 	client opnsense.Client
 }
 
-func (d *UnboundHostOverrideDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_unbound_host_override"
+func (d *forwardDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_unbound_forward"
 }
 
-func (d *UnboundHostOverrideDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = UnboundHostOverrideDataSourceSchema()
+func (d *forwardDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = forwardDataSourceSchema()
 }
 
-func (d *UnboundHostOverrideDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *forwardDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *UnboundHostOverrideDataSource) Configure(ctx context.Context, req datas
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *UnboundHostOverrideDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *UnboundHostOverrideResourceModel
+func (d *forwardDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *forwardResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *UnboundHostOverrideDataSource) Read(ctx context.Context, req datasource
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Unbound().GetHostOverride(ctx, data.Id.ValueString())
+	resource, err := d.client.Unbound().GetForward(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read host_override, got error: %s", err))
+			fmt.Sprintf("Unable to read forward, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertUnboundHostOverrideStructToSchema(resource)
+	resourceModel, err := convertForwardStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read host_override, got error: %s", err))
+			fmt.Sprintf("Unable to read forward, got error: %s", err))
 		return
 	}
 

@@ -1,34 +1,36 @@
-package service
+package unbound
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &UnboundForwardDataSource{}
+var _ datasource.DataSource = &hostAliasDataSource{}
+var _ datasource.DataSourceWithConfigure = &hostAliasDataSource{}
 
-func NewUnboundForwardDataSource() datasource.DataSource {
-	return &UnboundForwardDataSource{}
+func newHostAliasDataSource() datasource.DataSource {
+	return &hostAliasDataSource{}
 }
 
-// UnboundForwardDataSource defines the data source implementation.
-type UnboundForwardDataSource struct {
+// hostAliasDataSource defines the data source implementation.
+type hostAliasDataSource struct {
 	client opnsense.Client
 }
 
-func (d *UnboundForwardDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_unbound_forward"
+func (d *hostAliasDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_unbound_host_alias"
 }
 
-func (d *UnboundForwardDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = UnboundForwardDataSourceSchema()
+func (d *hostAliasDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = hostAliasDataSourceSchema()
 }
 
-func (d *UnboundForwardDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *hostAliasDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *UnboundForwardDataSource) Configure(ctx context.Context, req datasource
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *UnboundForwardDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *UnboundForwardResourceModel
+func (d *hostAliasDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *hostAliasResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *UnboundForwardDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Unbound().GetForward(ctx, data.Id.ValueString())
+	resource, err := d.client.Unbound().GetHostAlias(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read forward, got error: %s", err))
+			fmt.Sprintf("Unable to read host_alias, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertUnboundForwardStructToSchema(resource)
+	resourceModel, err := convertHostAliasStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read forward, got error: %s", err))
+			fmt.Sprintf("Unable to read host_alias, got error: %s", err))
 		return
 	}
 

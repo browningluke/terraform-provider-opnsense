@@ -1,9 +1,10 @@
-package service
+package unbound
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &UnboundForwardResource{}
-var _ resource.ResourceWithImportState = &UnboundForwardResource{}
+var _ resource.Resource = &forwardResource{}
+var _ resource.ResourceWithConfigure = &forwardResource{}
+var _ resource.ResourceWithImportState = &forwardResource{}
 
-func NewUnboundForwardResource() resource.Resource {
-	return &UnboundForwardResource{}
+func newForwardResource() resource.Resource {
+	return &forwardResource{}
 }
 
-// UnboundForwardResource defines the resource implementation.
-type UnboundForwardResource struct {
+// forwardResource defines the resource implementation.
+type forwardResource struct {
 	client opnsense.Client
 }
 
-func (r *UnboundForwardResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *forwardResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_unbound_forward"
 }
 
-func (r *UnboundForwardResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = unboundForwardResourceSchema()
+func (r *forwardResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = forwardResourceSchema()
 }
 
-func (r *UnboundForwardResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *forwardResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *UnboundForwardResource) Configure(ctx context.Context, req resource.Con
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *UnboundForwardResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *UnboundForwardResourceModel
+func (r *forwardResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *forwardResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *UnboundForwardResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Convert TF schema OPNsense struct
-	forward, err := convertUnboundForwardSchemaToStruct(data)
+	forward, err := convertForwardSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse forward, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *UnboundForwardResource) Create(ctx context.Context, req resource.Create
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundForwardResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *UnboundForwardResourceModel
+func (r *forwardResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *forwardResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *UnboundForwardResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Convert OPNsense struct to TF schema
-	forwardModel, err := convertUnboundForwardStructToSchema(forward)
+	forwardModel, err := convertForwardStructToSchema(forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read forward, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *UnboundForwardResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &forwardModel)...)
 }
 
-func (r *UnboundForwardResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *UnboundForwardResourceModel
+func (r *forwardResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *forwardResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *UnboundForwardResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Convert TF schema OPNsense struct
-	forward, err := convertUnboundForwardSchemaToStruct(data)
+	forward, err := convertForwardSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse forward, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *UnboundForwardResource) Update(ctx context.Context, req resource.Update
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundForwardResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *UnboundForwardResourceModel
+func (r *forwardResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *forwardResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *UnboundForwardResource) Delete(ctx context.Context, req resource.Delete
 	}
 }
 
-func (r *UnboundForwardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *forwardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

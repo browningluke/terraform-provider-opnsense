@@ -1,9 +1,10 @@
-package service
+package unbound
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &UnboundHostAliasResource{}
-var _ resource.ResourceWithImportState = &UnboundHostAliasResource{}
+var _ resource.Resource = &hostAliasResource{}
+var _ resource.ResourceWithConfigure = &hostAliasResource{}
+var _ resource.ResourceWithImportState = &hostAliasResource{}
 
-func NewUnboundHostAliasResource() resource.Resource {
-	return &UnboundHostAliasResource{}
+func newHostAliasResource() resource.Resource {
+	return &hostAliasResource{}
 }
 
-// UnboundHostAliasResource defines the resource implementation.
-type UnboundHostAliasResource struct {
+// hostAliasResource defines the resource implementation.
+type hostAliasResource struct {
 	client opnsense.Client
 }
 
-func (r *UnboundHostAliasResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *hostAliasResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_unbound_host_alias"
 }
 
-func (r *UnboundHostAliasResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = unboundHostAliasResourceSchema()
+func (r *hostAliasResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = hostAliasResourceSchema()
 }
 
-func (r *UnboundHostAliasResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *hostAliasResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *UnboundHostAliasResource) Configure(ctx context.Context, req resource.C
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *UnboundHostAliasResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *UnboundHostAliasResourceModel
+func (r *hostAliasResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *hostAliasResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *UnboundHostAliasResource) Create(ctx context.Context, req resource.Crea
 	}
 
 	// Convert TF schema OPNsense struct
-	hostAlias, err := convertUnboundHostAliasSchemaToStruct(data)
+	hostAlias, err := convertHostAliasSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse host alias, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *UnboundHostAliasResource) Create(ctx context.Context, req resource.Crea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundHostAliasResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *UnboundHostAliasResourceModel
+func (r *hostAliasResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *hostAliasResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *UnboundHostAliasResource) Read(ctx context.Context, req resource.ReadRe
 	}
 
 	// Convert OPNsense struct to TF schema
-	aliasModel, err := convertUnboundHostAliasStructToSchema(alias)
+	aliasModel, err := convertHostAliasStructToSchema(alias)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse host alias, got error: %s", err))
@@ -129,8 +131,8 @@ func (r *UnboundHostAliasResource) Read(ctx context.Context, req resource.ReadRe
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundHostAliasResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *UnboundHostAliasResourceModel
+func (r *hostAliasResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *hostAliasResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -140,7 +142,7 @@ func (r *UnboundHostAliasResource) Update(ctx context.Context, req resource.Upda
 	}
 
 	// Convert TF schema OPNsense struct
-	aliasOverride, err := convertUnboundHostAliasSchemaToStruct(data)
+	aliasOverride, err := convertHostAliasSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse host alias, got error: %s", err))
@@ -159,8 +161,8 @@ func (r *UnboundHostAliasResource) Update(ctx context.Context, req resource.Upda
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundHostAliasResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *UnboundHostAliasResourceModel
+func (r *hostAliasResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *hostAliasResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -178,6 +180,6 @@ func (r *UnboundHostAliasResource) Delete(ctx context.Context, req resource.Dele
 	}
 }
 
-func (r *UnboundHostAliasResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *hostAliasResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

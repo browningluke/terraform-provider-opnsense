@@ -1,18 +1,18 @@
-package service
+package unbound
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/unbound"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// UnboundDomainOverrideResourceModel describes the resource data model.
-type UnboundDomainOverrideResourceModel struct {
+// domainOverrideResourceModel describes the resource data model.
+type domainOverrideResourceModel struct {
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	Domain      types.String `tfsdk:"domain"`
 	Server      types.String `tfsdk:"server"`
@@ -21,7 +21,7 @@ type UnboundDomainOverrideResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func unboundDomainOverrideResourceSchema() schema.Schema {
+func domainOverrideResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.",
 
@@ -55,7 +55,7 @@ func unboundDomainOverrideResourceSchema() schema.Schema {
 	}
 }
 
-func UnboundDomainOverrideDataSourceSchema() dschema.Schema {
+func domainOverrideDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.",
 
@@ -84,7 +84,7 @@ func UnboundDomainOverrideDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResourceModel) (*unbound.DomainOverride, error) {
+func convertDomainOverrideSchemaToStruct(d *domainOverrideResourceModel) (*unbound.DomainOverride, error) {
 	return &unbound.DomainOverride{
 		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Domain:      d.Domain.ValueString(),
@@ -93,8 +93,8 @@ func convertUnboundDomainOverrideSchemaToStruct(d *UnboundDomainOverrideResource
 	}, nil
 }
 
-func convertUnboundDomainOverrideStructToSchema(d *unbound.DomainOverride) (*UnboundDomainOverrideResourceModel, error) {
-	return &UnboundDomainOverrideResourceModel{
+func convertDomainOverrideStructToSchema(d *unbound.DomainOverride) (*domainOverrideResourceModel, error) {
+	return &domainOverrideResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Domain:      types.StringValue(d.Domain),
 		Server:      types.StringValue(d.Server),

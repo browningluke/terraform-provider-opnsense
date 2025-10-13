@@ -1,9 +1,10 @@
-package service
+package unbound
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &UnboundHostOverrideResource{}
-var _ resource.ResourceWithImportState = &UnboundHostOverrideResource{}
+var _ resource.Resource = &hostOverrideResource{}
+var _ resource.ResourceWithConfigure = &hostOverrideResource{}
+var _ resource.ResourceWithImportState = &hostOverrideResource{}
 
-func NewUnboundHostOverrideResource() resource.Resource {
-	return &UnboundHostOverrideResource{}
+func newHostOverrideResource() resource.Resource {
+	return &hostOverrideResource{}
 }
 
-// UnboundHostOverrideResource defines the resource implementation.
-type UnboundHostOverrideResource struct {
+// hostOverrideResource defines the resource implementation.
+type hostOverrideResource struct {
 	client opnsense.Client
 }
 
-func (r *UnboundHostOverrideResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *hostOverrideResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_unbound_host_override"
 }
 
-func (r *UnboundHostOverrideResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = unboundHostOverrideResourceSchema()
+func (r *hostOverrideResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = hostOverrideResourceSchema()
 }
 
-func (r *UnboundHostOverrideResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *hostOverrideResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *UnboundHostOverrideResource) Configure(ctx context.Context, req resourc
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *UnboundHostOverrideResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *UnboundHostOverrideResourceModel
+func (r *hostOverrideResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *hostOverrideResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *UnboundHostOverrideResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Convert TF schema OPNsense struct
-	hostOverride, err := convertUnboundHostOverrideSchemaToStruct(data)
+	hostOverride, err := convertHostOverrideSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse host override, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *UnboundHostOverrideResource) Create(ctx context.Context, req resource.C
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundHostOverrideResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *UnboundHostOverrideResourceModel
+func (r *hostOverrideResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *hostOverrideResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *UnboundHostOverrideResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	// Convert OPNsense struct to TF schema
-	overrideModel, err := convertUnboundHostOverrideStructToSchema(override)
+	overrideModel, err := convertHostOverrideStructToSchema(override)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read host override, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *UnboundHostOverrideResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &overrideModel)...)
 }
 
-func (r *UnboundHostOverrideResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *UnboundHostOverrideResourceModel
+func (r *hostOverrideResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *hostOverrideResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *UnboundHostOverrideResource) Update(ctx context.Context, req resource.U
 	}
 
 	// Convert TF schema OPNsense struct
-	hostOverride, err := convertUnboundHostOverrideSchemaToStruct(data)
+	hostOverride, err := convertHostOverrideSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse host override, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *UnboundHostOverrideResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *UnboundHostOverrideResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *UnboundHostOverrideResourceModel
+func (r *hostOverrideResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *hostOverrideResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *UnboundHostOverrideResource) Delete(ctx context.Context, req resource.D
 	}
 }
 
-func (r *UnboundHostOverrideResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *hostOverrideResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

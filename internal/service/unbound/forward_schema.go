@@ -1,7 +1,8 @@
-package service
+package unbound
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/unbound"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
@@ -10,11 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// UnboundForwardResourceModel describes the resource data model.
-type UnboundForwardResourceModel struct {
+// forwardResourceModel describes the resource data model.
+type forwardResourceModel struct {
 	Enabled    types.Bool   `tfsdk:"enabled"`
 	Domain     types.String `tfsdk:"domain"`
 	ServerIP   types.String `tfsdk:"server_ip"`
@@ -24,7 +24,7 @@ type UnboundForwardResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func unboundForwardResourceSchema() schema.Schema {
+func forwardResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Query Forwarding section allows for entering arbitrary nameservers to forward queries to. Can forward queries normally, or over TLS.",
 
@@ -66,7 +66,7 @@ func unboundForwardResourceSchema() schema.Schema {
 	}
 }
 
-func UnboundForwardDataSourceSchema() dschema.Schema {
+func forwardDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Query Forwarding section allows for entering arbitrary nameservers to forward queries to. Can forward queries normally, or over TLS.",
 
@@ -99,7 +99,7 @@ func UnboundForwardDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*unbound.Forward, error) {
+func convertForwardSchemaToStruct(d *forwardResourceModel) (*unbound.Forward, error) {
 	return &unbound.Forward{
 		Enabled:  tools.BoolToString(d.Enabled.ValueBool()),
 		Domain:   d.Domain.ValueString(),
@@ -109,8 +109,8 @@ func convertUnboundForwardSchemaToStruct(d *UnboundForwardResourceModel) (*unbou
 	}, nil
 }
 
-func convertUnboundForwardStructToSchema(d *unbound.Forward) (*UnboundForwardResourceModel, error) {
-	return &UnboundForwardResourceModel{
+func convertForwardStructToSchema(d *unbound.Forward) (*forwardResourceModel, error) {
+	return &forwardResourceModel{
 		Enabled:    types.BoolValue(tools.StringToBool(d.Enabled)),
 		Domain:     types.StringValue(d.Domain),
 		ServerIP:   types.StringValue(d.Server),

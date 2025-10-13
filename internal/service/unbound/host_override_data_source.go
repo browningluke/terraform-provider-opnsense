@@ -1,34 +1,36 @@
-package service
+package unbound
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &UnboundHostAliasDataSource{}
+var _ datasource.DataSource = &hostOverrideDataSource{}
+var _ datasource.DataSourceWithConfigure = &hostOverrideDataSource{}
 
-func NewUnboundHostAliasDataSource() datasource.DataSource {
-	return &UnboundHostAliasDataSource{}
+func newHostOverrideDataSource() datasource.DataSource {
+	return &hostOverrideDataSource{}
 }
 
-// UnboundHostAliasDataSource defines the data source implementation.
-type UnboundHostAliasDataSource struct {
+// hostOverrideDataSource defines the data source implementation.
+type hostOverrideDataSource struct {
 	client opnsense.Client
 }
 
-func (d *UnboundHostAliasDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_unbound_host_alias"
+func (d *hostOverrideDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_unbound_host_override"
 }
 
-func (d *UnboundHostAliasDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = UnboundHostAliasDataSourceSchema()
+func (d *hostOverrideDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = hostOverrideDataSourceSchema()
 }
 
-func (d *UnboundHostAliasDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *hostOverrideDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *UnboundHostAliasDataSource) Configure(ctx context.Context, req datasour
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *UnboundHostAliasDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *UnboundHostAliasResourceModel
+func (d *hostOverrideDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *hostOverrideResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *UnboundHostAliasDataSource) Read(ctx context.Context, req datasource.Re
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Unbound().GetHostAlias(ctx, data.Id.ValueString())
+	resource, err := d.client.Unbound().GetHostOverride(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read host_alias, got error: %s", err))
+			fmt.Sprintf("Unable to read host_override, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertUnboundHostAliasStructToSchema(resource)
+	resourceModel, err := convertHostOverrideStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read host_alias, got error: %s", err))
+			fmt.Sprintf("Unable to read host_override, got error: %s", err))
 		return
 	}
 

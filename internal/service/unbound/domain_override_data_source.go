@@ -1,34 +1,36 @@
-package service
+package unbound
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &UnboundDomainOverrideDataSource{}
+var _ datasource.DataSource = &domainOverrideDataSource{}
+var _ datasource.DataSourceWithConfigure = &domainOverrideDataSource{}
 
-func NewUnboundDomainOverrideDataSource() datasource.DataSource {
-	return &UnboundDomainOverrideDataSource{}
+func newDomainOverrideDataSource() datasource.DataSource {
+	return &domainOverrideDataSource{}
 }
 
-// UnboundDomainOverrideDataSource defines the data source implementation.
-type UnboundDomainOverrideDataSource struct {
+// domainOverrideDataSource defines the data source implementation.
+type domainOverrideDataSource struct {
 	client opnsense.Client
 }
 
-func (d *UnboundDomainOverrideDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *domainOverrideDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_unbound_domain_override"
 }
 
-func (d *UnboundDomainOverrideDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = UnboundDomainOverrideDataSourceSchema()
+func (d *domainOverrideDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = domainOverrideDataSourceSchema()
 }
 
-func (d *UnboundDomainOverrideDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *domainOverrideDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *UnboundDomainOverrideDataSource) Configure(ctx context.Context, req dat
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *UnboundDomainOverrideDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *UnboundDomainOverrideResourceModel
+func (d *domainOverrideDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *domainOverrideResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -65,7 +67,7 @@ func (d *UnboundDomainOverrideDataSource) Read(ctx context.Context, req datasour
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertUnboundDomainOverrideStructToSchema(resource)
+	resourceModel, err := convertDomainOverrideStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read domain_override, got error: %s", err))

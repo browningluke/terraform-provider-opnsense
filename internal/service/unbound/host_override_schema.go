@@ -1,8 +1,9 @@
-package service
+package unbound
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/unbound"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,11 +16,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// UnboundHostOverrideResourceModel describes the resource data model.
-type UnboundHostOverrideResourceModel struct {
+// hostOverrideResourceModel describes the resource data model.
+type hostOverrideResourceModel struct {
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	Hostname    types.String `tfsdk:"hostname"`
 	Domain      types.String `tfsdk:"domain"`
@@ -33,7 +33,7 @@ type UnboundHostOverrideResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func unboundHostOverrideResourceSchema() schema.Schema {
+func hostOverrideResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Host overrides can be used to change DNS results from client queries or to add custom DNS records.",
 
@@ -104,7 +104,7 @@ func unboundHostOverrideResourceSchema() schema.Schema {
 	}
 }
 
-func UnboundHostOverrideDataSourceSchema() dschema.Schema {
+func hostOverrideDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Host overrides can be used to change DNS results from client queries or to add custom DNS records.",
 
@@ -149,7 +149,7 @@ func UnboundHostOverrideDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceModel) (*unbound.HostOverride, error) {
+func convertHostOverrideSchemaToStruct(d *hostOverrideResourceModel) (*unbound.HostOverride, error) {
 	return &unbound.HostOverride{
 		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Hostname:    d.Hostname.ValueString(),
@@ -162,8 +162,8 @@ func convertUnboundHostOverrideSchemaToStruct(d *UnboundHostOverrideResourceMode
 	}, nil
 }
 
-func convertUnboundHostOverrideStructToSchema(d *unbound.HostOverride) (*UnboundHostOverrideResourceModel, error) {
-	return &UnboundHostOverrideResourceModel{
+func convertHostOverrideStructToSchema(d *unbound.HostOverride) (*hostOverrideResourceModel, error) {
+	return &hostOverrideResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Hostname:    types.StringValue(d.Hostname),
 		Domain:      types.StringValue(d.Domain),
