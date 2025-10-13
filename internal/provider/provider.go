@@ -4,9 +4,17 @@ import (
 	"context"
 	"os"
 	"strconv"
-	"terraform-provider-opnsense/internal/service"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/diagnostics"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/interfaces"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/ipsec"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/kea"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/quagga"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/routes"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/unbound"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/wireguard"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -18,10 +26,10 @@ import (
 )
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
-var _ provider.Provider = &OPNsenseProvider{}
+var _ provider.Provider = &opnsenseProvider{}
 
 // OPNsenseProvider defines the provider implementation.
-type OPNsenseProvider struct {
+type opnsenseProvider struct {
 	// version is set to the provider version on release, "dev" when the
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
@@ -39,12 +47,12 @@ type OPNsenseProviderModel struct {
 	MaxRetries    types.Int64  `tfsdk:"retries"`
 }
 
-func (p *OPNsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (p *opnsenseProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "opnsense"
 	resp.Version = p.version
 }
 
-func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (p *opnsenseProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"uri": schema.StringAttribute{
@@ -91,7 +99,7 @@ func (p *OPNsenseProvider) Schema(ctx context.Context, req provider.SchemaReques
 	}
 }
 
-func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+func (p *opnsenseProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
 	// Get data from config
 	var data OPNsenseProviderModel
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -273,87 +281,46 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 	resp.ResourceData = client
 }
 
-func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		// Interfaces
-		service.NewInterfacesVlanResource,
-		service.NewInterfacesVipResource,
-		// Routes
-		service.NewRouteResource,
-		// Unbound
-		service.NewUnboundHostOverrideResource,
-		service.NewUnboundHostAliasResource,
-		service.NewUnboundDomainOverrideResource,
-		service.NewUnboundForwardResource,
-		// Wireguard
-		service.NewWireguardServerResource,
-		service.NewWireguardClientResource,
-		// Quagga
-		service.NewQuaggaBGPNeighborResource,
-		service.NewQuaggaBGPASPathResource,
-		service.NewQuaggaBGPPrefixListResource,
-		service.NewQuaggaBGPCommunityListResource,
-		service.NewQuaggaBGPRouteMapResource,
-		// Firewall
-		service.NewFirewallFilterResource,
-		service.NewFirewallNATResource,
-		service.NewFirewallNATOneToOneResource,
-		service.NewFirewallAliasResource,
-		service.NewFirewallCategoryResource,
-		// Kea
-		service.NewKeaSubnetResource,
-		service.NewKeaPeerResource,
-		service.NewKeaReservationResource,
-		// IPsec
-		service.NewIpsecPskResource,
-		service.NewIpsecConnectionResource,
-		service.NewIpsecVtiResource,
-		service.NewIpsecChildResource,
-		service.NewIpsecAuthLocalResource,
-		service.NewIpsecAuthRemoteResource,
+func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
+	controllers := [][]func() resource.Resource{
+		diagnostics.Resources(ctx),
+		firewall.Resources(ctx),
+		interfaces.Resources(ctx),
+		ipsec.Resources(ctx),
+		kea.Resources(ctx),
+		quagga.Resources(ctx),
+		routes.Resources(ctx),
+		unbound.Resources(ctx),
+		wireguard.Resources(ctx),
 	}
+
+	var resources []func() resource.Resource
+	for _, s := range controllers {
+		resources = append(resources, s...)
+	}
+	return resources
 }
 
-func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		// Interfaces
-		service.NewInterfacesVlanDataSource,
-		service.NewInterfacesVipDataSource,
-		service.NewInterfaceDataSource,
-		service.NewInterfaceAllDataSource,
-		// Routes
-		service.NewRouteDataSource,
-		// Unbound
-		service.NewUnboundHostOverrideDataSource,
-		service.NewUnboundHostAliasDataSource,
-		service.NewUnboundDomainOverrideDataSource,
-		service.NewUnboundForwardDataSource,
-		// Wireguard
-		service.NewWireguardServerDataSource,
-		service.NewWireguardClientDataSource,
-		// Quagga
-		service.NewQuaggaBGPNeighborDataSource,
-		service.NewQuaggaBGPASPathDataSource,
-		service.NewQuaggaBGPPrefixListDataSource,
-		service.NewQuaggaBGPCommunityListDataSource,
-		service.NewQuaggaBGPRouteMapDataSource,
-		// Firewall
-		service.NewFirewallFilterDataSource,
-		service.NewFirewallNATDataSource,
-		service.NewFirewallNATOneToOneDataSource,
-		service.NewFirewallAliasDataSource,
-		service.NewFirewallCategoryDataSource,
-		// Kea
-		service.NewKeaSubnetDataSource,
-		service.NewKeaPeerDataSource,
-		service.NewKeaReservationDataSource,
+func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
+	controllers := [][]func() datasource.DataSource{
+		diagnostics.DataSources(ctx),
+		firewall.DataSources(ctx),
+		interfaces.DataSources(ctx),
+		ipsec.DataSources(ctx),
+		kea.DataSources(ctx),
+		quagga.DataSources(ctx),
+		routes.DataSources(ctx),
+		unbound.DataSources(ctx),
+		wireguard.DataSources(ctx),
 	}
+
+	var dataSources []func() datasource.DataSource
+	for _, s := range controllers {
+		dataSources = append(dataSources, s...)
+	}
+	return dataSources
 }
 
-func New(version string) func() provider.Provider {
-	return func() provider.Provider {
-		return &OPNsenseProvider{
-			version: version,
-		}
-	}
+func NewProvider(ctx context.Context) (provider.Provider, error) {
+	return &opnsenseProvider{}, nil
 }

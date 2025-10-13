@@ -3,15 +3,17 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"log"
-	"terraform-provider-opnsense/internal/provider"
+
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
 )
 
 //go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
 
 var (
-	version string = "dev"
+	opnsenseProviderName        = "registry.terraform.io/browningluke/opnsense"
+	version              string = "dev"
 )
 
 func main() {
@@ -20,12 +22,23 @@ func main() {
 	flag.BoolVar(&debug, "debug", false, "set to true to run the provider with support for debuggers like delve")
 	flag.Parse()
 
-	opts := providerserver.ServeOpts{
-		Address: "registry.terraform.io/browningluke/opnsense",
-		Debug:   debug,
+	serverFactory, _, err := provider.ProtoV6ProviderServerFactory(context.Background())
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	err := providerserver.Serve(context.Background(), provider.New(version), opts)
+	var serveOpts []tf6server.ServeOpt
+
+	if debug {
+		serveOpts = append(serveOpts, tf6server.WithManagedDebug())
+	}
+
+	err = tf6server.Serve(
+		opnsenseProviderName,
+		serverFactory,
+		serveOpts...,
+	)
 
 	if err != nil {
 		log.Fatal(err.Error())

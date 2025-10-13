@@ -110,6 +110,7 @@ jobs:
           echo "OPNSENSE_API_KEY=${{ steps.apikey.outputs.key }}" >> $GITHUB_ENV
           echo "OPNSENSE_API_SECRET=${{ steps.apikey.outputs.secret }}" >> $GITHUB_ENV
           echo "OPNSENSE_URI=https://localhost:${{ env.OPNSENSE_WEB_PORT }}" >> $GITHUB_ENV
+          echo "OPNSENSE_ALLOW_INSECURE=true" >> $GITHUB_ENV
       - name: Run terraform tests
         run: |
           env TF_ACC=1 go test -v -p 1 ./...
