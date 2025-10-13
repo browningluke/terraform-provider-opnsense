@@ -24,6 +24,7 @@ type domainOverrideResourceModel struct {
 func domainOverrideResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Domain overrides can be used to forward queries for specific domains (and subsequent subdomains) to local or remote DNS servers.",
+		DeprecationMessage:  "This resource was removed upstream and is kept only for backward compatibility with older configurations. It may be removed in a future release.",
 
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
