@@ -6,6 +6,7 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -27,7 +28,7 @@ type aliasResourceModel struct {
 	Name    types.String `tfsdk:"name"`
 	Type    types.String `tfsdk:"type"`
 
-	IPProtocol types.String `tfsdk:"ip_protocol"`
+	IPProtocol types.Set    `tfsdk:"ip_protocol"`
 	Interface  types.String `tfsdk:"interface"`
 
 	Content    types.Set `tfsdk:"content"`
@@ -69,14 +70,15 @@ func aliasResourceSchema() schema.Schema {
 					),
 				},
 			},
-			"ip_protocol": schema.StringAttribute{
-				MarkdownDescription: "Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = \"asn\"`, `type = \"geoip\"`, or `type = \"external\"`. Defaults to `IPv4`.",
+			"ip_protocol": schema.SetAttribute{
+				MarkdownDescription: "Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = \"asn\"`, `type = \"geoip\"`, or `type = \"external\"`. Defaults to `[\"IPv4\"]`.",
 				Optional:            true,
 				Computed:            true,
-				Validators: []validator.String{
-					stringvalidator.OneOf("IPv4", "IPv6"),
+				ElementType:         types.StringType,
+				Validators: []validator.Set{
+					setvalidator.ValueStringsAre(stringvalidator.OneOf("IPv4", "IPv6")),
 				},
-				Default: stringdefault.StaticString("IPv4"),
+				Default: setdefault.StaticValue(tools.StringSliceToSet([]string{"IPv4"})),
 			},
 			"interface": schema.StringAttribute{
 				MarkdownDescription: "Choose on which interface this alias applies. Only applies (and must be set) when `type = \"dynipv6host\"`. Defaults to `\"\"`.",
@@ -146,9 +148,10 @@ func aliasDataSourceSchema() dschema.Schema {
 				MarkdownDescription: "The type of alias.",
 				Computed:            true,
 			},
-			"ip_protocol": dschema.StringAttribute{
+			"ip_protocol": dschema.SetAttribute{
 				MarkdownDescription: "Select the Internet Protocol version this alias applies to. Available values: `IPv4`, `IPv6`. Only applies when `type = \"asn\"`, `type = \"geoip\"`, or `type = \"external\"`.",
 				Computed:            true,
+				ElementType:         types.StringType,
 			},
 			"interface": dschema.StringAttribute{
 				MarkdownDescription: "Choose on which interface this alias applies. Only applies (and must be set) when `type = \"dynipv6host\"`.",
@@ -181,6 +184,10 @@ func aliasDataSourceSchema() dschema.Schema {
 }
 
 func convertAliasSchemaToStruct(d *aliasResourceModel) (*firewall.Alias, error) {
+	// Parse 'IPProtocol'
+	var protocolList []string
+	d.IPProtocol.ElementsAs(context.Background(), &protocolList, false)
+
 	// Parse 'Content'
 	var contentList []string
 	d.Content.ElementsAs(context.Background(), &contentList, false)
@@ -193,7 +200,7 @@ func convertAliasSchemaToStruct(d *aliasResourceModel) (*firewall.Alias, error) 
 		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Name:        d.Name.ValueString(),
 		Type:        api.SelectedMap(d.Type.ValueString()),
-		IPProtocol:  api.SelectedMap(d.IPProtocol.ValueString()),
+		IPProtocol:  protocolList,
 		Interface:   api.SelectedMap(d.Interface.ValueString()),
 		Content:     contentList,
 		Categories:  categoriesList,
@@ -208,7 +215,7 @@ func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) 
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Name:        types.StringValue(d.Name),
 		Type:        types.StringValue(d.Type.String()),
-		IPProtocol:  types.StringValue(d.IPProtocol.String()),
+		IPProtocol:  types.SetNull(types.StringType),
 		Interface:   types.StringValue(d.Interface.String()),
 		Content:     types.SetNull(types.StringType),
 		Categories:  types.SetNull(types.StringType),
@@ -216,6 +223,14 @@ func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) 
 		Statistics:  types.BoolValue(tools.StringToBool(d.Statistics)),
 		Description: tools.StringOrNull(d.Description),
 	}
+
+	// Parse 'IPProtocol'
+	var protocolList []attr.Value
+	for _, i := range d.IPProtocol {
+		protocolList = append(protocolList, basetypes.NewStringValue(i))
+	}
+	protocolTypeList, _ := types.SetValue(types.StringType, protocolList)
+	model.IPProtocol = protocolTypeList
 
 	// Parse 'Content'
 	var contentList []attr.Value

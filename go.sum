@@ -29,6 +29,7 @@ github.com/bmatcuk/doublestar/v4 v4.9.1 h1:X8jg9rRZmJd4yRy7ZeNDRnM+T3ZfHv15JiBJ/
 github.com/bmatcuk/doublestar/v4 v4.9.1/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
 github.com/browningluke/opnsense-go v0.12.0 h1:iUrmu000WIOLh9LFOHfhHOanFk1jZ1fjxngITo+3uh4=
 github.com/browningluke/opnsense-go v0.12.0/go.mod h1:zh2ofl18Q4soldkfczxgbHddNU7NoCDyIuutVN6sOrM=
+github.com/browningluke/opnsense-go v0.13.0/go.mod h1:zh2ofl18Q4soldkfczxgbHddNU7NoCDyIuutVN6sOrM=
 github.com/bufbuild/protocompile v0.4.0 h1:LbFKd2XowZvQ/kajzguUp2DC9UEIQhIq77fZZlaQsNA=
 github.com/bufbuild/protocompile v0.4.0/go.mod h1:3v93+mbWn/v3xzN+31nwkJfrEpAUwp+BagBSZWx+TP8=
 github.com/bufbuild/protocompile v0.14.1 h1:iA73zAf/fyljNjQKwYzUHD6AD4R8KMasmwa/FBatYVw=
