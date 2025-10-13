@@ -99,11 +99,11 @@ func filterResourceSchema() schema.Schema {
 				},
 			},
 			"ip_protocol": schema.StringAttribute{
-				MarkdownDescription: "Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`. Defaults to `inet`.",
+				MarkdownDescription: "Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`, `inet46`. Defaults to `inet`.",
 				Optional:            true,
 				Computed:            true,
 				Validators: []validator.String{
-					stringvalidator.OneOf("inet", "inet6"),
+					stringvalidator.OneOf("inet", "inet6", "inet46"),
 				},
 				Default: stringdefault.StaticString("inet"),
 			},
