@@ -1,9 +1,10 @@
-package service
+package quagga
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &QuaggaBGPASPathResource{}
-var _ resource.ResourceWithImportState = &QuaggaBGPASPathResource{}
+var _ resource.Resource = &bgpASPathResource{}
+var _ resource.ResourceWithConfigure = &bgpASPathResource{}
+var _ resource.ResourceWithImportState = &bgpASPathResource{}
 
-func NewQuaggaBGPASPathResource() resource.Resource {
-	return &QuaggaBGPASPathResource{}
+func newBGPASPathResource() resource.Resource {
+	return &bgpASPathResource{}
 }
 
-// QuaggaBGPASPathResource defines the resource implementation.
-type QuaggaBGPASPathResource struct {
+// bgpASPathResource defines the resource implementation.
+type bgpASPathResource struct {
 	client opnsense.Client
 }
 
-func (r *QuaggaBGPASPathResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *bgpASPathResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_aspath"
 }
 
-func (r *QuaggaBGPASPathResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = quaggaBGPASPathResourceSchema()
+func (r *bgpASPathResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = bgpASPathResourceSchema()
 }
 
-func (r *QuaggaBGPASPathResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *bgpASPathResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *QuaggaBGPASPathResource) Configure(ctx context.Context, req resource.Co
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *QuaggaBGPASPathResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *QuaggaBGPASPathResourceModel
+func (r *bgpASPathResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *bgpASPathResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *QuaggaBGPASPathResource) Create(ctx context.Context, req resource.Creat
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpASPath, err := convertQuaggaBGPASPathSchemaToStruct(data)
+	bgpASPath, err := convertBGPASPathSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp aspath, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *QuaggaBGPASPathResource) Create(ctx context.Context, req resource.Creat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPASPathResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *QuaggaBGPASPathResourceModel
+func (r *bgpASPathResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *bgpASPathResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *QuaggaBGPASPathResource) Read(ctx context.Context, req resource.ReadReq
 	}
 
 	// Convert OPNsense struct to TF schema
-	bgpASPathModel, err := convertQuaggaBGPASPathStructToSchema(bgpASPath)
+	bgpASPathModel, err := convertBGPASPathStructToSchema(bgpASPath)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read bgp aspath, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *QuaggaBGPASPathResource) Read(ctx context.Context, req resource.ReadReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &bgpASPathModel)...)
 }
 
-func (r *QuaggaBGPASPathResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *QuaggaBGPASPathResourceModel
+func (r *bgpASPathResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *bgpASPathResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *QuaggaBGPASPathResource) Update(ctx context.Context, req resource.Updat
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpASPath, err := convertQuaggaBGPASPathSchemaToStruct(data)
+	bgpASPath, err := convertBGPASPathSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp aspath, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *QuaggaBGPASPathResource) Update(ctx context.Context, req resource.Updat
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPASPathResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *QuaggaBGPASPathResourceModel
+func (r *bgpASPathResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *bgpASPathResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *QuaggaBGPASPathResource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *QuaggaBGPASPathResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bgpASPathResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

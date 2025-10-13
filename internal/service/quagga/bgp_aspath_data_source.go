@@ -1,34 +1,36 @@
-package service
+package quagga
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &QuaggaBGPNeighborDataSource{}
+var _ datasource.DataSource = &bgpASPathDataSource{}
+var _ datasource.DataSourceWithConfigure = &bgpASPathDataSource{}
 
-func NewQuaggaBGPNeighborDataSource() datasource.DataSource {
-	return &QuaggaBGPNeighborDataSource{}
+func newBGPASPathDataSource() datasource.DataSource {
+	return &bgpASPathDataSource{}
 }
 
-// QuaggaBGPNeighborDataSource defines the data source implementation.
-type QuaggaBGPNeighborDataSource struct {
+// bgpASPathDataSource defines the data source implementation.
+type bgpASPathDataSource struct {
 	client opnsense.Client
 }
 
-func (d *QuaggaBGPNeighborDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_neighbor"
+func (d *bgpASPathDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_aspath"
 }
 
-func (d *QuaggaBGPNeighborDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = QuaggaBGPNeighborDataSourceSchema()
+func (d *bgpASPathDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = bgpASPathDataSourceSchema()
 }
 
-func (d *QuaggaBGPNeighborDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *bgpASPathDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *QuaggaBGPNeighborDataSource) Configure(ctx context.Context, req datasou
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *QuaggaBGPNeighborDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *QuaggaBGPNeighborResourceModel
+func (d *bgpASPathDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *bgpASPathResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *QuaggaBGPNeighborDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Quagga().GetBGPNeighbor(ctx, data.Id.ValueString())
+	resource, err := d.client.Quagga().GetBGPASPath(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read neighbor, got error: %s", err))
+			fmt.Sprintf("Unable to read as path, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertQuaggaBGPNeighborStructToSchema(resource)
+	resourceModel, err := convertBGPASPathStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read neighbor, got error: %s", err))
+			fmt.Sprintf("Unable to read as path, got error: %s", err))
 		return
 	}
 

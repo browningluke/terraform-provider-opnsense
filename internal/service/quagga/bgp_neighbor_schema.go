@@ -1,8 +1,9 @@
-package service
+package quagga
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,11 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// QuaggaBGPNeighborResourceModel describes the resource data model.
-type QuaggaBGPNeighborResourceModel struct {
+// bgpNeighborResourceModel describes the resource data model.
+type bgpNeighborResourceModel struct {
 	Enabled               types.Bool   `tfsdk:"enabled"`
 	Description           types.String `tfsdk:"description"`
 	PeerIP                types.String `tfsdk:"peer_ip"`
@@ -219,7 +219,7 @@ func quaggaBGPNeighborResourceSchema() schema.Schema {
 	}
 }
 
-func QuaggaBGPNeighborDataSourceSchema() dschema.Schema {
+func bgpNeighborDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure neighbors for BGP.",
 
@@ -336,7 +336,7 @@ func QuaggaBGPNeighborDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertQuaggaBGPNeighborSchemaToStruct(d *QuaggaBGPNeighborResourceModel) (*quagga.BGPNeighbor, error) {
+func convertBGPNeighborSchemaToStruct(d *bgpNeighborResourceModel) (*quagga.BGPNeighbor, error) {
 	return &quagga.BGPNeighbor{
 		Enabled:               tools.BoolToString(d.Enabled.ValueBool()),
 		Description:           d.Description.ValueString(),
@@ -367,8 +367,8 @@ func convertQuaggaBGPNeighborSchemaToStruct(d *QuaggaBGPNeighborResourceModel) (
 	}, nil
 }
 
-func convertQuaggaBGPNeighborStructToSchema(d *quagga.BGPNeighbor) (*QuaggaBGPNeighborResourceModel, error) {
-	return &QuaggaBGPNeighborResourceModel{
+func convertBGPNeighborStructToSchema(d *quagga.BGPNeighbor) (*bgpNeighborResourceModel, error) {
+	return &bgpNeighborResourceModel{
 		Enabled:               types.BoolValue(tools.StringToBool(d.Enabled)),
 		Description:           types.StringValue(d.Description),
 		PeerIP:                types.StringValue(d.PeerIP),

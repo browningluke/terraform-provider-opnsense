@@ -1,8 +1,9 @@
-package service
+package quagga
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -13,11 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// QuaggaBGPCommunityListResourceModel describes the resource data model.
-type QuaggaBGPCommunityListResourceModel struct {
+// bgpCommunityListResourceModel describes the resource data model.
+type bgpCommunityListResourceModel struct {
 	Enabled        types.Bool   `tfsdk:"enabled"`
 	Description    types.String `tfsdk:"description"`
 	Number         types.Int64  `tfsdk:"number"`
@@ -28,7 +28,7 @@ type QuaggaBGPCommunityListResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func quaggaBGPCommunityListResourceSchema() schema.Schema {
+func bgpCommunityListResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure community lists for BGP.",
 
@@ -83,7 +83,7 @@ func quaggaBGPCommunityListResourceSchema() schema.Schema {
 	}
 }
 
-func QuaggaBGPCommunityListDataSourceSchema() dschema.Schema {
+func bgpCommunityListDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure community lists for BGP.",
 
@@ -120,7 +120,7 @@ func QuaggaBGPCommunityListDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertQuaggaBGPCommunityListSchemaToStruct(d *QuaggaBGPCommunityListResourceModel) (*quagga.BGPCommunityList, error) {
+func convertBGPCommunityListSchemaToStruct(d *bgpCommunityListResourceModel) (*quagga.BGPCommunityList, error) {
 	return &quagga.BGPCommunityList{
 		Enabled:        tools.BoolToString(d.Enabled.ValueBool()),
 		Description:    d.Description.ValueString(),
@@ -131,8 +131,8 @@ func convertQuaggaBGPCommunityListSchemaToStruct(d *QuaggaBGPCommunityListResour
 	}, nil
 }
 
-func convertQuaggaBGPCommunityListStructToSchema(d *quagga.BGPCommunityList) (*QuaggaBGPCommunityListResourceModel, error) {
-	return &QuaggaBGPCommunityListResourceModel{
+func convertBGPCommunityListStructToSchema(d *quagga.BGPCommunityList) (*bgpCommunityListResourceModel, error) {
+	return &bgpCommunityListResourceModel{
 		Enabled:        types.BoolValue(tools.StringToBool(d.Enabled)),
 		Description:    types.StringValue(d.Description),
 		Number:         types.Int64Value(tools.StringToInt64(d.Number)),

@@ -1,34 +1,36 @@
-package service
+package quagga
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &QuaggaBGPRouteMapDataSource{}
+var _ datasource.DataSource = &bgpRouteMapDataSource{}
+var _ datasource.DataSourceWithConfigure = &bgpRouteMapDataSource{}
 
-func NewQuaggaBGPRouteMapDataSource() datasource.DataSource {
-	return &QuaggaBGPRouteMapDataSource{}
+func newBGPRouteMapDataSource() datasource.DataSource {
+	return &bgpRouteMapDataSource{}
 }
 
-// QuaggaBGPRouteMapDataSource defines the data source implementation.
-type QuaggaBGPRouteMapDataSource struct {
+// bgpRouteMapDataSource defines the data source implementation.
+type bgpRouteMapDataSource struct {
 	client opnsense.Client
 }
 
-func (d *QuaggaBGPRouteMapDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *bgpRouteMapDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_routemap"
 }
 
-func (d *QuaggaBGPRouteMapDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = QuaggaBGPRouteMapDataSourceSchema()
+func (d *bgpRouteMapDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = bgpRouteMapDataSourceSchema()
 }
 
-func (d *QuaggaBGPRouteMapDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *bgpRouteMapDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *QuaggaBGPRouteMapDataSource) Configure(ctx context.Context, req datasou
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *QuaggaBGPRouteMapDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *QuaggaBGPRouteMapResourceModel
+func (d *bgpRouteMapDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *bgpRouteMapResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -65,7 +67,7 @@ func (d *QuaggaBGPRouteMapDataSource) Read(ctx context.Context, req datasource.R
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertQuaggaBGPRouteMapStructToSchema(resource)
+	resourceModel, err := convertBGPRouteMapStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read route map, got error: %s", err))

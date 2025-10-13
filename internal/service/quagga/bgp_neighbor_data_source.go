@@ -1,34 +1,36 @@
-package service
+package quagga
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &QuaggaBGPPrefixListDataSource{}
+var _ datasource.DataSource = &bgpNeighborDataSource{}
+var _ datasource.DataSourceWithConfigure = &bgpNeighborDataSource{}
 
-func NewQuaggaBGPPrefixListDataSource() datasource.DataSource {
-	return &QuaggaBGPPrefixListDataSource{}
+func newBGPNeighborDataSource() datasource.DataSource {
+	return &bgpNeighborDataSource{}
 }
 
-// QuaggaBGPPrefixListDataSource defines the data source implementation.
-type QuaggaBGPPrefixListDataSource struct {
+// bgpNeighborDataSource defines the data source implementation.
+type bgpNeighborDataSource struct {
 	client opnsense.Client
 }
 
-func (d *QuaggaBGPPrefixListDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_prefixlist"
+func (d *bgpNeighborDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_neighbor"
 }
 
-func (d *QuaggaBGPPrefixListDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = QuaggaBGPPrefixListDataSourceSchema()
+func (d *bgpNeighborDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = bgpNeighborDataSourceSchema()
 }
 
-func (d *QuaggaBGPPrefixListDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *bgpNeighborDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *QuaggaBGPPrefixListDataSource) Configure(ctx context.Context, req datas
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *QuaggaBGPPrefixListDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *QuaggaBGPPrefixListResourceModel
+func (d *bgpNeighborDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *bgpNeighborResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *QuaggaBGPPrefixListDataSource) Read(ctx context.Context, req datasource
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Quagga().GetBGPPrefixList(ctx, data.Id.ValueString())
+	resource, err := d.client.Quagga().GetBGPNeighbor(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read prefix list, got error: %s", err))
+			fmt.Sprintf("Unable to read neighbor, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertQuaggaBGPPrefixListStructToSchema(resource)
+	resourceModel, err := convertBGPNeighborStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read prefix list, got error: %s", err))
+			fmt.Sprintf("Unable to read neighbor, got error: %s", err))
 		return
 	}
 

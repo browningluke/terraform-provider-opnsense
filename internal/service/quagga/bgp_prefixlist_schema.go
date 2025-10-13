@@ -1,8 +1,9 @@
-package service
+package quagga
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -13,11 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// QuaggaBGPPrefixListResourceModel describes the resource data model.
-type QuaggaBGPPrefixListResourceModel struct {
+// bgpPrefixListResourceModel describes the resource data model.
+type bgpPrefixListResourceModel struct {
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	Description types.String `tfsdk:"description"`
 	Name        types.String `tfsdk:"name"`
@@ -29,7 +29,7 @@ type QuaggaBGPPrefixListResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func quaggaBGPPrefixListResourceSchema() schema.Schema {
+func bgpPrefixListResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure prefix lists for BGP.",
 
@@ -90,7 +90,7 @@ func quaggaBGPPrefixListResourceSchema() schema.Schema {
 	}
 }
 
-func QuaggaBGPPrefixListDataSourceSchema() dschema.Schema {
+func bgpPrefixListDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure prefix lists for BGP.",
 
@@ -131,7 +131,7 @@ func QuaggaBGPPrefixListDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertQuaggaBGPPrefixListSchemaToStruct(d *QuaggaBGPPrefixListResourceModel) (*quagga.BGPPrefixList, error) {
+func convertBGPPrefixListSchemaToStruct(d *bgpPrefixListResourceModel) (*quagga.BGPPrefixList, error) {
 	return &quagga.BGPPrefixList{
 		Enabled:        tools.BoolToString(d.Enabled.ValueBool()),
 		Description:    d.Description.ValueString(),
@@ -143,8 +143,8 @@ func convertQuaggaBGPPrefixListSchemaToStruct(d *QuaggaBGPPrefixListResourceMode
 	}, nil
 }
 
-func convertQuaggaBGPPrefixListStructToSchema(d *quagga.BGPPrefixList) (*QuaggaBGPPrefixListResourceModel, error) {
-	return &QuaggaBGPPrefixListResourceModel{
+func convertBGPPrefixListStructToSchema(d *quagga.BGPPrefixList) (*bgpPrefixListResourceModel, error) {
+	return &bgpPrefixListResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Description: types.StringValue(d.Description),
 		Name:        types.StringValue(d.Name),

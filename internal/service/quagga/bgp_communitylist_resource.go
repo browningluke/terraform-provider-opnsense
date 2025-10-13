@@ -1,9 +1,10 @@
-package service
+package quagga
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &QuaggaBGPCommunityListResource{}
-var _ resource.ResourceWithImportState = &QuaggaBGPCommunityListResource{}
+var _ resource.Resource = &bgpCommunityListResource{}
+var _ resource.ResourceWithConfigure = &bgpCommunityListResource{}
+var _ resource.ResourceWithImportState = &bgpCommunityListResource{}
 
-func NewQuaggaBGPCommunityListResource() resource.Resource {
-	return &QuaggaBGPCommunityListResource{}
+func newBGPCommunityListResource() resource.Resource {
+	return &bgpCommunityListResource{}
 }
 
-// QuaggaBGPCommunityListResource defines the resource implementation.
-type QuaggaBGPCommunityListResource struct {
+// bgpCommunityListResource defines the resource implementation.
+type bgpCommunityListResource struct {
 	client opnsense.Client
 }
 
-func (r *QuaggaBGPCommunityListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *bgpCommunityListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_communitylist"
 }
 
-func (r *QuaggaBGPCommunityListResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = quaggaBGPCommunityListResourceSchema()
+func (r *bgpCommunityListResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = bgpCommunityListResourceSchema()
 }
 
-func (r *QuaggaBGPCommunityListResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *bgpCommunityListResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *QuaggaBGPCommunityListResource) Configure(ctx context.Context, req reso
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *QuaggaBGPCommunityListResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *QuaggaBGPCommunityListResourceModel
+func (r *bgpCommunityListResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *bgpCommunityListResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *QuaggaBGPCommunityListResource) Create(ctx context.Context, req resourc
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpCommunityList, err := convertQuaggaBGPCommunityListSchemaToStruct(data)
+	bgpCommunityList, err := convertBGPCommunityListSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp community list, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *QuaggaBGPCommunityListResource) Create(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPCommunityListResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *QuaggaBGPCommunityListResourceModel
+func (r *bgpCommunityListResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *bgpCommunityListResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *QuaggaBGPCommunityListResource) Read(ctx context.Context, req resource.
 	}
 
 	// Convert OPNsense struct to TF schema
-	bgpCommunityListModel, err := convertQuaggaBGPCommunityListStructToSchema(bgpCommunityList)
+	bgpCommunityListModel, err := convertBGPCommunityListStructToSchema(bgpCommunityList)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read bgp community list, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *QuaggaBGPCommunityListResource) Read(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &bgpCommunityListModel)...)
 }
 
-func (r *QuaggaBGPCommunityListResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *QuaggaBGPCommunityListResourceModel
+func (r *bgpCommunityListResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *bgpCommunityListResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *QuaggaBGPCommunityListResource) Update(ctx context.Context, req resourc
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpCommunityList, err := convertQuaggaBGPCommunityListSchemaToStruct(data)
+	bgpCommunityList, err := convertBGPCommunityListSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp community list, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *QuaggaBGPCommunityListResource) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPCommunityListResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *QuaggaBGPCommunityListResourceModel
+func (r *bgpCommunityListResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *bgpCommunityListResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *QuaggaBGPCommunityListResource) Delete(ctx context.Context, req resourc
 	}
 }
 
-func (r *QuaggaBGPCommunityListResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bgpCommunityListResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

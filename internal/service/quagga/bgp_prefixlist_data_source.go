@@ -1,34 +1,36 @@
-package service
+package quagga
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &QuaggaBGPASPathDataSource{}
+var _ datasource.DataSource = &bgpPrefixListDataSource{}
+var _ datasource.DataSourceWithConfigure = &bgpPrefixListDataSource{}
 
-func NewQuaggaBGPASPathDataSource() datasource.DataSource {
-	return &QuaggaBGPASPathDataSource{}
+func newBGPPrefixListDataSource() datasource.DataSource {
+	return &bgpPrefixListDataSource{}
 }
 
-// QuaggaBGPASPathDataSource defines the data source implementation.
-type QuaggaBGPASPathDataSource struct {
+// bgpPrefixListDataSource defines the data source implementation.
+type bgpPrefixListDataSource struct {
 	client opnsense.Client
 }
 
-func (d *QuaggaBGPASPathDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_aspath"
+func (d *bgpPrefixListDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_prefixlist"
 }
 
-func (d *QuaggaBGPASPathDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = QuaggaBGPASPathDataSourceSchema()
+func (d *bgpPrefixListDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = bgpPrefixListDataSourceSchema()
 }
 
-func (d *QuaggaBGPASPathDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *bgpPrefixListDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *QuaggaBGPASPathDataSource) Configure(ctx context.Context, req datasourc
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *QuaggaBGPASPathDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *QuaggaBGPASPathResourceModel
+func (d *bgpPrefixListDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *bgpPrefixListResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -57,18 +59,18 @@ func (d *QuaggaBGPASPathDataSource) Read(ctx context.Context, req datasource.Rea
 	}
 
 	// Get resource from OPNsense API
-	resource, err := d.client.Quagga().GetBGPASPath(ctx, data.Id.ValueString())
+	resource, err := d.client.Quagga().GetBGPPrefixList(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read as path, got error: %s", err))
+			fmt.Sprintf("Unable to read prefix list, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertQuaggaBGPASPathStructToSchema(resource)
+	resourceModel, err := convertBGPPrefixListStructToSchema(resource)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read as path, got error: %s", err))
+			fmt.Sprintf("Unable to read prefix list, got error: %s", err))
 		return
 	}
 

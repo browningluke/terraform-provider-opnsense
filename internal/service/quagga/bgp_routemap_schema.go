@@ -1,9 +1,10 @@
-package service
+package quagga
 
 import (
 	"context"
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -15,11 +16,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// QuaggaBGPRouteMapResourceModel describes the resource data model.
-type QuaggaBGPRouteMapResourceModel struct {
+// bgpRouteMapResourceModel describes the resource data model.
+type bgpRouteMapResourceModel struct {
 	Enabled       types.Bool   `tfsdk:"enabled"`
 	Description   types.String `tfsdk:"description"`
 	Name          types.String `tfsdk:"name"`
@@ -33,7 +33,7 @@ type QuaggaBGPRouteMapResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func quaggaBGPRouteMapResourceSchema() schema.Schema {
+func bgpRouteMapResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure route maps for BGP.",
 
@@ -108,7 +108,7 @@ func quaggaBGPRouteMapResourceSchema() schema.Schema {
 	}
 }
 
-func QuaggaBGPRouteMapDataSourceSchema() dschema.Schema {
+func bgpRouteMapDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure route maps for BGP.",
 
@@ -160,7 +160,7 @@ func QuaggaBGPRouteMapDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertQuaggaBGPRouteMapSchemaToStruct(d *QuaggaBGPRouteMapResourceModel) (*quagga.BGPRouteMap, error) {
+func convertBGPRouteMapSchemaToStruct(d *bgpRouteMapResourceModel) (*quagga.BGPRouteMap, error) {
 	// Parse 'ASPathList'
 	var asPathList []string
 	d.ASPathList.ElementsAs(context.Background(), &asPathList, false)
@@ -186,8 +186,8 @@ func convertQuaggaBGPRouteMapSchemaToStruct(d *QuaggaBGPRouteMapResourceModel) (
 	}, nil
 }
 
-func convertQuaggaBGPRouteMapStructToSchema(d *quagga.BGPRouteMap) (*QuaggaBGPRouteMapResourceModel, error) {
-	model := &QuaggaBGPRouteMapResourceModel{
+func convertBGPRouteMapStructToSchema(d *quagga.BGPRouteMap) (*bgpRouteMapResourceModel, error) {
+	model := &bgpRouteMapResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Description: types.StringValue(d.Description),
 		Name:        types.StringValue(d.Name),

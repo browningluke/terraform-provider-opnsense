@@ -1,9 +1,10 @@
-package service
+package quagga
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &QuaggaBGPNeighborResource{}
-var _ resource.ResourceWithImportState = &QuaggaBGPNeighborResource{}
+var _ resource.Resource = &bgpNeighborResource{}
+var _ resource.ResourceWithConfigure = &bgpNeighborResource{}
+var _ resource.ResourceWithImportState = &bgpNeighborResource{}
 
-func NewQuaggaBGPNeighborResource() resource.Resource {
-	return &QuaggaBGPNeighborResource{}
+func newBGPNeighborResource() resource.Resource {
+	return &bgpNeighborResource{}
 }
 
-// QuaggaBGPNeighborResource defines the resource implementation.
-type QuaggaBGPNeighborResource struct {
+// bgpNeighborResource defines the resource implementation.
+type bgpNeighborResource struct {
 	client opnsense.Client
 }
 
-func (r *QuaggaBGPNeighborResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *bgpNeighborResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_neighbor"
 }
 
-func (r *QuaggaBGPNeighborResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *bgpNeighborResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = quaggaBGPNeighborResourceSchema()
 }
 
-func (r *QuaggaBGPNeighborResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *bgpNeighborResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *QuaggaBGPNeighborResource) Configure(ctx context.Context, req resource.
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *QuaggaBGPNeighborResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *QuaggaBGPNeighborResourceModel
+func (r *bgpNeighborResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *bgpNeighborResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *QuaggaBGPNeighborResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpNeighbor, err := convertQuaggaBGPNeighborSchemaToStruct(data)
+	bgpNeighbor, err := convertBGPNeighborSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp neighbor, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *QuaggaBGPNeighborResource) Create(ctx context.Context, req resource.Cre
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPNeighborResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *QuaggaBGPNeighborResourceModel
+func (r *bgpNeighborResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *bgpNeighborResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *QuaggaBGPNeighborResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	// Convert OPNsense struct to TF schema
-	bgpNeighborModel, err := convertQuaggaBGPNeighborStructToSchema(bgpNeighbor)
+	bgpNeighborModel, err := convertBGPNeighborStructToSchema(bgpNeighbor)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read bgp neighbor, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *QuaggaBGPNeighborResource) Read(ctx context.Context, req resource.ReadR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &bgpNeighborModel)...)
 }
 
-func (r *QuaggaBGPNeighborResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *QuaggaBGPNeighborResourceModel
+func (r *bgpNeighborResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *bgpNeighborResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *QuaggaBGPNeighborResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpNeighbor, err := convertQuaggaBGPNeighborSchemaToStruct(data)
+	bgpNeighbor, err := convertBGPNeighborSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp neighbor, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *QuaggaBGPNeighborResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPNeighborResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *QuaggaBGPNeighborResourceModel
+func (r *bgpNeighborResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *bgpNeighborResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *QuaggaBGPNeighborResource) Delete(ctx context.Context, req resource.Del
 	}
 }
 
-func (r *QuaggaBGPNeighborResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bgpNeighborResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

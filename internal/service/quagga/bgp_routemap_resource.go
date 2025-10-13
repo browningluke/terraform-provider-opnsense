@@ -1,9 +1,10 @@
-package service
+package quagga
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &QuaggaBGPRouteMapResource{}
-var _ resource.ResourceWithImportState = &QuaggaBGPRouteMapResource{}
+var _ resource.Resource = &bgpRouteMapResource{}
+var _ resource.ResourceWithConfigure = &bgpRouteMapResource{}
+var _ resource.ResourceWithImportState = &bgpRouteMapResource{}
 
-func NewQuaggaBGPRouteMapResource() resource.Resource {
-	return &QuaggaBGPRouteMapResource{}
+func newBGPRouteMapResource() resource.Resource {
+	return &bgpRouteMapResource{}
 }
 
-// QuaggaBGPRouteMapResource defines the resource implementation.
-type QuaggaBGPRouteMapResource struct {
+// bgpRouteMapResource defines the resource implementation.
+type bgpRouteMapResource struct {
 	client opnsense.Client
 }
 
-func (r *QuaggaBGPRouteMapResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *bgpRouteMapResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_routemap"
 }
 
-func (r *QuaggaBGPRouteMapResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = quaggaBGPRouteMapResourceSchema()
+func (r *bgpRouteMapResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = bgpRouteMapResourceSchema()
 }
 
-func (r *QuaggaBGPRouteMapResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *bgpRouteMapResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *QuaggaBGPRouteMapResource) Configure(ctx context.Context, req resource.
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *QuaggaBGPRouteMapResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *QuaggaBGPRouteMapResourceModel
+func (r *bgpRouteMapResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *bgpRouteMapResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *QuaggaBGPRouteMapResource) Create(ctx context.Context, req resource.Cre
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpRouteMap, err := convertQuaggaBGPRouteMapSchemaToStruct(data)
+	bgpRouteMap, err := convertBGPRouteMapSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp route map, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *QuaggaBGPRouteMapResource) Create(ctx context.Context, req resource.Cre
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPRouteMapResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *QuaggaBGPRouteMapResourceModel
+func (r *bgpRouteMapResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *bgpRouteMapResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *QuaggaBGPRouteMapResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	// Convert OPNsense struct to TF schema
-	bgpRouteMapModel, err := convertQuaggaBGPRouteMapStructToSchema(bgpRouteMap)
+	bgpRouteMapModel, err := convertBGPRouteMapStructToSchema(bgpRouteMap)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read bgp route map, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *QuaggaBGPRouteMapResource) Read(ctx context.Context, req resource.ReadR
 	resp.Diagnostics.Append(resp.State.Set(ctx, &bgpRouteMapModel)...)
 }
 
-func (r *QuaggaBGPRouteMapResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *QuaggaBGPRouteMapResourceModel
+func (r *bgpRouteMapResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *bgpRouteMapResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *QuaggaBGPRouteMapResource) Update(ctx context.Context, req resource.Upd
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpRouteMap, err := convertQuaggaBGPRouteMapSchemaToStruct(data)
+	bgpRouteMap, err := convertBGPRouteMapSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp route map, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *QuaggaBGPRouteMapResource) Update(ctx context.Context, req resource.Upd
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPRouteMapResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *QuaggaBGPRouteMapResourceModel
+func (r *bgpRouteMapResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *bgpRouteMapResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *QuaggaBGPRouteMapResource) Delete(ctx context.Context, req resource.Del
 	}
 }
 
-func (r *QuaggaBGPRouteMapResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bgpRouteMapResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

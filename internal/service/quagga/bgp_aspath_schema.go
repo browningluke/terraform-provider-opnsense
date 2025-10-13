@@ -1,8 +1,9 @@
-package service
+package quagga
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -13,11 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
-	"terraform-provider-opnsense/internal/tools"
 )
 
-// QuaggaBGPASPathResourceModel describes the resource data model.
-type QuaggaBGPASPathResourceModel struct {
+// bgpASPathResourceModel describes the resource data model.
+type bgpASPathResourceModel struct {
 	Enabled     types.Bool   `tfsdk:"enabled"`
 	Description types.String `tfsdk:"description"`
 	Number      types.Int64  `tfsdk:"number"`
@@ -27,7 +27,7 @@ type QuaggaBGPASPathResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func quaggaBGPASPathResourceSchema() schema.Schema {
+func bgpASPathResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure AS Path lists for BGP.",
 
@@ -75,7 +75,7 @@ func quaggaBGPASPathResourceSchema() schema.Schema {
 	}
 }
 
-func QuaggaBGPASPathDataSourceSchema() dschema.Schema {
+func bgpASPathDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure AS Path lists for BGP.",
 
@@ -108,7 +108,7 @@ func QuaggaBGPASPathDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertQuaggaBGPASPathSchemaToStruct(d *QuaggaBGPASPathResourceModel) (*quagga.BGPASPath, error) {
+func convertBGPASPathSchemaToStruct(d *bgpASPathResourceModel) (*quagga.BGPASPath, error) {
 	return &quagga.BGPASPath{
 		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Description: d.Description.ValueString(),
@@ -118,8 +118,8 @@ func convertQuaggaBGPASPathSchemaToStruct(d *QuaggaBGPASPathResourceModel) (*qua
 	}, nil
 }
 
-func convertQuaggaBGPASPathStructToSchema(d *quagga.BGPASPath) (*QuaggaBGPASPathResourceModel, error) {
-	return &QuaggaBGPASPathResourceModel{
+func convertBGPASPathStructToSchema(d *quagga.BGPASPath) (*bgpASPathResourceModel, error) {
+	return &bgpASPathResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Description: types.StringValue(d.Description),
 		Number:      types.Int64Value(tools.StringToInt64(d.Number)),

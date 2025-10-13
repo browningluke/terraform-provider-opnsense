@@ -1,9 +1,10 @@
-package service
+package quagga
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &QuaggaBGPPrefixListResource{}
-var _ resource.ResourceWithImportState = &QuaggaBGPPrefixListResource{}
+var _ resource.Resource = &bgpPrefixListResource{}
+var _ resource.ResourceWithConfigure = &bgpPrefixListResource{}
+var _ resource.ResourceWithImportState = &bgpPrefixListResource{}
 
-func NewQuaggaBGPPrefixListResource() resource.Resource {
-	return &QuaggaBGPPrefixListResource{}
+func newBGPPrefixListResource() resource.Resource {
+	return &bgpPrefixListResource{}
 }
 
-// QuaggaBGPPrefixListResource defines the resource implementation.
-type QuaggaBGPPrefixListResource struct {
+// bgpPrefixListResource defines the resource implementation.
+type bgpPrefixListResource struct {
 	client opnsense.Client
 }
 
-func (r *QuaggaBGPPrefixListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *bgpPrefixListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quagga_bgp_prefixlist"
 }
 
-func (r *QuaggaBGPPrefixListResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = quaggaBGPPrefixListResourceSchema()
+func (r *bgpPrefixListResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = bgpPrefixListResourceSchema()
 }
 
-func (r *QuaggaBGPPrefixListResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *bgpPrefixListResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *QuaggaBGPPrefixListResource) Configure(ctx context.Context, req resourc
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *QuaggaBGPPrefixListResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *QuaggaBGPPrefixListResourceModel
+func (r *bgpPrefixListResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *bgpPrefixListResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *QuaggaBGPPrefixListResource) Create(ctx context.Context, req resource.C
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpPrefixList, err := convertQuaggaBGPPrefixListSchemaToStruct(data)
+	bgpPrefixList, err := convertBGPPrefixListSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp prefix list, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *QuaggaBGPPrefixListResource) Create(ctx context.Context, req resource.C
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPPrefixListResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *QuaggaBGPPrefixListResourceModel
+func (r *bgpPrefixListResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *bgpPrefixListResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *QuaggaBGPPrefixListResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	// Convert OPNsense struct to TF schema
-	bgpPrefixListModel, err := convertQuaggaBGPPrefixListStructToSchema(bgpPrefixList)
+	bgpPrefixListModel, err := convertBGPPrefixListStructToSchema(bgpPrefixList)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read bgp prefix list, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *QuaggaBGPPrefixListResource) Read(ctx context.Context, req resource.Rea
 	resp.Diagnostics.Append(resp.State.Set(ctx, &bgpPrefixListModel)...)
 }
 
-func (r *QuaggaBGPPrefixListResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *QuaggaBGPPrefixListResourceModel
+func (r *bgpPrefixListResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *bgpPrefixListResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *QuaggaBGPPrefixListResource) Update(ctx context.Context, req resource.U
 	}
 
 	// Convert TF schema OPNsense struct
-	bgpPrefixList, err := convertQuaggaBGPPrefixListSchemaToStruct(data)
+	bgpPrefixList, err := convertBGPPrefixListSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse bgp prefix list, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *QuaggaBGPPrefixListResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *QuaggaBGPPrefixListResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *QuaggaBGPPrefixListResourceModel
+func (r *bgpPrefixListResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *bgpPrefixListResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *QuaggaBGPPrefixListResource) Delete(ctx context.Context, req resource.D
 	}
 }
 
-func (r *QuaggaBGPPrefixListResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bgpPrefixListResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
