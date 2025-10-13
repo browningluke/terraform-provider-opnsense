@@ -275,6 +275,10 @@ func (p *OPNsenseProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		// BInd
+		service.NewBindAclResource,
+		service.NewBindPrimaryDomainResource,
+		service.NewBindRecordResource,
 		// Interfaces
 		service.NewInterfacesVlanResource,
 		service.NewInterfacesVipResource,
@@ -316,6 +320,10 @@ func (p *OPNsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 
 func (p *OPNsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		// BInd
+		service.NewBindAclDataSource,
+		service.NewBindPrimaryDomainDataSource,
+		service.NewBindRecordDataSource,
 		// Interfaces
 		service.NewInterfacesVlanDataSource,
 		service.NewInterfacesVipDataSource,
