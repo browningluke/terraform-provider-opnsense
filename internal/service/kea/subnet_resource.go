@@ -1,9 +1,10 @@
-package service
+package kea
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &KeaPeerResource{}
-var _ resource.ResourceWithImportState = &KeaPeerResource{}
+var _ resource.Resource = &subnetResource{}
+var _ resource.ResourceWithConfigure = &subnetResource{}
+var _ resource.ResourceWithImportState = &subnetResource{}
 
-func NewKeaPeerResource() resource.Resource {
-	return &KeaPeerResource{}
+func newSubnetResource() resource.Resource {
+	return &subnetResource{}
 }
 
-// KeaPeerResource defines the resource implementation.
-type KeaPeerResource struct {
+// subnetResource defines the resource implementation.
+type subnetResource struct {
 	client opnsense.Client
 }
 
-func (r *KeaPeerResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_kea_peer"
+func (r *subnetResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_kea_subnet"
 }
 
-func (r *KeaPeerResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = KeaPeerResourceSchema()
+func (r *subnetResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = subnetResourceSchema()
 }
 
-func (r *KeaPeerResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *subnetResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *KeaPeerResource) Configure(ctx context.Context, req resource.ConfigureR
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *KeaPeerResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *KeaPeerResourceModel
+func (r *subnetResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *subnetResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,18 +65,18 @@ func (r *KeaPeerResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	// Convert TF schema OPNsense struct
-	peer, err := convertKeaPeerSchemaToStruct(data)
+	subnet, err := convertSubnetSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to parse peer, got error: %s", err))
+			fmt.Sprintf("Unable to parse forward, got error: %s", err))
 		return
 	}
 
-	// Add peer to kea
-	id, err := r.client.Kea().AddPeer(ctx, peer)
+	// Add subnet to kea
+	id, err := r.client.Kea().AddSubnet(ctx, subnet)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to create peer, got error: %s", err))
+			fmt.Sprintf("Unable to create forward, got error: %s", err))
 		return
 	}
 
@@ -88,8 +90,8 @@ func (r *KeaPeerResource) Create(ctx context.Context, req resource.CreateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *KeaPeerResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *KeaPeerResourceModel
+func (r *subnetResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *subnetResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -99,25 +101,25 @@ func (r *KeaPeerResource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 
 	// Get resource from OPNsense unbound API
-	peer, err := r.client.Kea().GetPeer(ctx, data.Id.ValueString())
+	forward, err := r.client.Kea().GetSubnet(ctx, data.Id.ValueString())
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
-			tflog.Warn(ctx, fmt.Sprintf("peer not present in remote, removing from state"))
+			tflog.Warn(ctx, fmt.Sprintf("subnet not present in remote, removing from state"))
 			resp.State.RemoveResource(ctx)
 			return
 		}
 
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read peer, got error: %s", err))
+			fmt.Sprintf("Unable to read subnet, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resModel, err := convertKeaPeerStructToSchema(peer)
+	resModel, err := convertSubnetStructToSchema(forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read peer, got error: %s", err))
+			fmt.Sprintf("Unable to read subnet, got error: %s", err))
 		return
 	}
 
@@ -128,8 +130,8 @@ func (r *KeaPeerResource) Read(ctx context.Context, req resource.ReadRequest, re
 	resp.Diagnostics.Append(resp.State.Set(ctx, &resModel)...)
 }
 
-func (r *KeaPeerResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *KeaPeerResourceModel
+func (r *subnetResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *subnetResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,18 +141,18 @@ func (r *KeaPeerResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// Convert TF schema OPNsense struct
-	res, err := convertKeaPeerSchemaToStruct(data)
+	res, err := convertSubnetSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to parse peer, got error: %s", err))
+			fmt.Sprintf("Unable to parse subnet, got error: %s", err))
 		return
 	}
 
 	// Update res in unbound
-	err = r.client.Kea().UpdatePeer(ctx, data.Id.ValueString(), res)
+	err = r.client.Kea().UpdateSubnet(ctx, data.Id.ValueString(), res)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to create peer, got error: %s", err))
+			fmt.Sprintf("Unable to create subnet, got error: %s", err))
 		return
 	}
 
@@ -158,8 +160,8 @@ func (r *KeaPeerResource) Update(ctx context.Context, req resource.UpdateRequest
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *KeaPeerResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *KeaPeerResourceModel
+func (r *subnetResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *subnetResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -168,15 +170,15 @@ func (r *KeaPeerResource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	err := r.client.Kea().DeletePeer(ctx, data.Id.ValueString())
+	err := r.client.Kea().DeleteSubnet(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to delete peer, got error: %s", err))
+			fmt.Sprintf("Unable to delete subnet, got error: %s", err))
 		return
 	}
 }
 
-func (r *KeaPeerResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *subnetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }

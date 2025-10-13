@@ -1,34 +1,36 @@
-package service
+package kea
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &KeaPeerDataSource{}
+var _ datasource.DataSource = &subnetDataSource{}
+var _ datasource.DataSourceWithConfigure = &subnetDataSource{}
 
-func NewKeaPeerDataSource() datasource.DataSource {
-	return &KeaPeerDataSource{}
+func newSubnetDataSource() datasource.DataSource {
+	return &subnetDataSource{}
 }
 
-// KeaPeerDataSource defines the data source implementation.
-type KeaPeerDataSource struct {
+// subnetDataSource defines the data source implementation.
+type subnetDataSource struct {
 	client opnsense.Client
 }
 
-func (d *KeaPeerDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_kea_peer"
+func (d *subnetDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_kea_subnet"
 }
 
-func (d *KeaPeerDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = KeaPeerDataSourceSchema()
+func (d *subnetDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = subnetDataSourceSchema()
 }
 
-func (d *KeaPeerDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *subnetDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *KeaPeerDataSource) Configure(ctx context.Context, req datasource.Config
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *KeaPeerDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *KeaPeerResourceModel
+func (d *subnetDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *subnetResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -56,19 +58,19 @@ func (d *KeaPeerDataSource) Read(ctx context.Context, req datasource.ReadRequest
 		return
 	}
 
-	// Get kea peer from OPNsense unbound API
-	resourceStruct, err := d.client.Kea().GetPeer(ctx, data.Id.ValueString())
+	// Get kea subnet from OPNsense unbound API
+	resourceStruct, err := d.client.Kea().GetSubnet(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read kea peer, got error: %s", err))
+			fmt.Sprintf("Unable to read kea subnet, got error: %s", err))
 		return
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertKeaPeerStructToSchema(resourceStruct)
+	resourceModel, err := convertSubnetStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read kea peer, got error: %s", err))
+			fmt.Sprintf("Unable to read kea subnet, got error: %s", err))
 		return
 	}
 

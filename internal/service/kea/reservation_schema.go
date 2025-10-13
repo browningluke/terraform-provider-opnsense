@@ -1,4 +1,4 @@
-package service
+package kea
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -11,8 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// KeaReservationResourceModel describes the resource data model.
-type KeaReservationResourceModel struct {
+// reservationResourceModel describes the resource data model.
+type reservationResourceModel struct {
 	SubnetId types.String `tfsdk:"subnet_id"`
 
 	IpAddress  types.String `tfsdk:"ip_address"`
@@ -24,7 +24,7 @@ type KeaReservationResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func KeaReservationResourceSchema() schema.Schema {
+func reservationResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure DHCP reservations for Kea.",
 
@@ -64,7 +64,7 @@ func KeaReservationResourceSchema() schema.Schema {
 	}
 }
 
-func KeaReservationDataSourceSchema() dschema.Schema {
+func reservationDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure DHCP reservations for Kea.",
 
@@ -97,7 +97,7 @@ func KeaReservationDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertKeaReservationSchemaToStruct(d *KeaReservationResourceModel) (*kea.Reservation, error) {
+func convertReservationSchemaToStruct(d *reservationResourceModel) (*kea.Reservation, error) {
 	return &kea.Reservation{
 		Subnet:      api.SelectedMap(d.SubnetId.ValueString()),
 		IpAddress:   d.IpAddress.ValueString(),
@@ -107,8 +107,8 @@ func convertKeaReservationSchemaToStruct(d *KeaReservationResourceModel) (*kea.R
 	}, nil
 }
 
-func convertKeaReservationStructToSchema(d *kea.Reservation) (*KeaReservationResourceModel, error) {
-	return &KeaReservationResourceModel{
+func convertReservationStructToSchema(d *kea.Reservation) (*reservationResourceModel, error) {
+	return &reservationResourceModel{
 		SubnetId:    types.StringValue(d.Subnet.String()),
 		IpAddress:   types.StringValue(d.IpAddress),
 		MacAddress:  types.StringValue(d.HwAddress),

@@ -1,4 +1,4 @@
-package service
+package kea
 
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -13,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// KeaPeerResourceModel describes the resource data model.
-type KeaPeerResourceModel struct {
+// peerResourceModel describes the resource data model.
+type peerResourceModel struct {
 	Name types.String `tfsdk:"name"`
 	Url  types.String `tfsdk:"url"`
 	Role types.String `tfsdk:"role"`
@@ -22,7 +22,7 @@ type KeaPeerResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-func KeaPeerResourceSchema() schema.Schema {
+func peerResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure HA Peers for Kea.",
 
@@ -55,7 +55,7 @@ func KeaPeerResourceSchema() schema.Schema {
 	}
 }
 
-func KeaPeerDataSourceSchema() dschema.Schema {
+func peerDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure HA Peers for Kea.",
 
@@ -80,7 +80,7 @@ func KeaPeerDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertKeaPeerSchemaToStruct(d *KeaPeerResourceModel) (*kea.Peer, error) {
+func convertPeerSchemaToStruct(d *peerResourceModel) (*kea.Peer, error) {
 	return &kea.Peer{
 		Name: d.Name.ValueString(),
 		Url:  d.Url.ValueString(),
@@ -88,8 +88,8 @@ func convertKeaPeerSchemaToStruct(d *KeaPeerResourceModel) (*kea.Peer, error) {
 	}, nil
 }
 
-func convertKeaPeerStructToSchema(d *kea.Peer) (*KeaPeerResourceModel, error) {
-	return &KeaPeerResourceModel{
+func convertPeerStructToSchema(d *kea.Peer) (*peerResourceModel, error) {
+	return &peerResourceModel{
 		Name: types.StringValue(d.Name),
 		Url:  types.StringValue(d.Url),
 		Role: types.StringValue(d.Role.String()),

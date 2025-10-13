@@ -1,34 +1,36 @@
-package service
+package kea
 
 import (
 	"context"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ datasource.DataSource = &KeaReservationDataSource{}
+var _ datasource.DataSource = &reservationDataSource{}
+var _ datasource.DataSourceWithConfigure = &reservationDataSource{}
 
-func NewKeaReservationDataSource() datasource.DataSource {
-	return &KeaReservationDataSource{}
+func newReservationDataSource() datasource.DataSource {
+	return &reservationDataSource{}
 }
 
-// KeaReservationDataSource defines the data source implementation.
-type KeaReservationDataSource struct {
+// reservationDataSource defines the data source implementation.
+type reservationDataSource struct {
 	client opnsense.Client
 }
 
-func (d *KeaReservationDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *reservationDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_kea_reservation"
 }
 
-func (d *KeaReservationDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
-	resp.Schema = KeaReservationDataSourceSchema()
+func (d *reservationDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = reservationDataSourceSchema()
 }
 
-func (d *KeaReservationDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *reservationDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -46,8 +48,8 @@ func (d *KeaReservationDataSource) Configure(ctx context.Context, req datasource
 	d.client = opnsense.NewClient(apiClient)
 }
 
-func (d *KeaReservationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data *KeaReservationResourceModel
+func (d *reservationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data *reservationResourceModel
 
 	// Read Terraform configuration data into the model
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
@@ -65,7 +67,7 @@ func (d *KeaReservationDataSource) Read(ctx context.Context, req datasource.Read
 	}
 
 	// Convert OPNsense struct to TF schema
-	resourceModel, err := convertKeaReservationStructToSchema(resourceStruct)
+	resourceModel, err := convertReservationStructToSchema(resourceStruct)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read kea reservation, got error: %s", err))

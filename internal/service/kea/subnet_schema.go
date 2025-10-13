@@ -1,9 +1,9 @@
-package service
+package kea
 
 import (
 	"context"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"strings"
-	"terraform-provider-opnsense/internal/tools"
 
 	"github.com/browningluke/opnsense-go/pkg/kea"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -17,8 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// KeaSubnetResourceModel describes the resource data model.
-type KeaSubnetResourceModel struct {
+// subnetResourceModel describes the resource data model.
+type subnetResourceModel struct {
 	Subnet types.String `tfsdk:"subnet"`
 	Pools  types.Set    `tfsdk:"pools"`
 
@@ -45,7 +45,7 @@ type KeaSubnetResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
-type KeaStaticRouteModel struct {
+type staticRouteModel struct {
 	DestinationIp types.String `tfsdk:"destination_ip"`
 	RouterIp      types.String `tfsdk:"router_ip"`
 }
@@ -55,7 +55,7 @@ var keaStaticRouteTypes = map[string]attr.Type{
 	"router_ip":      types.StringType,
 }
 
-func KeaSubnetResourceSchema() schema.Schema {
+func subnetResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure DHCP subnets for Kea.",
 
@@ -92,7 +92,7 @@ func KeaSubnetResourceSchema() schema.Schema {
 			},
 			"static_routes": schema.SetNestedAttribute{
 				MarkdownDescription: "Static routes that the client should install in its routing cache. Defaults to `[]`.",
-				//Required:            true,
+				// Required:            true,
 				Optional: true,
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
@@ -186,7 +186,7 @@ func KeaSubnetResourceSchema() schema.Schema {
 	}
 }
 
-func KeaSubnetDataSourceSchema() dschema.Schema {
+func subnetDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Configure DHCP subnets for Kea.",
 
@@ -279,9 +279,9 @@ func KeaSubnetDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertKeaSubnetSchemaToStruct(d *KeaSubnetResourceModel) (*kea.Subnet, error) {
+func convertSubnetSchemaToStruct(d *subnetResourceModel) (*kea.Subnet, error) {
 	// Parse static routes
-	var routesList []KeaStaticRouteModel
+	var routesList []staticRouteModel
 	d.StaticRoutes.ElementsAs(context.Background(), &routesList, false)
 
 	// Convert routes to string
@@ -312,8 +312,8 @@ func convertKeaSubnetSchemaToStruct(d *KeaSubnetResourceModel) (*kea.Subnet, err
 	}, nil
 }
 
-func convertKeaSubnetStructToSchema(d *kea.Subnet) (*KeaSubnetResourceModel, error) {
-	model := &KeaSubnetResourceModel{
+func convertSubnetStructToSchema(d *kea.Subnet) (*subnetResourceModel, error) {
+	model := &subnetResourceModel{
 		Subnet:            types.StringValue(d.Subnet),
 		Pools:             tools.StringSliceToSet(strings.Split(d.Pools, "\n")),
 		MatchClientId:     types.BoolValue(tools.StringToBool(d.MatchClientId)),
@@ -340,7 +340,7 @@ func convertKeaSubnetStructToSchema(d *kea.Subnet) (*KeaSubnetResourceModel, err
 
 	// Parse static routes
 	routeSlice := strings.Split(d.OptionData.StaticRoutes, ";")
-	routes := []KeaStaticRouteModel{}
+	routes := []staticRouteModel{}
 
 	// Try to fill list
 	if len(routeSlice) > 0 {
@@ -351,7 +351,7 @@ func convertKeaSubnetStructToSchema(d *kea.Subnet) (*KeaSubnetResourceModel, err
 				continue
 			}
 
-			routes = append(routes, KeaStaticRouteModel{
+			routes = append(routes, staticRouteModel{
 				DestinationIp: types.StringValue(routePiece[0]),
 				RouterIp:      types.StringValue(routePiece[1]),
 			})

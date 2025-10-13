@@ -1,9 +1,10 @@
-package service
+package kea
 
 import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
@@ -14,27 +15,28 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &KeaReservationResource{}
-var _ resource.ResourceWithImportState = &KeaReservationResource{}
+var _ resource.Resource = &reservationResource{}
+var _ resource.ResourceWithConfigure = &reservationResource{}
+var _ resource.ResourceWithImportState = &reservationResource{}
 
-func NewKeaReservationResource() resource.Resource {
-	return &KeaReservationResource{}
+func newReservationResource() resource.Resource {
+	return &reservationResource{}
 }
 
-// KeaReservationResource defines the resource implementation.
-type KeaReservationResource struct {
+// reservationResource defines the resource implementation.
+type reservationResource struct {
 	client opnsense.Client
 }
 
-func (r *KeaReservationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *reservationResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_kea_reservation"
 }
 
-func (r *KeaReservationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
-	resp.Schema = KeaReservationResourceSchema()
+func (r *reservationResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+	resp.Schema = reservationResourceSchema()
 }
 
-func (r *KeaReservationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *reservationResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
@@ -52,8 +54,8 @@ func (r *KeaReservationResource) Configure(ctx context.Context, req resource.Con
 	r.client = opnsense.NewClient(apiClient)
 }
 
-func (r *KeaReservationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var data *KeaReservationResourceModel
+func (r *reservationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *reservationResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -63,7 +65,7 @@ func (r *KeaReservationResource) Create(ctx context.Context, req resource.Create
 	}
 
 	// Convert TF schema OPNsense struct
-	reservation, err := convertKeaReservationSchemaToStruct(data)
+	reservation, err := convertReservationSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse reservation, got error: %s", err))
@@ -88,8 +90,8 @@ func (r *KeaReservationResource) Create(ctx context.Context, req resource.Create
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *KeaReservationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var data *KeaReservationResourceModel
+func (r *reservationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var data *reservationResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -114,7 +116,7 @@ func (r *KeaReservationResource) Read(ctx context.Context, req resource.ReadRequ
 	}
 
 	// Convert OPNsense struct to TF schema
-	resModel, err := convertKeaReservationStructToSchema(reservation)
+	resModel, err := convertReservationStructToSchema(reservation)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read reservation, got error: %s", err))
@@ -128,8 +130,8 @@ func (r *KeaReservationResource) Read(ctx context.Context, req resource.ReadRequ
 	resp.Diagnostics.Append(resp.State.Set(ctx, &resModel)...)
 }
 
-func (r *KeaReservationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var data *KeaReservationResourceModel
+func (r *reservationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var data *reservationResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
@@ -139,7 +141,7 @@ func (r *KeaReservationResource) Update(ctx context.Context, req resource.Update
 	}
 
 	// Convert TF schema OPNsense struct
-	res, err := convertKeaReservationSchemaToStruct(data)
+	res, err := convertReservationSchemaToStruct(data)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse reservation, got error: %s", err))
@@ -158,8 +160,8 @@ func (r *KeaReservationResource) Update(ctx context.Context, req resource.Update
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 }
 
-func (r *KeaReservationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data *KeaReservationResourceModel
+func (r *reservationResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *reservationResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -177,6 +179,6 @@ func (r *KeaReservationResource) Delete(ctx context.Context, req resource.Delete
 	}
 }
 
-func (r *KeaReservationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *reservationResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
 }
