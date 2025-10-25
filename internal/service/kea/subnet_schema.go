@@ -2,8 +2,9 @@ package kea
 
 import (
 	"context"
-	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"strings"
+
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 
 	"github.com/browningluke/opnsense-go/pkg/kea"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
@@ -37,7 +38,7 @@ type subnetResourceModel struct {
 	TimeServers types.Set `tfsdk:"time_servers"`
 
 	NextServer   types.String `tfsdk:"next_server"`
-	TFPTServer   types.String `tfsdk:"tfpt_server"`
+	TFTPServer   types.String `tfsdk:"tftp_server"`
 	TFTPBootfile types.String `tfsdk:"tftp_bootfile"`
 
 	Description types.String `tfsdk:"description"`
@@ -305,7 +306,7 @@ func convertSubnetSchemaToStruct(d *subnetResourceModel) (*kea.Subnet, error) {
 			DomainName:        d.DomainName.ValueString(),
 			NtpServers:        tools.SetToStringSlice(d.NTPServers),
 			TimeServers:       tools.SetToStringSlice(d.TimeServers),
-			TftpServerName:    d.TFPTServer.ValueString(),
+			TftpServerName:    d.TFTPServer.ValueString(),
 			BootFileName:      d.TFTPBootfile.ValueString(),
 		},
 		Description: d.Description.ValueString(),
@@ -325,7 +326,7 @@ func convertSubnetStructToSchema(d *kea.Subnet) (*subnetResourceModel, error) {
 		NTPServers:        tools.StringSliceToSet(d.OptionData.NtpServers),
 		TimeServers:       tools.StringSliceToSet(d.OptionData.TimeServers),
 		NextServer:        types.StringValue(d.NextServer),
-		TFPTServer:        types.StringValue(d.OptionData.TftpServerName),
+		TFTPServer:        types.StringValue(d.OptionData.TftpServerName),
 		TFTPBootfile:      types.StringValue(d.OptionData.BootFileName),
 		Description:       types.StringValue(d.Description),
 	}
