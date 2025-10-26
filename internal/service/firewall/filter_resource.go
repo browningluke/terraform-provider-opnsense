@@ -8,6 +8,7 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -18,6 +19,7 @@ import (
 var _ resource.Resource = &filterResource{}
 var _ resource.ResourceWithConfigure = &filterResource{}
 var _ resource.ResourceWithImportState = &filterResource{}
+var _ resource.ResourceWithConfigValidators = &filterResource{}
 
 func newFilterResource() resource.Resource {
 	return &filterResource{}
@@ -34,6 +36,33 @@ func (r *filterResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *filterResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = filterResourceSchema()
+}
+
+func (r *filterResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		// Ensure adaptive end is greater than or equal to adaptive start
+		validators.NumericGreaterThanOrEqual(
+			path.MatchRoot("stateful_firewall").AtName("adaptive_timeouts").AtName("end"),
+			path.MatchRoot("stateful_firewall").AtName("adaptive_timeouts").AtName("start"),
+		),
+		// Ensure adaptive end is greater than or equal to max states
+		validators.NumericGreaterThanOrEqual(
+			path.MatchRoot("stateful_firewall").AtName("adaptive_timeouts").AtName("end"),
+			path.MatchRoot("stateful_firewall").AtName("max").AtName("states"),
+		),
+		// Ensure max.states is only set for TCP protocols
+		validators.RequiresStringEqualsOneOf(
+			path.MatchRoot("stateful_firewall").AtName("max").AtName("states"),
+			path.MatchRoot("filter").AtName("protocol"),
+			[]string{"TCP", "TCP/UDP"},
+		),
+		// Ensure icmp_type is only set for ICMP protocol
+		validators.RequiresStringEqualsOneOf(
+			path.MatchRoot("filter").AtName("icmp_type"),
+			path.MatchRoot("filter").AtName("protocol"),
+			[]string{"ICMP"},
+		),
+	}
 }
 
 func (r *filterResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
