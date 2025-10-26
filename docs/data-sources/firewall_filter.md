@@ -20,36 +20,147 @@ Firewall filter rules can be used to restrict or allow traffic from and/or to sp
 
 ### Read-Only
 
-- `action` (String) Choose what to do with packets that match the criteria specified below. Hint: the difference between block and reject is that with reject, a packet (TCP RST or ICMP port unreachable for UDP) is returned to the sender, whereas with block the packet is dropped silently. In either case, the original packet is discarded. Available values: `pass`, `block`, `reject`.
-- `description` (String) Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.
-- `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
-- `direction` (String) Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic. Available values: `in`, `out`.
-- `enabled` (Boolean) Enable this firewall filter rule.
-- `gateway` (String) Leave as `""` to use the system routing table. Or choose a gateway to utilize policy based routing.
-- `interface` (Set of String) The interface(s) on which the packets must come in to match this rule.
-- `ip_protocol` (String) Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`.
-- `log` (Boolean) Log packets that are handled by this rule.
-- `protocol` (String) Choose which IP protocol this rule should match.
-- `quick` (Boolean) If a packet matches a rule specifying quick, then that rule is considered the last matching rule and the specified action is taken. When a rule does not have quick enabled, the last matching rule wins.
-- `sequence` (Number) Specify the order of this filter rule.
-- `source` (Attributes) (see [below for nested schema](#nestedatt--source))
+- `categories` (Set of String) The IDs of multiple groups for organizing items.
+- `description` (String) Optional description for reference (not parsed).
+- `enabled` (Boolean) Whether this firewall filter rule is enabled.
+- `filter` (Attributes) (see [below for nested schema](#nestedatt--filter))
+- `interface` (Attributes) (see [below for nested schema](#nestedatt--interface))
+- `internal_tagging` (Attributes) (see [below for nested schema](#nestedatt--internal_tagging))
+- `no_xmlrpc_sync` (Boolean) Whether this item is excluded from the HA synchronization process. An already existing item with the same UUID on the synchronization target will not be altered or deleted as long as this is active.
+- `priority` (Attributes) (see [below for nested schema](#nestedatt--priority))
+- `sequence` (Number) The order of this filter rule.
+- `source_routing` (Attributes) (see [below for nested schema](#nestedatt--source_routing))
+- `stateful_firewall` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall))
+- `traffic_shaping` (Attributes) (see [below for nested schema](#nestedatt--traffic_shaping))
 
-<a id="nestedatt--destination"></a>
-### Nested Schema for `destination`
-
-Read-Only:
-
-- `invert` (Boolean) Use this option to invert the sense of the match.
-- `net` (String) Specify the IP address, CIDR or alias for the destination of the packet for this mapping.
-- `port` (String) Specify the port for the destination of the packet for this mapping.
-
-
-<a id="nestedatt--source"></a>
-### Nested Schema for `source`
+<a id="nestedatt--filter"></a>
+### Nested Schema for `filter`
 
 Read-Only:
 
-- `invert` (Boolean) Use this option to invert the sense of the match.
-- `net` (String) Specify the IP address, CIDR or alias for the source of the packet for this mapping.
-- `port` (String) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `""`).
+- `action` (String) What to do with packets that match the criteria. Hint: the difference between block and reject is that with reject, a packet (TCP RST or ICMP port unreachable for UDP) is returned to the sender, whereas with block the packet is dropped silently. In either case, the original packet is discarded.
+- `allow_options` (Boolean) Whether packets with IP options are allowed to pass. Otherwise they are blocked.
+- `destination` (Attributes) (see [below for nested schema](#nestedatt--filter--destination))
+- `direction` (String) The direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic.
+- `icmp_type` (Set of String)
+- `ip_protocol` (String)
+- `log` (Boolean) Whether packets handled by this rule are logged.
+- `protocol` (String)
+- `quick` (Boolean) Whether a packet matching this rule is the last matching rule. If quick is enabled, the specified action is taken immediately.
+- `schedule` (String)
+- `source` (Attributes) (see [below for nested schema](#nestedatt--filter--source))
+- `tcp_flags` (Set of String) The TCP flags that must be set for this rule to match.
+- `tcp_flags_out_of` (Set of String) The TCP flags that must be cleared for this rule to match.
+
+<a id="nestedatt--filter--destination"></a>
+### Nested Schema for `filter.destination`
+
+Read-Only:
+
+- `invert` (Boolean) Whether the sense of the match is inverted.
+- `net` (String)
+- `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.
+
+
+<a id="nestedatt--filter--source"></a>
+### Nested Schema for `filter.source`
+
+Read-Only:
+
+- `invert` (Boolean) Whether the sense of the match is inverted.
+- `net` (String)
+- `port` (String) Source port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.
+
+
+
+<a id="nestedatt--interface"></a>
+### Nested Schema for `interface`
+
+Read-Only:
+
+- `interface` (Set of String) The interfaces the filter rule is applied on.
+- `invert` (Boolean) Whether all but selected interfaces are used.
+
+
+<a id="nestedatt--internal_tagging"></a>
+### Nested Schema for `internal_tagging`
+
+Read-Only:
+
+- `match_local` (String) Specifies that packets must already be tagged with the given tag in order to match the rule.
+- `set_local` (String) Packets matching this rule are tagged with the specified string. The tag acts as an internal marker that can be used to identify these packets later on. This can be used, for example, to provide trust between interfaces and to determine if packets have been processed by translation rules. Tags are "sticky", meaning that the packet will be tagged even if the rule is not the last matching rule. Further matching rules can replace the tag with a new one but will not remove a previously applied tag. A packet is only ever assigned one tag at a time.
+
+
+<a id="nestedatt--priority"></a>
+### Nested Schema for `priority`
+
+Read-Only:
+
+- `low_delay_set` (Number) Used in combination with set priority, packets which have a TOS of lowdelay and TCP ACKs with no data payload will be assigned this priority when offered.
+- `match` (Number) Only matches packets which have the given queueing priority assigned.
+- `match_tos` (String)
+- `set` (Number) The specific queueing priority assigned to packets matching this rule. If the packet is transmitted on a vlan(4) interface, the queueing priority will be written as the priority code point in the 802.1Q VLAN header.
+
+
+<a id="nestedatt--source_routing"></a>
+### Nested Schema for `source_routing`
+
+Read-Only:
+
+- `disable_reply_to` (Boolean) Whether reply-to is explicitly disabled for this rule.
+- `gateway` (String) The gateway used for routing. 'default' uses the system routing table. A specific gateway can be chosen to utilize policy based routing.
+- `reply_to` (String) How packets route back in the opposite direction (replies), when set to default, packets on WAN type interfaces reply to their connected gateway on the interface (unless globally disabled). A specific gateway may be chosen as well here. This setting is only relevant in the context of a state, for stateless rules there is no defined opposite direction.
+
+
+<a id="nestedatt--stateful_firewall"></a>
+### Nested Schema for `stateful_firewall`
+
+Read-Only:
+
+- `adaptive_timeouts` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall--adaptive_timeouts))
+- `max` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall--max))
+- `no_pfsync` (Boolean) Whether states created by this rule are prevented from being synced with pfsync.
+- `overload_table` (String) The overload table used when max new connections per time interval has been reached. The default virusprot table comes with a default block rule in floating rules, alternatively specify your own table here.
+- `policy` (String) How states created by this rule are treated, default (as defined in advanced), floating in which case states are valid on all interfaces or interface bound. Interface bound states are more secure, floating more flexible.
+- `timeout` (Number) State Timeout in seconds (TCP only).
+- `type` (String) The state tracking mechanism used, default is full stateful tracking, sloppy ignores sequence numbers, use none for stateless rules.
+
+<a id="nestedatt--stateful_firewall--adaptive_timeouts"></a>
+### Nested Schema for `stateful_firewall.adaptive_timeouts`
+
+Read-Only:
+
+- `end` (Number) When reaching this number of state entries, all timeout values become zero, effectively purging all state entries immediately. This value is used to define the scale factor, it should not actually be reached (set a lower state limit).
+- `start` (Number) When the number of state entries exceeds this value, adaptive scaling begins. All timeout values are scaled linearly with factor `(adaptive.end - number of states) / (adaptive.end - adaptive.start)`.
+
+
+<a id="nestedatt--stateful_firewall--max"></a>
+### Nested Schema for `stateful_firewall.max`
+
+Read-Only:
+
+- `new_connections` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall--max--new_connections))
+- `source_connections` (Number) The maximum number of simultaneous TCP connections which have completed the 3-way handshake that a single host can make.
+- `source_nodes` (Number) The maximum number of source addresses which can simultaneously have state table entries.
+- `source_states` (Number) The maximum number of simultaneous state entries that a single source address can create with this rule.
+- `states` (Number) The limit on the number of concurrent states the rule may create. When this limit is reached, further packets that would create state are dropped until existing states time out.
+
+<a id="nestedatt--stateful_firewall--max--new_connections"></a>
+### Nested Schema for `stateful_firewall.max.new_connections`
+
+Read-Only:
+
+- `count` (Number) Maximum new connections per host, measured over time.
+- `seconds` (Number) Time interval (seconds) to measure the number of connections.
+
+
+
+
+<a id="nestedatt--traffic_shaping"></a>
+### Nested Schema for `traffic_shaping`
+
+Read-Only:
+
+- `reverse_shaper` (String) The selected pipe or queue used to shape packets in the reverse rule direction.
+- `shaper` (String) The selected pipe or queue used to shape packets in the rule direction.
 

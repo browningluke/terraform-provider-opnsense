@@ -1,72 +1,165 @@
-resource "opnsense_firewall_filter" "example_one" {
-  enabled = false
-
-  sequence = 1
-  action   = "block"
-  quick    = false
-
-  interface = [
-    "lan",
-    "lo0",
-  ]
-
-  direction = "in"
-  ip_protocol = "inet"
-  protocol    = "UDP"
-
-  source = {
-    net    = "any"
-    invert = true
-  }
-
-  destination = {
-    net    = "examplealias"
-    port   = "https"
-  }
-
-  log = false
-  description = "example rule"
+# Define a category for use in filter examples
+resource "opnsense_firewall_category" "example" {
+  name = "Example Category"
 }
 
-resource "opnsense_firewall_filter" "example_two" {
-  action = "pass"
-  interface = [
-    "wan",
-  ]
-
-  direction = "in"
-  protocol  = "TCP"
-
-  source = {
-    net = "wan" # This is equiv. to WAN Net
+# Example 1: Minimal firewall filter with only required attributes
+resource "opnsense_firewall_filter" "minimal" {
+  interface = {
+    interface = ["lan"]
   }
 
-  destination = {
-    net  = "10.8.0.1"
-    port = "443"
+  filter = {
+    action    = "pass"
+    direction = "in"
+    protocol  = "any"
   }
-
-  description = "example rule"
 }
 
-resource "opnsense_firewall_filter" "example_three" {
-  action = "pass"
-  interface = [
-    "wan",
+# Example 2: Typical use case: Allow HTTPS traffic from specific source to web server
+resource "opnsense_firewall_filter" "allow_https" {
+  enabled     = true
+  sequence    = 100
+  description = "Allow HTTPS traffic to web server"
+
+  categories = [
+    opnsense_firewall_category.example.id,
   ]
 
-  direction = "out"
-  protocol  = "TCP"
-
-  source = {
-    net = "192.168.0.0/16"
+  interface = {
+    interface = ["wan"]
   }
 
-  destination = {
-    net  = "wanip" # This is equiv. to WAN Address
-    port = "80-443"
+  filter = {
+    quick     = true
+    action    = "pass"
+    direction = "in"
+    protocol  = "TCP"
+
+    source = {
+      net = "any"
+    }
+
+    destination = {
+      net  = "192.168.1.100"
+      port = "https"
+    }
+
+    log = true
   }
 
-  description = "example rule"
-  log         = true
+  stateful_firewall = {
+    type = "keep"
+  }
+}
+
+# Example 3: Comprehensive example with all attributes explicitly configured
+resource "opnsense_firewall_filter" "comprehensive" {
+  enabled        = true
+  sequence       = 200
+  no_xmlrpc_sync = false
+  description    = "Comprehensive example with all attributes"
+
+  categories = [
+    opnsense_firewall_category.example.id,
+  ]
+
+  interface = {
+    invert = false
+    interface = [
+      "lan",
+      "opt1",
+    ]
+  }
+
+  filter = {
+    quick         = true
+    action        = "pass"
+    allow_options = false
+    direction     = "in"
+    ip_protocol   = "inet"
+    protocol      = "TCP"
+
+    icmp_type = [
+      "echoreq",
+      "echorep",
+    ]
+
+    source = {
+      invert = false
+      net    = "192.168.1.0/24"
+      port   = "1024-65535"
+    }
+
+    destination = {
+      invert = false
+      net    = "10.0.0.10"
+      port   = "https"
+    }
+
+    log = true
+
+    tcp_flags = [
+      "syn",
+      "ack",
+    ]
+
+    tcp_flags_out_of = [
+      "syn",
+      "ack",
+      "fin",
+      "rst",
+    ]
+
+    schedule = ""
+  }
+
+  stateful_firewall = {
+    type    = "keep"
+    policy  = ""
+    timeout = 3600
+
+    adaptive_timeouts = {
+      start = 60000
+      end   = 120000
+    }
+
+    max = {
+      states             = 10000
+      source_nodes       = 1000
+      source_states      = 500
+      source_connections = 100
+
+      new_connections = {
+        count   = 10
+        seconds = 10
+      }
+    }
+
+    overload_table = ""
+    no_pfsync      = false
+  }
+
+  traffic_shaping = {
+    shaper         = ""
+    reverse_shaper = ""
+  }
+
+  source_routing = {
+    gateway          = ""
+    disable_reply_to = false
+    reply_to         = ""
+  }
+
+  priority = {
+    match         = -1
+    set           = 3
+    low_delay_set = 4
+    match_tos     = "lowdelay"
+  }
+
+  internal_tagging = {
+    set_local   = "webtraffic"
+    match_local = ""
+  }
 }

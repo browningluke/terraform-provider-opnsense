@@ -9,82 +9,173 @@ description: |-
 
 Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded
 
-~> This resource requires the `os-firewall` plugin to be installed. It will *not* behave correctly if it is not installed.
-
 ## Example Usage
 
 ```terraform
-resource "opnsense_firewall_filter" "example_one" {
-  enabled = false
-
-  sequence = 1
-  action   = "block"
-  quick    = false
-
-  interface = [
-    "lan",
-    "lo0",
-  ]
-
-  direction = "in"
-  ip_protocol = "inet"
-  protocol    = "UDP"
-
-  source = {
-    net    = "any"
-    invert = true
-  }
-
-  destination = {
-    net    = "examplealias"
-    port   = "https"
-  }
-
-  log = false
-  description = "example rule"
+# Define a category for use in filter examples
+resource "opnsense_firewall_category" "example" {
+  name = "Example Category"
 }
 
-resource "opnsense_firewall_filter" "example_two" {
-  action = "pass"
-  interface = [
-    "wan",
-  ]
-
-  direction = "in"
-  protocol  = "TCP"
-
-  source = {
-    net = "wan" # This is equiv. to WAN Net
+# Example 1: Minimal firewall filter with only required attributes
+resource "opnsense_firewall_filter" "minimal" {
+  interface = {
+    interface = ["lan"]
   }
 
-  destination = {
-    net  = "10.8.0.1"
-    port = "443"
+  filter = {
+    action    = "pass"
+    direction = "in"
+    protocol  = "any"
   }
-
-  description = "example rule"
 }
 
-resource "opnsense_firewall_filter" "example_three" {
-  action = "pass"
-  interface = [
-    "wan",
+# Example 2: Typical use case: Allow HTTPS traffic from specific source to web server
+resource "opnsense_firewall_filter" "allow_https" {
+  enabled     = true
+  sequence    = 100
+  description = "Allow HTTPS traffic to web server"
+
+  categories = [
+    opnsense_firewall_category.example.id,
   ]
 
-  direction = "out"
-  protocol  = "TCP"
-
-  source = {
-    net = "192.168.0.0/16"
+  interface = {
+    interface = ["wan"]
   }
 
-  destination = {
-    net  = "wanip" # This is equiv. to WAN Address
-    port = "80-443"
+  filter = {
+    quick     = true
+    action    = "pass"
+    direction = "in"
+    protocol  = "TCP"
+
+    source = {
+      net = "any"
+    }
+
+    destination = {
+      net  = "192.168.1.100"
+      port = "https"
+    }
+
+    log = true
   }
 
-  description = "example rule"
-  log         = true
+  stateful_firewall = {
+    type = "keep"
+  }
+}
+
+# Example 3: Comprehensive example with all attributes explicitly configured
+resource "opnsense_firewall_filter" "comprehensive" {
+  enabled        = true
+  sequence       = 200
+  no_xmlrpc_sync = false
+  description    = "Comprehensive example with all attributes"
+
+  categories = [
+    opnsense_firewall_category.example.id,
+  ]
+
+  interface = {
+    invert = false
+    interface = [
+      "lan",
+      "opt1",
+    ]
+  }
+
+  filter = {
+    quick         = true
+    action        = "pass"
+    allow_options = false
+    direction     = "in"
+    ip_protocol   = "inet"
+    protocol      = "TCP"
+
+    icmp_type = [
+      "echoreq",
+      "echorep",
+    ]
+
+    source = {
+      invert = false
+      net    = "192.168.1.0/24"
+      port   = "1024-65535"
+    }
+
+    destination = {
+      invert = false
+      net    = "10.0.0.10"
+      port   = "https"
+    }
+
+    log = true
+
+    tcp_flags = [
+      "syn",
+      "ack",
+    ]
+
+    tcp_flags_out_of = [
+      "syn",
+      "ack",
+      "fin",
+      "rst",
+    ]
+
+    schedule = ""
+  }
+
+  stateful_firewall = {
+    type    = "keep"
+    policy  = ""
+    timeout = 3600
+
+    adaptive_timeouts = {
+      start = 60000
+      end   = 120000
+    }
+
+    max = {
+      states             = 10000
+      source_nodes       = 1000
+      source_states      = 500
+      source_connections = 100
+
+      new_connections = {
+        count   = 10
+        seconds = 10
+      }
+    }
+
+    overload_table = ""
+    no_pfsync      = false
+  }
+
+  traffic_shaping = {
+    shaper         = ""
+    reverse_shaper = ""
+  }
+
+  source_routing = {
+    gateway          = ""
+    disable_reply_to = false
+    reply_to         = ""
+  }
+
+  priority = {
+    match         = -1
+    set           = 3
+    low_delay_set = 4
+    match_tos     = "lowdelay"
+  }
+
+  internal_tagging = {
+    set_local   = "webtraffic"
+    match_local = ""
+  }
 }
 ```
 
@@ -93,45 +184,162 @@ resource "opnsense_firewall_filter" "example_three" {
 
 ### Required
 
-- `action` (String) Choose what to do with packets that match the criteria specified below. Hint: the difference between block and reject is that with reject, a packet (TCP RST or ICMP port unreachable for UDP) is returned to the sender, whereas with block the packet is dropped silently. In either case, the original packet is discarded. Available values: `pass`, `block`, `reject`.
-- `direction` (String) Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic. Available values: `in`, `out`.
-- `interface` (Set of String) Choose on which interface(s) packets must come in to match this rule. Must specify at least 1.
-- `protocol` (String) Choose which IP protocol this rule should match.
+- `filter` (Attributes) (see [below for nested schema](#nestedatt--filter))
+- `interface` (Attributes) (see [below for nested schema](#nestedatt--interface))
 
 ### Optional
 
+- `categories` (Set of String) For grouping purposes, provide the IDs of multiple groups here to organize items. Defaults to `[]`.
 - `description` (String) Optional description here for your reference (not parsed).
-- `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `enabled` (Boolean) Enable this firewall filter rule. Defaults to `true`.
-- `gateway` (String) Leave as `""` to use the system routing table. Or choose a gateway to utilize policy based routing. Defaults to `""`.
-- `ip_protocol` (String) Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`, `inet46`. Defaults to `inet`.
-- `log` (Boolean) Log packets that are handled by this rule. Defaults to `false`.
-- `quick` (Boolean) If a packet matches a rule specifying quick, then that rule is considered the last matching rule and the specified action is taken. When a rule does not have quick enabled, the last matching rule wins. Defaults to `true`.
+- `internal_tagging` (Attributes) (see [below for nested schema](#nestedatt--internal_tagging))
+- `no_xmlrpc_sync` (Boolean) Whether to exclude this item from the HA synchronization process. An already existing item with the same UUID on the synchronization target will not be altered or deleted as long as this is active. Defaults to `false`.
+- `priority` (Attributes) (see [below for nested schema](#nestedatt--priority))
 - `sequence` (Number) Specify the order of this filter rule. Defaults to `1`.
-- `source` (Attributes) (see [below for nested schema](#nestedatt--source))
+- `source_routing` (Attributes) (see [below for nested schema](#nestedatt--source_routing))
+- `stateful_firewall` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall))
+- `traffic_shaping` (Attributes) (see [below for nested schema](#nestedatt--traffic_shaping))
 
 ### Read-Only
 
 - `id` (String) UUID of the resource.
 
-<a id="nestedatt--destination"></a>
-### Nested Schema for `destination`
+<a id="nestedatt--filter"></a>
+### Nested Schema for `filter`
+
+Required:
+
+- `action` (String) Choose what to do with packets that match the criteria specified below. Hint: the difference between block and reject is that with reject, a packet (TCP RST or ICMP port unreachable for UDP) is returned to the sender, whereas with block the packet is dropped silently. In either case, the original packet is discarded.
+- `direction` (String) Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic.
+- `protocol` (String)
 
 Optional:
 
-- `invert` (Boolean) Use this option to invert the sense of the match. Defaults to `false`.
-- `net` (String) Specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
-- `port` (String) Destination port number, well known name (imap, imaps, http, https, ...) or alias name, for ranges use a dash. Defaults to `""`.
+- `allow_options` (Boolean) Whether to allow packets with IP options to pass. Otherwise they are blocked. Defaults to `false`.
+- `destination` (Attributes) (see [below for nested schema](#nestedatt--filter--destination))
+- `icmp_type` (Set of String)
+- `ip_protocol` (String)
+- `log` (Boolean) Whether to log packets that are handled by this rule. Defaults to `false`.
+- `quick` (Boolean) If a packet matches a rule specifying quick, then that rule is considered the last matching rule and the specified action is taken. When a rule does not have quick enabled, the last matching rule wins. Defaults to `true`.
+- `schedule` (String)
+- `source` (Attributes) (see [below for nested schema](#nestedatt--filter--source))
+- `tcp_flags` (Set of String) The TCP flags that must be set this rule to match. Defaults to `[]`.
+- `tcp_flags_out_of` (Set of String) The TCP flags that must be cleared for this rule to match. Defaults to `[]`.
 
-
-<a id="nestedatt--source"></a>
-### Nested Schema for `source`
+<a id="nestedatt--filter--destination"></a>
+### Nested Schema for `filter.destination`
 
 Optional:
 
-- `invert` (Boolean) Use this option to invert the sense of the match. Defaults to `false`.
-- `net` (String) Specify the IP address, CIDR or alias for the source of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
-- `port` (String) Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `""`). Defaults to `""`.
+- `invert` (Boolean) Whether to invert the sense of the match. Defaults to `false`.
+- `net` (String)
+- `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `""`.
+
+
+<a id="nestedatt--filter--source"></a>
+### Nested Schema for `filter.source`
+
+Optional:
+
+- `invert` (Boolean) Whether to invert the sense of the match. Defaults to `false`.
+- `net` (String)
+- `port` (String) Source port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `""`.
+
+
+
+<a id="nestedatt--interface"></a>
+### Nested Schema for `interface`
+
+Required:
+
+- `interface` (Set of String) The interfaces to apply the filter rule on.
+
+Optional:
+
+- `invert` (Boolean) Whether to use all but selected interfaces. Defaults to `false`.
+
+
+<a id="nestedatt--internal_tagging"></a>
+### Nested Schema for `internal_tagging`
+
+Optional:
+
+- `match_local` (String) Used to specify that packets must already be tagged with the given tag in order to match the rule. Defaults to `""`.
+- `set_local` (String) Packets matching this rule will be tagged with the specified string. The tag acts as an internal marker that can be used to identify these packets later on. This can be used, for example, to provide trust between interfaces and to determine if packets have been processed by translation rules. Tags are "sticky", meaning that the packet will be tagged even if the rule is not the last matching rule. Further matching rules can replace the tag with a new one but will not remove a previously applied tag. A packet is only ever assigned one tag at a time. Defaults to `""`.
+
+
+<a id="nestedatt--priority"></a>
+### Nested Schema for `priority`
+
+Optional:
+
+- `low_delay_set` (Number) Used in combination with set priority, packets which have a TOS of lowdelay and TCP ACKs with no data payload will be assigned this priority when offered. Defaults to `-1`.
+- `match` (Number) Only match packets which have the given queueing priority assigned. Defaults to `-1`.
+- `match_tos` (String)
+- `set` (Number) Packets matching this rule will be assigned a specific queueing priority. If the packet is transmitted on a vlan(4) interface, the queueing priority will be written as the priority code point in the 802.1Q VLAN header. Defaults to `-1`.
+
+
+<a id="nestedatt--source_routing"></a>
+### Nested Schema for `source_routing`
+
+Optional:
+
+- `disable_reply_to` (Boolean) Whether to explicitly disable reply-to for this rule. Defaults to `false`.
+- `gateway` (String) Leave as 'default' to use the system routing table. Or choose a gateway to utilize policy based routing. Defaults to `""`.
+- `reply_to` (String) Determines how packets route back in the opposite direction (replies), when set to default, packets on WAN type interfaces reply to their connected gateway on the interface (unless globally disabled). A specific gateway may be chosen as well here. This setting is only relevant in the context of a state, for stateless rules there is no defined opposite direction. Defaults to `""`.
+
+
+<a id="nestedatt--stateful_firewall"></a>
+### Nested Schema for `stateful_firewall`
+
+Optional:
+
+- `adaptive_timeouts` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall--adaptive_timeouts))
+- `max` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall--max))
+- `no_pfsync` (Boolean) Whether to prevent states created by this rule to be synced with pfsync. Defaults to `false`.
+- `overload_table` (String) Overload table used when max new connections per time interval has been reached. The default virusprot table comes with a default block rule in floating rules, alternatively specify your own table here. Defaults to `""`.
+- `policy` (String) How states created by this rule are treated, default (as defined in advanced), floating in which case states are valid on all interfaces or interface bound. Interface bound states are more secure, floating more flexible. Defaults to `""`.
+- `timeout` (Number) State Timeout in seconds (TCP only). Defaults to `-1`.
+- `type` (String) State tracking mechanism to use, default is full stateful tracking, sloppy ignores sequence numbers, use none for stateless rules. Defaults to `"keep"`.
+
+<a id="nestedatt--stateful_firewall--adaptive_timeouts"></a>
+### Nested Schema for `stateful_firewall.adaptive_timeouts`
+
+Optional:
+
+- `end` (Number) When reaching this number of state entries, all timeout values become zero, effectively purging all state entries immediately. This value is used to define the scale factor, it should not actually be reached (set a lower state limit). Defaults to `-1`.
+- `start` (Number) When the number of state entries exceeds this value, adaptive scaling begins. All timeout values are scaled linearly with factor `(adaptive.end - number of states) / (adaptive.end - adaptive.start)`. Defaults to `-1`.
+
+
+<a id="nestedatt--stateful_firewall--max"></a>
+### Nested Schema for `stateful_firewall.max`
+
+Optional:
+
+- `new_connections` (Attributes) (see [below for nested schema](#nestedatt--stateful_firewall--max--new_connections))
+- `source_connections` (Number) Limit the maximum number of simultaneous TCP connections which have completed the 3-way handshake that a single host can make. Defaults to `-1`.
+- `source_nodes` (Number) Limits the maximum number of source addresses which can simultaneously have state table entries. Defaults to `-1`.
+- `source_states` (Number) Limits the maximum number of simultaneous state entries that a single source address can create with this rule. Defaults to `-1`.
+- `states` (Number) Limits the number of concurrent states the rule may create. When this limit is reached, further packets that would create state are dropped until existing states time out. Defaults to `-1`.
+
+<a id="nestedatt--stateful_firewall--max--new_connections"></a>
+### Nested Schema for `stateful_firewall.max.new_connections`
+
+Optional:
+
+- `count` (Number) Maximum new connections per host, measured over time. Defaults to `-1`.
+- `seconds` (Number) Time interval (seconds) to measure the number of connections. Defaults to `-1`.
+
+
+
+
+<a id="nestedatt--traffic_shaping"></a>
+### Nested Schema for `traffic_shaping`
+
+Optional:
+
+- `reverse_shaper` (String) Shape packets using the selected pipe or queue in the reverse rule direction. Defaults to `""`.
+- `shaper` (String) Shape packets using the selected pipe or queue in the rule direction. Defaults to `""`.
 
 ## Import
 
