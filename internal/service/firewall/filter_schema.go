@@ -123,9 +123,29 @@ type filterResourceModel struct {
 	Id types.String `tfsdk:"id"`
 }
 
+// filterResourceModelV0 describes the OLD v0 schema with flat structure (pre-nested blocks).
+// This is used for state migration from v0 to v1.
+type filterResourceModelV0 struct {
+	Enabled     types.Bool   `tfsdk:"enabled"`
+	Sequence    types.Int64  `tfsdk:"sequence"`
+	Action      types.String `tfsdk:"action"`
+	Quick       types.Bool   `tfsdk:"quick"`
+	Interface   types.Set    `tfsdk:"interface"`
+	Direction   types.String `tfsdk:"direction"`
+	IPProtocol  types.String `tfsdk:"ip_protocol"`
+	Protocol    types.String `tfsdk:"protocol"`
+	Source      types.Object `tfsdk:"source"`
+	Destination types.Object `tfsdk:"destination"`
+	Gateway     types.String `tfsdk:"gateway"`
+	Log         types.Bool   `tfsdk:"log"`
+	Description types.String `tfsdk:"description"`
+	Id          types.String `tfsdk:"id"`
+}
+
 func filterResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded",
+		Version:             1,
 
 		Attributes: map[string]schema.Attribute{
 			"enabled": schema.BoolAttribute{
@@ -1424,4 +1444,176 @@ func convertFilterStructToSchema(d *firewall.Filter) (*filterResourceModel, erro
 	}
 
 	return model, nil
+}
+
+// filterResourceSchemaV0 returns the v0 (flat) schema for state migration.
+// This is the schema before nested blocks were introduced.
+func filterResourceSchemaV0() schema.Schema {
+	return schema.Schema{
+		MarkdownDescription: "Firewall filter rules can be used to restrict or allow traffic from and/or to specific networks as well as influence how traffic should be forwarded",
+		Version:             0,
+
+		Attributes: map[string]schema.Attribute{
+			"enabled": schema.BoolAttribute{
+				MarkdownDescription: "Enable this firewall filter rule. Defaults to `true`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
+			},
+			"sequence": schema.Int64Attribute{
+				MarkdownDescription: "Specify the order of this filter rule. Defaults to `1`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(1),
+			},
+			"action": schema.StringAttribute{
+				MarkdownDescription: "Choose what to do with packets that match the criteria specified below. Hint: the difference between block and reject is that with reject, a packet (TCP RST or ICMP port unreachable for UDP) is returned to the sender, whereas with block the packet is dropped silently. In either case, the original packet is discarded. Available values: `pass`, `block`, `reject`.",
+				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.OneOf("pass", "block", "reject"),
+				},
+			},
+			"quick": schema.BoolAttribute{
+				MarkdownDescription: "If a packet matches a rule specifying quick, then that rule is considered the last matching rule and the specified action is taken. When a rule does not have quick enabled, the last matching rule wins. Defaults to `true`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(true),
+			},
+			"interface": schema.SetAttribute{
+				MarkdownDescription: "Choose on which interface(s) packets must come in to match this rule. Must specify at least 1.",
+				Required:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+				},
+			},
+			"direction": schema.StringAttribute{
+				MarkdownDescription: "Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic. Available values: `in`, `out`.",
+				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.OneOf("in", "out"),
+				},
+			},
+			"ip_protocol": schema.StringAttribute{
+				MarkdownDescription: "Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`, `inet46`. Defaults to `inet`.",
+				Optional:            true,
+				Computed:            true,
+				Validators: []validator.String{
+					stringvalidator.OneOf("inet", "inet6", "inet46"),
+				},
+				Default: stringdefault.StaticString("inet"),
+			},
+			"protocol": schema.StringAttribute{
+				MarkdownDescription: "Choose which IP protocol this rule should match.",
+				Required:            true,
+			},
+			"source": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"net":    types.StringType,
+							"port":   types.StringType,
+							"invert": types.BoolType,
+						},
+						map[string]attr.Value{
+							"net":    types.StringValue("any"),
+							"port":   types.StringValue(""),
+							"invert": types.BoolValue(false),
+						},
+					),
+				),
+				Attributes: map[string]schema.Attribute{
+					"net": schema.StringAttribute{
+						MarkdownDescription: "Specify the IP address, CIDR or alias for the source of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString("any"),
+					},
+					"port": schema.StringAttribute{
+						MarkdownDescription: "Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `\"\"`). Defaults to `\"\"`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString(""),
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^(\\w){0,32}$"),
+								"must be number (80), range (80-443), well known name (http) or alias name"),
+						},
+					},
+					"invert": schema.BoolAttribute{
+						MarkdownDescription: "Use this option to invert the sense of the match. Defaults to `false`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+					},
+				},
+			},
+			"destination": schema.SingleNestedAttribute{
+				Optional: true,
+				Computed: true,
+				Default: objectdefault.StaticValue(
+					types.ObjectValueMust(
+						map[string]attr.Type{
+							"net":    types.StringType,
+							"port":   types.StringType,
+							"invert": types.BoolType,
+						},
+						map[string]attr.Value{
+							"net":    types.StringValue("any"),
+							"port":   types.StringValue(""),
+							"invert": types.BoolValue(false),
+						},
+					),
+				),
+				Attributes: map[string]schema.Attribute{
+					"net": schema.StringAttribute{
+						MarkdownDescription: "Specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString("any"),
+					},
+					"port": schema.StringAttribute{
+						MarkdownDescription: "Destination port number, well known name (imap, imaps, http, https, ...) or alias name, for ranges use a dash. Defaults to `\"\"`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString(""),
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^(\\w){0,32}$"),
+								"must be number (80), range (80-443), well known name (http) or alias name"),
+						},
+					},
+					"invert": schema.BoolAttribute{
+						MarkdownDescription: "Use this option to invert the sense of the match. Defaults to `false`.",
+						Optional:            true,
+						Computed:            true,
+						Default:             booldefault.StaticBool(false),
+					},
+				},
+			},
+			"gateway": schema.StringAttribute{
+				MarkdownDescription: "Leave as `\"\"` to use the system routing table. Or choose a gateway to utilize policy based routing. Defaults to `\"\"`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
+			},
+			"log": schema.BoolAttribute{
+				MarkdownDescription: "Log packets that are handled by this rule. Defaults to `false`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
+			"description": schema.StringAttribute{
+				MarkdownDescription: "Optional description here for your reference (not parsed).",
+				Optional:            true,
+			},
+			"id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "UUID of the resource.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+		},
+	}
 }

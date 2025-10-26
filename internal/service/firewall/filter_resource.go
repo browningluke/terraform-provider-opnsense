@@ -9,9 +9,11 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
@@ -20,6 +22,7 @@ var _ resource.Resource = &filterResource{}
 var _ resource.ResourceWithConfigure = &filterResource{}
 var _ resource.ResourceWithImportState = &filterResource{}
 var _ resource.ResourceWithConfigValidators = &filterResource{}
+var _ resource.ResourceWithUpgradeState = &filterResource{}
 
 func newFilterResource() resource.Resource {
 	return &filterResource{}
@@ -218,4 +221,145 @@ func (r *filterResource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 func (r *filterResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *filterResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	schemaV0 := filterResourceSchemaV0()
+	return map[int64]resource.StateUpgrader{
+		// Upgrade from version 0 (old flat schema) to version 1 (nested schema)
+		0: {
+			PriorSchema:   &schemaV0,
+			StateUpgrader: upgradeFilterStateV0toV1,
+		},
+	}
+}
+
+// upgradeFilterStateV0toV1 migrates state from schema version 0 to version 1.
+// Schema v0 had a flat structure with top-level attributes.
+// Schema v1 reorganizes into nested blocks: interface, filter, stateful_firewall, etc.
+func upgradeFilterStateV0toV1(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+	tflog.Info(ctx, "Upgrading filter resource state from v0 to v1")
+
+	// Parse the old state from RawState JSON
+	var oldState filterResourceModelV0
+
+	// Read old state
+	resp.Diagnostics.Append(req.State.Get(ctx, &oldState)...)
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Failed to read old state during upgrade")
+		return
+	}
+
+	// Extract source and destination objects
+	var oldSource *firewallLocation
+	var oldDest *firewallLocation
+
+	if !oldState.Source.IsNull() {
+		oldSource = &firewallLocation{}
+		resp.Diagnostics.Append(oldState.Source.As(ctx, oldSource, basetypes.ObjectAsOptions{})...)
+	}
+
+	if !oldState.Destination.IsNull() {
+		oldDest = &firewallLocation{}
+		resp.Diagnostics.Append(oldState.Destination.As(ctx, oldDest, basetypes.ObjectAsOptions{})...)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Build new v1 state structure
+	newState := &filterResourceModel{
+		// Top-level fields (preserved)
+		Enabled:     oldState.Enabled,
+		Sequence:    oldState.Sequence,
+		Description: oldState.Description,
+		Id:          oldState.Id,
+
+		// New top-level fields (defaults)
+		NoXMLRPCSync: types.BoolValue(false),
+		Categories:   types.SetValueMust(types.StringType, []attr.Value{}),
+
+		// Interface block (transform Set → nested with invert)
+		Interface: &filterInterfaceBlock{
+			Invert:    types.BoolValue(false),
+			Interface: oldState.Interface,
+		},
+
+		// Filter block (consolidate many old top-level fields)
+		Filter: &filterFilterBlock{
+			Quick:         oldState.Quick,
+			Action:        oldState.Action,
+			AllowOptions:  types.BoolValue(false), // New field, default
+			Direction:     oldState.Direction,
+			IPProtocol:    oldState.IPProtocol,
+			Protocol:      oldState.Protocol,
+			ICMPType:      types.SetValueMust(types.StringType, []attr.Value{}), // New field, default
+			Source:        oldSource,
+			Destination:   oldDest,
+			Log:           oldState.Log,
+			TCPFlags:      types.SetValueMust(types.StringType, []attr.Value{}), // New field, default
+			TCPFlagsOutOf: types.SetValueMust(types.StringType, []attr.Value{}), // New field, default
+			Schedule:      types.StringValue(""),                                // New field, default
+		},
+
+		// Stateful Firewall block (new, all defaults)
+		StatefulFirewall: &filterStatefulFirewallBlock{
+			Type:    types.StringValue("keep"),
+			Policy:  types.StringValue(""),
+			Timeout: types.Int64Value(-1),
+			AdaptiveTimeouts: &filterAdaptiveTimeouts{
+				Start: types.Int64Value(-1),
+				End:   types.Int64Value(-1),
+			},
+			Max: &filterMax{
+				States:            types.Int64Value(-1),
+				SourceNodes:       types.Int64Value(-1),
+				SourceStates:      types.Int64Value(-1),
+				SourceConnections: types.Int64Value(-1),
+				NewConnections: &filterNewConnections{
+					Count:   types.Int64Value(-1),
+					Seconds: types.Int64Value(-1),
+				},
+			},
+			OverloadTable: types.StringValue(""),
+			NoPfsync:      types.BoolValue(false),
+		},
+
+		// Traffic Shaping block (new, all defaults)
+		TrafficShaping: &filterTrafficShapingBlock{
+			Shaper:        types.StringValue(""),
+			ReverseShaper: types.StringValue(""),
+		},
+
+		// Source Routing block (gateway moved here)
+		SourceRouting: &filterSourceRoutingBlock{
+			Gateway:        oldState.Gateway,
+			DisableReplyTo: types.BoolValue(false), // New field, default
+			ReplyTo:        types.StringValue(""),  // New field, default
+		},
+
+		// Priority block (new, all defaults)
+		Priority: &filterPriorityBlock{
+			Match:       types.Int64Value(-1),
+			Set:         types.Int64Value(-1),
+			LowDelaySet: types.Int64Value(-1),
+			MatchTOS:    types.StringValue(""),
+		},
+
+		// Internal Tagging block (new, all defaults)
+		InternalTagging: &filterInternalTaggingBlock{
+			SetLocal:   types.StringValue(""),
+			MatchLocal: types.StringValue(""),
+		},
+	}
+
+	// Set the upgraded state
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+
+	if !resp.Diagnostics.HasError() {
+		tflog.Info(ctx, "Successfully upgraded filter resource state from v0 to v1", map[string]any{
+			"id": oldState.Id.ValueString(),
+		})
+	}
 }
