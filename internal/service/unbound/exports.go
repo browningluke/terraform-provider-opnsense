@@ -13,6 +13,7 @@ func Resources(ctx context.Context) []func() resource.Resource {
 		newForwardResource,
 		newHostAliasResource,
 		newHostOverrideResource,
+		newSettingsResource,
 	}
 }
 
@@ -22,5 +23,6 @@ func DataSources(ctx context.Context) []func() datasource.DataSource {
 		newForwardDataSource,
 		newHostAliasDataSource,
 		newHostOverrideDataSource,
+		newSettingsDataSource,
 	}
 }
