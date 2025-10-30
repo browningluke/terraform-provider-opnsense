@@ -1,0 +1,107 @@
+name: Feature Request
+description: Suggest a new resource, data source, or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! Please fill out the information below to help us understand your request.
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: Feature Type
+      description: What type of feature are you requesting?
+      options:
+        - New Resource
+        - New Data Source
+        - Resource Enhancement
+        - Data Source Enhancement
+        - Provider Enhancement
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: opnsense-api
+    attributes:
+      label: OPNsense API Endpoint
+      description: |
+        Which OPNsense API endpoint does this relate to? Include the module/controller/resource path.
+        Example: `Firewall/Alias`, `Kea/Dhcpv4/Subnet`, `Unbound/Settings/ACL`
+
+        See: https://docs.opnsense.org/development/api.html
+      placeholder: |
+        Module/Controller/Resource path
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: A clear and concise description of the feature you'd like to see.
+      placeholder: |
+        I would like to be able to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case / Motivation
+      description: |
+        Describe your use case and why this feature would be valuable.
+        How would this feature help you manage your OPNsense configuration?
+      placeholder: |
+        I need this feature because...
+        This would help me to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: |
+        If you have ideas on how this could be implemented, share them here.
+        Include example Terraform configuration if applicable.
+      placeholder: |
+        ```hcl
+        resource "opnsense_example_resource" "example" {
+          attribute = "value"
+        }
+        ```
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context, screenshots, or examples about the feature request.
+      placeholder: |
+        Links to OPNsense documentation, screenshots of UI, etc.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution
+      description: |
+        This is an open source project. Would you be willing to contribute this feature?
+      options:
+        - label: I am willing to submit a pull request to implement this feature
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        **Note**: Feature requests for **Core API** resources will be prioritized over Plugin API resources.
+        See the [Current API Coverage](https://github.com/browningluke/terraform-provider-opnsense#current-api-coverage) section in the README.
