@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/browningluke/terraform-provider-opnsense/discussions
+    about: Ask questions and discuss with the community
+  - name: OPNsense Documentation
+    url: https://docs.opnsense.org/
+    about: Official OPNsense documentation
+  - name: OPNsense API Documentation
+    url: https://docs.opnsense.org/development/api.html
+    about: OPNsense API reference documentation
