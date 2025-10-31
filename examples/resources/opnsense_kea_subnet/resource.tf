@@ -58,7 +58,7 @@ resource "opnsense_kea_subnet" "example" {
     "10.10.101.11"
   ]
 
-  tfpt_server = "tfpt.example.com"
+  tftp_server = "tftp.example.com"
   tftp_bootfile = "bootfile.txt"
 
   description = "EXAMPLE"
