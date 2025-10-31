@@ -33,8 +33,8 @@ Configure DHCP subnets for Kea.
 - `routers` (Set of String) Default gateways to offer to the clients.
 - `static_routes` (Attributes Set) Static routes that the client should install in its routing cache. (see [below for nested schema](#nestedatt--static_routes))
 - `subnet` (String) Subnet in use (e.g. `"192.0.2.64/26"`).
-- `tfpt_server` (String) TFTP server address or fqdn.
 - `tftp_bootfile` (String) Boot filename to request.
+- `tftp_server` (String) TFTP server address or fqdn.
 - `time_servers` (Set of String) Set of RFC 868 time servers available to the client.
 
 <a id="nestedatt--static_routes"></a>

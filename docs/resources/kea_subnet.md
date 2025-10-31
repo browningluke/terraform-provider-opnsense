@@ -99,8 +99,8 @@ resource "opnsense_kea_subnet" "example" {
 - `pools` (Set of String) Set of pools in range or subnet format (e.g. `"192.168.0.100 - 192.168.0.200"` , `"192.0.2.64/26"`). Defaults to `[]`.
 - `routers` (Set of String) Default gateways to offer to the clients. Defaults to `[]`.
 - `static_routes` (Attributes Set) Static routes that the client should install in its routing cache. Defaults to `[]`. (see [below for nested schema](#nestedatt--static_routes))
-- `tftp_server` (String) TFTP server address or fqdn. Defaults to `""`.
 - `tftp_bootfile` (String) Boot filename to request. Defaults to `""`.
+- `tftp_server` (String) TFTP server address or fqdn. Defaults to `""`.
 - `time_servers` (Set of String) Set of RFC 868 time servers available to the client. Defaults to `[]`.
 
 ### Read-Only
