@@ -18,6 +18,7 @@ import (
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/wireguard"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/ephemeral"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -28,6 +29,7 @@ import (
 
 // Ensure OPNsenseProvider satisfies various provider interfaces.
 var _ provider.Provider = &opnsenseProvider{}
+var _ provider.ProviderWithEphemeralResources = &opnsenseProvider{}
 
 // OPNsenseProvider defines the provider implementation.
 type opnsenseProvider struct {
@@ -280,6 +282,7 @@ func (p *opnsenseProvider) Configure(ctx context.Context, req provider.Configure
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
+	resp.EphemeralResourceData = client
 }
 
 func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
@@ -322,6 +325,19 @@ func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		dataSources = append(dataSources, s...)
 	}
 	return dataSources
+}
+
+// EphemeralResources implements provider.ProviderWithEphemeralResources.
+func (p *opnsenseProvider) EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
+	controllers := [][]func() ephemeral.EphemeralResource{
+		auth.EphemeralResources(ctx),
+	}
+
+	var ephemerals []func() ephemeral.EphemeralResource
+	for _, s := range controllers {
+		ephemerals = append(ephemerals, s...)
+	}
+	return ephemerals
 }
 
 func NewProvider(ctx context.Context) (provider.Provider, error) {

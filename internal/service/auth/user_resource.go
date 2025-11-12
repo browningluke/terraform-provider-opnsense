@@ -81,6 +81,12 @@ func (u *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 
 	tflog.Info(ctx, fmt.Sprintf("%+v\n%+v\n", data, resourceStruct))
 
+	var ephemeralPass types.String
+	req.Config.GetAttribute(ctx, path.Root("password"), &ephemeralPass)
+	resourceStruct.Password = ephemeralPass.ValueString()
+
+	tflog.Info(ctx, fmt.Sprintf("%+v\n%+v\n", data, resourceStruct))
+
 	// Add firewall category to unbound
 	id, err := u.client.Auth().AddUser(ctx, resourceStruct)
 	if err != nil {
@@ -143,6 +149,8 @@ func (u *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	// ID cannot be added by convert... func, have to add here
 	resourceModel.Id = data.Id
+
+	tflog.Info(ctx, fmt.Sprintf("\n%+v\n%+v\n%+v\n", data, resourceStruct, resourceModel))
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &resourceModel)...)

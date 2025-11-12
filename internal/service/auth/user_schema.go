@@ -43,6 +43,7 @@ func userResourceSchema() schema.Schema {
 				Required:            true,
 				MarkdownDescription: "Password of the user",
 				Sensitive:           true,
+				WriteOnly:           true,
 			},
 		},
 	}
