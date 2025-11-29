@@ -12,10 +12,11 @@ import (
 )
 
 type userResourceModel struct {
-	Id       types.String `tfsdk:"id"`
-	Disabled types.Bool   `tfsdk:"disabled"`
-	Name     types.String `tfsdk:"name"`
-	Password types.String `tfsdk:"password"`
+	Id              types.String `tfsdk:"id"`
+	Disabled        types.Bool   `tfsdk:"disabled"`
+	Name            types.String `tfsdk:"name"`
+	Password        types.String `tfsdk:"password_wo"`
+	PasswordVersion types.Int32  `tfsdk:"password_wo_version"`
 }
 
 func userResourceSchema() schema.Schema {
@@ -39,11 +40,18 @@ func userResourceSchema() schema.Schema {
 				Required:            true,
 				MarkdownDescription: "Name of the user",
 			},
-			"password": schema.StringAttribute{
+			"password_wo": schema.StringAttribute{
 				Required:            true,
 				MarkdownDescription: "Password of the user",
 				Sensitive:           true,
 				WriteOnly:           true,
+			},
+			"password_wo_version": schema.Int32Attribute{
+				Required:            true,
+				MarkdownDescription: "Version of the password. Increment to update the password set on `password_wo`",
+				// PlanModifiers: []planmodifier.Int32{
+				// 	int32planmodifier.UseStateForUnknown(),
+				// },
 			},
 		},
 	}

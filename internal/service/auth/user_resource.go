@@ -79,13 +79,13 @@ func (u *userResource) Create(ctx context.Context, req resource.CreateRequest, r
 		return
 	}
 
-	tflog.Info(ctx, fmt.Sprintf("%+v\n%+v\n", data, resourceStruct))
+	// tflog.Debug(ctx, fmt.Sprintf("%+v\n%+v\n", data, resourceStruct))
 
 	var ephemeralPass types.String
-	req.Config.GetAttribute(ctx, path.Root("password"), &ephemeralPass)
+	req.Config.GetAttribute(ctx, path.Root("password_wo"), &ephemeralPass)
 	resourceStruct.Password = ephemeralPass.ValueString()
 
-	tflog.Info(ctx, fmt.Sprintf("%+v\n%+v\n", data, resourceStruct))
+	// tflog.Debug(ctx, fmt.Sprintf("%+v\n%+v\n", data, resourceStruct))
 
 	// Add firewall category to unbound
 	id, err := u.client.Auth().AddUser(ctx, resourceStruct)
@@ -149,8 +149,9 @@ func (u *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	// ID cannot be added by convert... func, have to add here
 	resourceModel.Id = data.Id
+	resourceModel.PasswordVersion = data.PasswordVersion
 
-	tflog.Info(ctx, fmt.Sprintf("\n%+v\n%+v\n%+v\n", data, resourceStruct, resourceModel))
+	tflog.Debug(ctx, fmt.Sprintf("\n%+v\n%+v\n%+v\n", data, resourceStruct, resourceModel))
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &resourceModel)...)
@@ -159,9 +160,11 @@ func (u *userResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 // Update implements resource.Resource.
 func (u *userResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var data *userResourceModel
+	var state *userResourceModel
 
 	// Read Terraform plan data into the model
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 
 	if resp.Diagnostics.HasError() {
 		return
@@ -173,6 +176,10 @@ func (u *userResource) Update(ctx context.Context, req resource.UpdateRequest, r
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to parse user, got error: %s", err))
 		return
+	}
+
+	if state.PasswordVersion != data.PasswordVersion {
+		req.Config.GetAttribute(ctx, path.Root("password_wo"), &resourceStruct.Password)
 	}
 
 	// Update firewall category in unbound
