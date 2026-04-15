@@ -15,13 +15,15 @@ on:
   pull_request:
     branches:
       - main
-    paths-ignore:
-      - 'docs/**'
-      - 'examples/**'
-      - 'scripts/**'
-      - 'templates/**'
-      - 'README.md'
-      - '.github/**'
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!examples/**'
+      - '!scripts/**'
+      - '!templates/**'
+      - '!README.md'
+      - '!.github/**'
+      - '.github/workflows/terraform-test.yml'
 
 permissions:
   contents: read
