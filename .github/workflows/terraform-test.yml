@@ -27,9 +27,9 @@ permissions:
   contents: read
 
 env:
-  OPNSENSE_VERSION: "25.7"
-  OPNSENSE_URL: "https://files.bsd.ac/opnsense-qemu/opnsense-25.7.qcow2"
-  OPNSENSE_SHA1: edba9015951e68438fb6b0c0e1de21383bfaa399
+  OPNSENSE_VERSION: "26.1"
+  OPNSENSE_URL: "https://files.bsd.ac/opnsense-qemu/opnsense-26.1.qcow2"
+  OPNSENSE_SHA1: 2266a644b1669be1a8d916a0a79fc91ba4be4733
   OPNSENSE_SSH_PORT: 8022
   OPNSENSE_WEB_PORT: 8443
   TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
