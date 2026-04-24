@@ -1,7 +1,3 @@
-# Written by: GitHub Copilot
-# Requested by: LBrowning
-# Date: 2026-04-24
-
 name: Post-merge Tests (Tier 2)
 
 on:

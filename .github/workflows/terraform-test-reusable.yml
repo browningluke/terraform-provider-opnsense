@@ -1,7 +1,3 @@
-# Written by: GitHub Copilot
-# Requested by: LBrowning
-# Date: 2026-04-24
-
 name: Run terraform tests (reusable)
 
 on:
