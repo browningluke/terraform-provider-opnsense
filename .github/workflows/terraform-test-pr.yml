@@ -1,0 +1,74 @@
+# Written by: GitHub Copilot
+# Requested by: LBrowning
+# Date: 2026-04-24
+
+name: PR Tests (Tier 1)
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!examples/**'
+      - '!scripts/**'
+      - '!templates/**'
+      - '!README.md'
+      - '!.github/**'
+      - '.github/workflows/terraform-test-pr.yml'
+      - '.github/workflows/terraform-test-reusable.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      packages: ${{ steps.detect.outputs.packages }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          fetch-depth: 0
+      - name: Fetch main branch
+        run: git fetch origin main --depth=1
+      - name: Detect changed packages
+        id: detect
+        run: |
+          ALL_CHANGED=$(git diff --name-only origin/main...HEAD)
+
+          # Check for any Go source or module file changes
+          GO_FILES=$(echo "$ALL_CHANGED" | grep '\.go$' || true)
+          MOD_CHANGED=$(echo "$ALL_CHANGED" | grep -E '^go\.(mod|sum)$' || true)
+
+          if [ -z "$GO_FILES" ] && [ -z "$MOD_CHANGED" ]; then
+            echo "No Go files changed — skipping tests"
+            echo "packages=" >> "$GITHUB_OUTPUT"
+          elif [ -n "$MOD_CHANGED" ]; then
+            echo "go.mod/go.sum changed — running full suite"
+            echo "packages=./..." >> "$GITHUB_OUTPUT"
+          else
+            CORE_CHANGED=$(echo "$GO_FILES" | grep -E '^(main\.go|internal/tools/|internal/acctest/|internal/provider/|internal/validators/)' || true)
+            if [ -n "$CORE_CHANGED" ]; then
+              echo "Core files changed — running full suite"
+              echo "packages=./..." >> "$GITHUB_OUTPUT"
+            else
+              SERVICE_PKGS=$(echo "$GO_FILES" | grep '^internal/service/' | sed 's|^\(internal/service/[^/]*\)/.*|\1|' | sort -u | sed 's|^|./|; s|$|/...|' | tr '\n' ' ' | sed 's/ $//')
+              if [ -z "$SERVICE_PKGS" ]; then
+                echo "No relevant packages detected — running full suite"
+                echo "packages=./..." >> "$GITHUB_OUTPUT"
+              else
+                echo "Changed service packages: ${SERVICE_PKGS}"
+                echo "packages=${SERVICE_PKGS}" >> "$GITHUB_OUTPUT"
+              fi
+            fi
+          fi
+
+  test:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.packages != ''
+    uses: ./.github/workflows/terraform-test-reusable.yml
+    with:
+      packages: ${{ needs.detect-changes.outputs.packages }}

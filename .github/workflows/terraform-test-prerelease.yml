@@ -2,19 +2,18 @@
 # Requested by: LBrowning
 # Date: 2026-04-24
 
-name: Post-merge Tests (Tier 2)
+name: Pre-release Tests (Tier 3)
 
 on:
   push:
-    branches:
-      - main
-    paths-ignore:
-      - 'docs/**'
-      - 'examples/**'
-      - 'scripts/**'
-      - 'templates/**'
-      - 'README.md'
-      - '.github/**'
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manually triggering this workflow'
+        required: false
+        type: string
 
 permissions:
   contents: read
