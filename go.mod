@@ -3,7 +3,7 @@ module github.com/browningluke/terraform-provider-opnsense
 go 1.25.8
 
 require (
-	github.com/browningluke/opnsense-go v0.14.0
+	github.com/browningluke/opnsense-go v0.15.0
 	github.com/hashicorp/terraform-plugin-docs v0.25.0
 	github.com/hashicorp/terraform-plugin-framework v1.16.1
 	github.com/hashicorp/terraform-plugin-framework-validators v0.19.0
