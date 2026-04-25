@@ -158,7 +158,7 @@ func subnetResourceSchema() schema.Schema {
 				Default:             stringdefault.StaticString(""),
 			},
 
-			"tfpt_server": schema.StringAttribute{
+			"tftp_server": schema.StringAttribute{
 				MarkdownDescription: "TFTP server address or fqdn. Defaults to `\"\"`.",
 				Optional:            true,
 				Computed:            true,
@@ -264,7 +264,7 @@ func subnetDataSourceSchema() dschema.Schema {
 				Computed:            true,
 			},
 
-			"tfpt_server": dschema.StringAttribute{
+			"tftp_server": dschema.StringAttribute{
 				MarkdownDescription: "TFTP server address or fqdn.",
 				Computed:            true,
 			},

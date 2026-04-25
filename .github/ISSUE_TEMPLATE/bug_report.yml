@@ -1,0 +1,193 @@
+name: Bug Report
+description: Report a bug or unexpected behavior
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill out the information below to help us diagnose and fix the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: |
+        When I try to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: affected-resource
+    attributes:
+      label: Affected Resource(s)
+      description: |
+        Which resource(s) or data source(s) are affected?
+        List one per line if multiple resources are affected.
+      placeholder: |
+        opnsense_firewall_filter
+        opnsense_firewall_alias
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: |
+        I expected...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: |
+        Instead, what happened was...
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: |
+        Please provide detailed steps to reproduce the issue.
+      placeholder: |
+        1. Configure the provider with...
+        2. Create a resource with...
+        3. Run `terraform apply`
+        4. Observe error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: terraform-config
+    attributes:
+      label: Terraform Configuration
+      description: |
+        Please provide the relevant Terraform configuration.
+        **Remove any sensitive information** (API keys, passwords, IP addresses, etc.)
+      placeholder: |
+        ```hcl
+        resource "opnsense_firewall_filter" "example" {
+          # Your configuration here
+        }
+        ```
+      render: hcl
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output
+      description: |
+        If applicable, provide the full error message or output from Terraform.
+      placeholder: |
+        ```
+        Error: ...
+        ```
+      render: shell
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Debug Logs
+      description: |
+        If possible, provide debug logs by running Terraform with:
+        `TF_LOG=DEBUG terraform apply`
+
+        **Please redact any sensitive information** before pasting.
+      placeholder: |
+        ```
+        [DEBUG] logs here...
+        ```
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: terraform-version
+    attributes:
+      label: Terraform Version
+      description: Run `terraform version` to get this information
+      placeholder: "e.g., v1.9.0"
+    validations:
+      required: true
+
+  - type: input
+    id: provider-version
+    attributes:
+      label: Provider Version
+      description: Which version of this provider are you using?
+      placeholder: "e.g., v0.16.0"
+    validations:
+      required: true
+
+  - type: input
+    id: opnsense-version
+    attributes:
+      label: OPNsense Version
+      description: Which version of OPNsense are you running?
+      placeholder: "e.g., 24.7, 25.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: opnsense-environment
+    attributes:
+      label: OPNsense Environment
+      description: What type of OPNsense deployment are you using?
+      options:
+        - Physical Hardware
+        - Virtual Machine (VMware)
+        - Virtual Machine (Proxmox)
+        - Virtual Machine (VirtualBox)
+        - Virtual Machine (KVM/QEMU)
+        - Virtual Machine (Hyper-V)
+        - Cloud Instance
+        - Other
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context about the problem here.
+        - Does this issue occur consistently or intermittently?
+        - Did this work in a previous version?
+        - Are there any related issues?
+      placeholder: |
+        This started happening after...
+        This only occurs when...
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please confirm the following before submitting
+      options:
+        - label: I have searched existing issues to ensure this is not a duplicate
+          required: true
+        - label: I have removed all sensitive information from configurations and logs
+          required: true
+        - label: I am using the latest version of the provider (or have noted the version above)
+          required: false
+
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        **Note**: This provider is under active development. If you encounter a bug, please check if it's already been reported or fixed in a newer version.
