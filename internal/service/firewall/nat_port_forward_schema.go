@@ -43,6 +43,7 @@ type natPortForwardResourceModel struct {
 
 func natPortForwardResourceSchema() schema.Schema {
 	return schema.Schema{
+		Version:             1,
 		MarkdownDescription: "Destination NAT (port forwarding) redirects traffic arriving on an external interface to an internal host. Use this to expose internal services (e.g. web servers, SSH) to the outside network.",
 
 		Attributes: map[string]schema.Attribute{
@@ -86,7 +87,7 @@ func natPortForwardResourceSchema() schema.Schema {
 							"invert": types.BoolType,
 						},
 						map[string]attr.Value{
-							"net":    types.StringValue(""),
+							"net":    types.StringValue("any"),
 							"port":   types.StringValue(""),
 							"invert": types.BoolValue(false),
 						},
@@ -94,10 +95,10 @@ func natPortForwardResourceSchema() schema.Schema {
 				),
 				Attributes: map[string]schema.Attribute{
 					"net": schema.StringAttribute{
-						MarkdownDescription: "Specify the IP address, CIDR or alias for the source of the packet. Empty string means any source. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`).",
+						MarkdownDescription: "Specify the IP address, CIDR or alias for the source of the packet. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
 						Optional:            true,
 						Computed:            true,
-						Default:             stringdefault.StaticString(""),
+						Default:             stringdefault.StaticString("any"),
 					},
 					"port": schema.StringAttribute{
 						MarkdownDescription: "Specify the source port for this rule. This is usually random and almost never equal to the destination port range (and should usually be `\"\"`). Defaults to `\"\"`.",
@@ -128,7 +129,7 @@ func natPortForwardResourceSchema() schema.Schema {
 							"invert": types.BoolType,
 						},
 						map[string]attr.Value{
-							"net":    types.StringValue(""),
+							"net":    types.StringValue("any"),
 							"port":   types.StringValue(""),
 							"invert": types.BoolValue(false),
 						},
@@ -136,10 +137,10 @@ func natPortForwardResourceSchema() schema.Schema {
 				),
 				Attributes: map[string]schema.Attribute{
 					"net": schema.StringAttribute{
-						MarkdownDescription: "Specify the IP address, CIDR or alias for the destination of the packet. Empty string means any destination. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`).",
+						MarkdownDescription: "Specify the IP address, CIDR or alias for the destination of the packet. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
 						Optional:            true,
 						Computed:            true,
-						Default:             stringdefault.StaticString(""),
+						Default:             stringdefault.StaticString("any"),
 					},
 					"port": schema.StringAttribute{
 						MarkdownDescription: "Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `\"\"`.",
@@ -360,6 +361,15 @@ func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firew
 }
 
 func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortForwardResourceModel, error) {
+	sourceNet := d.Source.Network
+	if sourceNet == "" {
+		sourceNet = "any"
+	}
+	destinationNet := d.Destination.Network
+	if destinationNet == "" {
+		destinationNet = "any"
+	}
+
 	return &natPortForwardResourceModel{
 		// API uses "disabled" (inverted), schema uses "enabled" (user-friendly).
 		Enabled:    types.BoolValue(!tools.StringToBool(d.Disabled)),
@@ -368,12 +378,12 @@ func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortFo
 		IPProtocol: types.StringValue(d.IPProtocol.String()),
 		Protocol:   types.StringValue(d.Protocol.String()),
 		Source: &firewallLocation{
-			Net:    types.StringValue(d.Source.Network),
+			Net:    types.StringValue(sourceNet),
 			Port:   types.StringValue(d.Source.Port),
 			Invert: types.BoolValue(tools.StringToBool(d.Source.Invert)),
 		},
 		Destination: &firewallLocation{
-			Net:    types.StringValue(d.Destination.Network),
+			Net:    types.StringValue(destinationNet),
 			Port:   types.StringValue(d.Destination.Port),
 			Invert: types.BoolValue(tools.StringToBool(d.Destination.Invert)),
 		},
