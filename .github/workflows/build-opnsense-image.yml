@@ -1,0 +1,19 @@
+name: Build OPNsense Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/upgrade-opnsense.py'
+  schedule:
+    - cron: '0 4 */7 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  opnsense-image:
+    uses: ./.github/workflows/build-opnsense-image-reusable.yml
+
