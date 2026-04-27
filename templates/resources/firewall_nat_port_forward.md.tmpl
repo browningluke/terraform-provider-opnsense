@@ -1,0 +1,35 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Firewall
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> This resource requires the `os-firewall` plugin to be installed. It will *not* behave correctly if it is not installed.
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{.Name}} using the `id`. For example:
+
+```terraform
+import {
+  to = {{.Name}}.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import {{.Name}} using the `id`. For example:
+
+```console
+% terraform import {{.Name}}.example <opnsense-resource-id>
+```
