@@ -1,7 +1,5 @@
 package firewall
 
-// NAT port forward schema for the opnsense_firewall_nat_port_forward resource.
-
 import (
 	"regexp"
 
