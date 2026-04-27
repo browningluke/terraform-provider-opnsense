@@ -107,6 +107,12 @@ jobs:
           echo "qemu-pid=${QEMU_PID}" >> "$GITHUB_OUTPUT"
           sleep 180 # Wait for the VM to boot
           [ -d "/proc/${QEMU_PID}" ] || (echo "QEMU process not found" && exit 1)
+      - name: Upgrade OPNsense to latest 26.1.x patches
+        # The bsd.ac image ships OPNsense 26.1 base. Multiple DNAT bugs
+        # were fixed in 26.1.1-26.1.3 (community changelog) that cause
+        # /api/firewall/d_nat/addRule to return 500. Apply patches first.
+        run: |
+          python3 scripts/upgrade-opnsense.py
       - name: Create API key
         id: apikey
         run: |
