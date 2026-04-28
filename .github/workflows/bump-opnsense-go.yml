@@ -1,0 +1,58 @@
+name: Bump opnsense-go Version
+
+on:
+  repository_dispatch:
+    types: [opnsense-go-release]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: go.mod
+
+      - name: Bump opnsense-go
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          go get "github.com/browningluke/opnsense-go@${VERSION}"
+          go mod tidy
+
+      - name: Open pull request
+        env:
+          GH_TOKEN: ${{ secrets.AUTOMATION_TOKEN }}
+          VERSION: ${{ github.event.client_payload.version }}
+          RELEASE_URL: ${{ github.event.client_payload.release_url }}
+          RELEASE_NAME: ${{ github.event.client_payload.release_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "bump/opnsense-go-${VERSION}"
+          git add go.mod go.sum
+          git commit -m "chore(deps): bump opnsense-go to ${VERSION}"
+          git push origin "bump/opnsense-go-${VERSION}"
+
+          cat > /tmp/pr-body.md << EOF
+          Bumps \`github.com/browningluke/opnsense-go\` to \`${VERSION}\`.
+
+          This PR was opened automatically in response to a new release of [opnsense-go](${RELEASE_URL}).
+
+          **Release:** [${RELEASE_NAME}](${RELEASE_URL})
+          EOF
+
+          PR_URL=$(gh pr create \
+            --title "chore(deps): bump opnsense-go to ${VERSION}" \
+            --body-file /tmp/pr-body.md \
+            --base main \
+            --head "bump/opnsense-go-${VERSION}")
+
+          gh pr merge "$PR_URL" --auto --squash
