@@ -1,0 +1,12 @@
+// OPNsense pre-test setup configuration for terraform-provider-opnsense
+//
+// Each entry is a POST request applied to the OPNsense API before acceptance
+// tests run. Entries are applied in order. If any entry fails, the CI step
+// fails immediately.
+//
+// To add a new pre-condition:
+//   1. Find the relevant API endpoint (GET the resource first to see its shape)
+//   2. Add an entry below with a clear "description", the "endpoint", and the
+//      full "body" payload.
+//   No changes to configure-opnsense.py are needed.
+[]
