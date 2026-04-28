@@ -2,12 +2,14 @@
 page_title: "opnsense_kea_reservation Resource - terraform-provider-opnsense"
 subcategory: Kea
 description: |-
-  Configure DHCP reservations for Kea.
+  Configure DHCPv4 reservations for Kea.
 ---
 
 # opnsense_kea_reservation (Resource)
 
-Configure DHCP reservations for Kea.
+~> **Deprecated** Use [`opnsense_kea_dhcpv4_reservation`](kea_dhcpv4_reservation) instead. This resource will be removed in a future release.
+
+Configure DHCPv4 reservations for Kea.
 
 ## Example Usage
 

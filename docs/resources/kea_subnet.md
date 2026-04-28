@@ -2,12 +2,14 @@
 page_title: "opnsense_kea_subnet Resource - terraform-provider-opnsense"
 subcategory: Kea
 description: |-
-  Configure DHCP subnets for Kea.
+  Configure DHCPv4 subnets for Kea.
 ---
 
 # opnsense_kea_subnet (Resource)
 
-Configure DHCP subnets for Kea.
+~> **Deprecated** Use [`opnsense_kea_dhcpv4_subnet`](kea_dhcpv4_subnet) instead. This resource will be removed in a future release.
+
+Configure DHCPv4 subnets for Kea.
 
 ## Example Usage
 

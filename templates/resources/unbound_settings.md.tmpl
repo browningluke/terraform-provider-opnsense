@@ -1,0 +1,49 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Unbound
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+~> **Singleton Resource — Known Terraform Best-Practice Violation**
+This resource is a singleton. There should only ever be **one** `{{.Name}}` block
+in your entire Terraform configuration. It manages the global Unbound DNS resolver
+settings on your OPNsense appliance rather than creating discrete objects.
+This design is a known violation of Terraform's resource model and best practices.
+It is provided intentionally because the ability to manage these settings via
+Terraform has value despite the trade-off.
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+This resource **cannot be created** via `terraform apply`. You must import it
+before it can be managed. The import ID is always the fixed string `unbound_settings`.
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import):
+
+```terraform
+import {
+  to = {{.Name}}.settings
+  id = "unbound_settings"
+}
+```
+
+Using `terraform import`:
+
+```console
+% terraform import {{.Name}}.settings unbound_settings
+```
+
+~> **Note on destroy**
+Running `terraform destroy` (or removing this resource from your configuration)
+will only remove it from Terraform state. The upstream Unbound configuration on
+your OPNsense appliance will **not** be deleted or reset.
