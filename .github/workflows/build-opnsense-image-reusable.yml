@@ -1,0 +1,93 @@
+name: Build OPNsense Image (reusable)
+
+on:
+  workflow_call: {}
+
+permissions:
+  contents: read
+
+env:
+  OPNSENSE_VERSION: "26.1"
+  OPNSENSE_URL: "https://files.bsd.ac/opnsense-qemu/opnsense-26.1.qcow2"
+  OPNSENSE_SHA1: 2266a644b1669be1a8d916a0a79fc91ba4be4733
+  OPNSENSE_SSH_PORT: 8022
+  OPNSENSE_WEB_PORT: 8443
+
+jobs:
+  opnsense-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Restore OPNsense image cache
+        id: cache
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
+        with:
+          path: opnsense-images
+          key: opnsense-image-${{ env.OPNSENSE_SHA1 }}-${{ hashFiles('scripts/upgrade-opnsense.py') }}
+      - name: Create opnsense image directory
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mkdir -p opnsense-images
+      - name: Download OPNsense image
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: curl -L "$OPNSENSE_URL" -o opnsense-images/opnsense.qcow2
+      - name: Verify OPNsense image
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: echo "$OPNSENSE_SHA1  opnsense-images/opnsense.qcow2" | sha1sum -c -
+      - name: Disable triggers
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p /etc/dpkg/dpkg.cfg.d
+          sudo tee /etc/dpkg/dpkg.cfg.d/01_nodoc > /dev/null << 'EOF'
+          path-exclude /usr/share/doc/*
+          path-exclude /usr/share/man/*
+          path-exclude /usr/share/info/*
+          EOF
+      - name: Install qemu
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86
+      - name: Start opnsense VM
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: start-vm
+        run: |
+          qemu-system-x86_64 -m 6144 -smp 2 -hda opnsense-images/opnsense.qcow2 \
+          -netdev user,id=user.0,hostfwd=tcp::${{ env.OPNSENSE_SSH_PORT }}-:22,hostfwd=tcp::${{ env.OPNSENSE_WEB_PORT }}-:443 \
+          -device virtio-net,netdev=user.0 \
+          -chardev socket,path=/tmp/qemu-isa-serial.sock,server=on,wait=off,id=qga0 \
+          -device isa-serial,chardev=qga0 \
+          -device virtio-serial \
+          -chardev socket,path=/tmp/qemu-virtconsole.sock,server=on,wait=off,id=qvt0 \
+          -device virtconsole,chardev=qvt0 \
+          -chardev socket,path=/tmp/qemu-virtserialport.sock,server=on,wait=off,id=qvsp0 \
+          -device virtserialport,chardev=qvsp0,name=org.qemu.guest_agent.0 \
+          -nographic &
+          QEMU_PID="$!"
+          echo "qemu-pid=${QEMU_PID}" >> "$GITHUB_OUTPUT"
+          sleep 180 # Wait for the VM to boot
+          [ -d "/proc/${QEMU_PID}" ] || (echo "QEMU process not found" && exit 1)
+      - name: Upgrade OPNsense to latest 26.1.x patches
+        if: steps.cache.outputs.cache-hit != 'true'
+        # The bsd.ac image ships OPNsense 26.1 base. Multiple DNAT bugs
+        # were fixed in 26.1.1-26.1.3 (community changelog) that cause
+        # /api/firewall/d_nat/addRule to return 500. Apply patches first.
+        run: python3 scripts/upgrade-opnsense.py
+      - name: Shutdown OPNsense VM
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          python3 scripts/shutdown-opnsense.py
+          echo "Waiting for QEMU (PID ${{ steps.start-vm.outputs.qemu-pid }}) to exit..."
+          for i in $(seq 1 60); do
+            [ -d "/proc/${{ steps.start-vm.outputs.qemu-pid }}" ] || { echo "VM exited after $((i * 2))s"; break; }
+            sleep 2
+          done
+          [ -d "/proc/${{ steps.start-vm.outputs.qemu-pid }}" ] && kill -9 "${{ steps.start-vm.outputs.qemu-pid }}" || true
+      - name: Stop opnsense VM
+        if: always() && steps.start-vm.outputs.qemu-pid != ''
+        run: kill -9 ${{ steps.start-vm.outputs.qemu-pid }} || true
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: opnsense-image
+          path: opnsense-images
