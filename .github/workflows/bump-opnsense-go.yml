@@ -24,7 +24,7 @@ jobs:
         env:
           VERSION: ${{ github.event.client_payload.version }}
         run: |
-          go get github.com/browningluke/opnsense-go@${VERSION}
+          go get "github.com/browningluke/opnsense-go@${VERSION}"
           go mod tidy
 
       - name: Open pull request
