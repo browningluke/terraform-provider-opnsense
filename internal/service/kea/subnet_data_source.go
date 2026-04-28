@@ -59,7 +59,7 @@ func (d *subnetDataSource) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 
 	// Get kea subnet from OPNsense unbound API
-	resourceStruct, err := d.client.Kea().GetSubnet(ctx, data.Id.ValueString())
+	resourceStruct, err := d.client.Kea().GetSubnetV4(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read kea subnet, got error: %s", err))

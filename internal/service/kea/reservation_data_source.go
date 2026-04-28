@@ -59,7 +59,7 @@ func (d *reservationDataSource) Read(ctx context.Context, req datasource.ReadReq
 	}
 
 	// Get kea reservation from OPNsense unbound API
-	resourceStruct, err := d.client.Kea().GetReservation(ctx, data.Id.ValueString())
+	resourceStruct, err := d.client.Kea().GetReservationV4(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read kea reservation, got error: %s", err))

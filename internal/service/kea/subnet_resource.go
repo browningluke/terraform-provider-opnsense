@@ -73,7 +73,7 @@ func (r *subnetResource) Create(ctx context.Context, req resource.CreateRequest,
 	}
 
 	// Add subnet to kea
-	id, err := r.client.Kea().AddSubnet(ctx, subnet)
+	id, err := r.client.Kea().AddSubnetV4(ctx, subnet)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create forward, got error: %s", err))
@@ -101,7 +101,7 @@ func (r *subnetResource) Read(ctx context.Context, req resource.ReadRequest, res
 	}
 
 	// Get resource from OPNsense unbound API
-	forward, err := r.client.Kea().GetSubnet(ctx, data.Id.ValueString())
+	forward, err := r.client.Kea().GetSubnetV4(ctx, data.Id.ValueString())
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
@@ -149,7 +149,7 @@ func (r *subnetResource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	// Update res in unbound
-	err = r.client.Kea().UpdateSubnet(ctx, data.Id.ValueString(), res)
+	err = r.client.Kea().UpdateSubnetV4(ctx, data.Id.ValueString(), res)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create subnet, got error: %s", err))
@@ -170,7 +170,7 @@ func (r *subnetResource) Delete(ctx context.Context, req resource.DeleteRequest,
 		return
 	}
 
-	err := r.client.Kea().DeleteSubnet(ctx, data.Id.ValueString())
+	err := r.client.Kea().DeleteSubnetV4(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

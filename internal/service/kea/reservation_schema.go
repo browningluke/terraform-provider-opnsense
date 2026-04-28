@@ -26,7 +26,8 @@ type reservationResourceModel struct {
 
 func reservationResourceSchema() schema.Schema {
 	return schema.Schema{
-		MarkdownDescription: "Configure DHCP reservations for Kea.",
+		MarkdownDescription: "Configure DHCPv4 reservations for Kea.",
+		DeprecationMessage:  "Use `opnsense_kea_dhcpv4_reservation` instead. This resource will be removed in a future release.",
 
 		Attributes: map[string]schema.Attribute{
 			"subnet_id": schema.StringAttribute{
@@ -66,7 +67,8 @@ func reservationResourceSchema() schema.Schema {
 
 func reservationDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
-		MarkdownDescription: "Configure DHCP reservations for Kea.",
+		MarkdownDescription: "Configure DHCPv4 reservations for Kea.",
+		DeprecationMessage:  "Use `opnsense_kea_dhcpv4_reservation` instead. This data source will be removed in a future release.",
 
 		Attributes: map[string]dschema.Attribute{
 			"id": dschema.StringAttribute{
@@ -97,8 +99,8 @@ func reservationDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertReservationSchemaToStruct(d *reservationResourceModel) (*kea.Reservation, error) {
-	return &kea.Reservation{
+func convertReservationSchemaToStruct(d *reservationResourceModel) (*kea.ReservationV4, error) {
+	return &kea.ReservationV4{
 		Subnet:      api.SelectedMap(d.SubnetId.ValueString()),
 		IpAddress:   d.IpAddress.ValueString(),
 		HwAddress:   d.MacAddress.ValueString(),
@@ -107,7 +109,7 @@ func convertReservationSchemaToStruct(d *reservationResourceModel) (*kea.Reserva
 	}, nil
 }
 
-func convertReservationStructToSchema(d *kea.Reservation) (*reservationResourceModel, error) {
+func convertReservationStructToSchema(d *kea.ReservationV4) (*reservationResourceModel, error) {
 	return &reservationResourceModel{
 		SubnetId:    types.StringValue(d.Subnet.String()),
 		IpAddress:   types.StringValue(d.IpAddress),

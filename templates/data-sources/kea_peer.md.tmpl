@@ -7,14 +7,12 @@ description: |-
 
 # {{.Name}} ({{.Type}})
 
+~> **Deprecated** Use [`opnsense_kea_dhcpv4_peer`](../data-sources/kea_dhcpv4_peer) instead. This data source will be removed in a future release.
+
 {{ .Description | trimspace }}
 
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/data-sources/" .Name "/data-source.tf") }}
+
 {{ .SchemaMarkdown | trimspace }}
-
-{{ if .HasImport -}}
-## Import
-
-Import is supported using the following syntax:
-
-{{ printf "{{codefile \"shell\" %q}}" .ImportFile }}
-{{- end }}
