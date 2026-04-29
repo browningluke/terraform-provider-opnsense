@@ -24,7 +24,8 @@ type peerResourceModel struct {
 
 func peerResourceSchema() schema.Schema {
 	return schema.Schema{
-		MarkdownDescription: "Configure HA Peers for Kea.",
+		MarkdownDescription: "Configure HA Peers for Kea DHCPv4.",
+		DeprecationMessage:  "Use `opnsense_kea_dhcpv4_peer` instead. This resource will be removed in a future release.",
 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
@@ -57,7 +58,8 @@ func peerResourceSchema() schema.Schema {
 
 func peerDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
-		MarkdownDescription: "Configure HA Peers for Kea.",
+		MarkdownDescription: "Configure HA Peers for Kea DHCPv4.",
+		DeprecationMessage:  "Use `opnsense_kea_dhcpv4_peer` instead. This data source will be removed in a future release.",
 
 		Attributes: map[string]dschema.Attribute{
 			"id": dschema.StringAttribute{
@@ -80,15 +82,15 @@ func peerDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertPeerSchemaToStruct(d *peerResourceModel) (*kea.Peer, error) {
-	return &kea.Peer{
+func convertPeerSchemaToStruct(d *peerResourceModel) (*kea.PeerV4, error) {
+	return &kea.PeerV4{
 		Name: d.Name.ValueString(),
 		Url:  d.Url.ValueString(),
 		Role: api.SelectedMap(d.Role.ValueString()),
 	}, nil
 }
 
-func convertPeerStructToSchema(d *kea.Peer) (*peerResourceModel, error) {
+func convertPeerStructToSchema(d *kea.PeerV4) (*peerResourceModel, error) {
 	return &peerResourceModel{
 		Name: types.StringValue(d.Name),
 		Url:  types.StringValue(d.Url),

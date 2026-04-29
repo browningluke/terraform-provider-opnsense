@@ -73,7 +73,7 @@ func (r *reservationResource) Create(ctx context.Context, req resource.CreateReq
 	}
 
 	// Add reservation to kea
-	id, err := r.client.Kea().AddReservation(ctx, reservation)
+	id, err := r.client.Kea().AddReservationV4(ctx, reservation)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create reservation, got error: %s", err))
@@ -101,7 +101,7 @@ func (r *reservationResource) Read(ctx context.Context, req resource.ReadRequest
 	}
 
 	// Get resource from OPNsense unbound API
-	reservation, err := r.client.Kea().GetReservation(ctx, data.Id.ValueString())
+	reservation, err := r.client.Kea().GetReservationV4(ctx, data.Id.ValueString())
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
@@ -149,7 +149,7 @@ func (r *reservationResource) Update(ctx context.Context, req resource.UpdateReq
 	}
 
 	// Update res in unbound
-	err = r.client.Kea().UpdateReservation(ctx, data.Id.ValueString(), res)
+	err = r.client.Kea().UpdateReservationV4(ctx, data.Id.ValueString(), res)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create reservation, got error: %s", err))
@@ -170,7 +170,7 @@ func (r *reservationResource) Delete(ctx context.Context, req resource.DeleteReq
 		return
 	}
 
-	err := r.client.Kea().DeleteReservation(ctx, data.Id.ValueString())
+	err := r.client.Kea().DeleteReservationV4(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

@@ -73,7 +73,7 @@ func (r *peerResource) Create(ctx context.Context, req resource.CreateRequest, r
 	}
 
 	// Add peer to kea
-	id, err := r.client.Kea().AddPeer(ctx, peer)
+	id, err := r.client.Kea().AddPeerV4(ctx, peer)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create peer, got error: %s", err))
@@ -101,7 +101,7 @@ func (r *peerResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 	}
 
 	// Get resource from OPNsense unbound API
-	peer, err := r.client.Kea().GetPeer(ctx, data.Id.ValueString())
+	peer, err := r.client.Kea().GetPeerV4(ctx, data.Id.ValueString())
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
@@ -149,7 +149,7 @@ func (r *peerResource) Update(ctx context.Context, req resource.UpdateRequest, r
 	}
 
 	// Update res in unbound
-	err = r.client.Kea().UpdatePeer(ctx, data.Id.ValueString(), res)
+	err = r.client.Kea().UpdatePeerV4(ctx, data.Id.ValueString(), res)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create peer, got error: %s", err))
@@ -170,7 +170,7 @@ func (r *peerResource) Delete(ctx context.Context, req resource.DeleteRequest, r
 		return
 	}
 
-	err := r.client.Kea().DeletePeer(ctx, data.Id.ValueString())
+	err := r.client.Kea().DeletePeerV4(ctx, data.Id.ValueString())
 
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",

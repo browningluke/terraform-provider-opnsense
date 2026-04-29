@@ -1,0 +1,16 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Kea
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/data-sources/" .Name "/data-source.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}

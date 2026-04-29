@@ -59,7 +59,7 @@ func (d *peerDataSource) Read(ctx context.Context, req datasource.ReadRequest, r
 	}
 
 	// Get kea peer from OPNsense unbound API
-	resourceStruct, err := d.client.Kea().GetPeer(ctx, data.Id.ValueString())
+	resourceStruct, err := d.client.Kea().GetPeerV4(ctx, data.Id.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read kea peer, got error: %s", err))
