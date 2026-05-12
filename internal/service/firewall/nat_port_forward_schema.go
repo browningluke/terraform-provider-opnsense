@@ -2,6 +2,7 @@ package firewall
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
@@ -60,7 +61,7 @@ func natPortForwardResourceSchema() schema.Schema {
 				Default:             int64default.StaticInt64(1),
 			},
 			"interface": schema.StringAttribute{
-				MarkdownDescription: "Choose on which interface packets must come in to match this rule.",
+				MarkdownDescription: "Choose on which interface packets must come in to match this rule. Multiple interfaces may be specified as a comma-separated list.",
 				Required:            true,
 			},
 			"ip_protocol": schema.StringAttribute{
@@ -234,7 +235,7 @@ func natPortForwardDataSourceSchema() dschema.Schema {
 				Computed:            true,
 			},
 			"interface": dschema.StringAttribute{
-				MarkdownDescription: "The interface on which packets must come in to match this rule.",
+				MarkdownDescription: "The interface or comma-separated interfaces on which packets must come in to match this rule.",
 				Computed:            true,
 			},
 			"ip_protocol": dschema.StringAttribute{
@@ -334,12 +335,23 @@ func natReflectionAPIToSchema(s string) string {
 	}
 }
 
+func natPortForwardInterfaceSchemaToAPI(s string) api.SelectedMap {
+	var interfaces []string
+	for _, iface := range strings.Split(s, ",") {
+		iface = strings.TrimSpace(iface)
+		if iface != "" {
+			interfaces = append(interfaces, iface)
+		}
+	}
+	return api.SelectedMap(strings.Join(interfaces, ","))
+}
+
 func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firewall.NatPortForward, error) {
 	return &firewall.NatPortForward{
 		// Schema uses "enabled" (user-friendly), API uses "disabled" (inverted).
 		Disabled:   tools.BoolToString(!d.Enabled.ValueBool()),
 		Sequence:   tools.Int64ToString(d.Sequence.ValueInt64()),
-		Interface:  api.SelectedMap(d.Interface.ValueString()),
+		Interface:  natPortForwardInterfaceSchemaToAPI(d.Interface.ValueString()),
 		IPProtocol: api.SelectedMap(d.IPProtocol.ValueString()),
 		Protocol:   api.SelectedMap(d.Protocol.ValueString()),
 		Source: firewall.NatPortForwardLocation{

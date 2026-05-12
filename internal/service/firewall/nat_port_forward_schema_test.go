@@ -55,6 +55,38 @@ func TestConvertNATPortForwardSchemaToStruct(t *testing.T) {
 	require.Equal(t, "WAN HTTPS to k3s Traefik ingress VIP", result.Description)
 }
 
+func TestConvertNATPortForwardSchemaToStructWithMultipleInterfaces(t *testing.T) {
+	data := &natPortForwardResourceModel{
+		Enabled:    types.BoolValue(true),
+		Sequence:   types.Int64Value(100),
+		Interface:  types.StringValue("wan, openvpn"),
+		IPProtocol: types.StringValue("inet"),
+		Protocol:   types.StringValue("tcp"),
+		Source: &firewallLocation{
+			Net:    types.StringValue("any"),
+			Port:   types.StringValue(""),
+			Invert: types.BoolValue(false),
+		},
+		Destination: &firewallLocation{
+			Net:    types.StringValue("wanip"),
+			Port:   types.StringValue("443"),
+			Invert: types.BoolValue(false),
+		},
+		Target: &firewallTarget{
+			IP:   types.StringValue("10.1.1.20"),
+			Port: types.StringValue("443"),
+		},
+		Log:           types.BoolValue(false),
+		NatReflection: types.StringValue("default"),
+		Description:   types.StringValue("WAN HTTPS to k3s Traefik ingress VIP"),
+	}
+
+	result, err := convertNATPortForwardSchemaToStruct(data)
+
+	require.NoError(t, err)
+	require.Equal(t, "wan,openvpn", result.Interface.String())
+}
+
 func TestConvertNATPortForwardStructToSchema(t *testing.T) {
 	result, err := convertNATPortForwardStructToSchema(&opnfirewall.NatPortForward{
 		Disabled:   "1",

@@ -44,7 +44,7 @@ resource "opnsense_firewall_nat_port_forward" "wan_https_k3s_ingress" {
 
 ### Required
 
-- `interface` (String) Choose on which interface packets must come in to match this rule.
+- `interface` (String) Choose on which interface packets must come in to match this rule. Multiple interfaces may be specified as a comma-separated list.
 - `protocol` (String) Choose which IP protocol this rule should match.
 - `target` (Attributes) (see [below for nested schema](#nestedatt--target))
 
