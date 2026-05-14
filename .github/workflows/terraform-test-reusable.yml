@@ -1,0 +1,131 @@
+name: Run terraform tests (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      packages:
+        description: 'Go packages to test (e.g. ./... or ./internal/service/firewall/...)'
+        type: string
+        default: './...'
+
+permissions:
+  contents: read
+
+env:
+  OPNSENSE_SSH_PORT: 8022
+  OPNSENSE_WEB_PORT: 8443
+  TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Set up Go
+        uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
+        with:
+          go-version-file: go.mod
+      - name: Build provider
+        run: |
+          go build -o terraform-provider-opnsense
+      - name: Upload artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: terraform-provider-opnsense
+          path: terraform-provider-opnsense
+
+  opnsense-image:
+    uses: ./.github/workflows/build-opnsense-image-reusable.yml
+
+  test:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - opnsense-image
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Install terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3.1.2
+      - name: Download OPNsense image
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: opnsense-image
+      - name: Move OPNsense image
+        run: |
+          mkdir -p opnsense-images
+          mv opnsense.qcow2 opnsense-images/
+      - name: Disable triggers
+        run: |
+          mkdir -p /etc/dpkg/dpkg.cfg.d
+          sudo tee /etc/dpkg/dpkg.cfg.d/01_nodoc > /dev/null << 'EOF'
+          path-exclude /usr/share/doc/*
+          path-exclude /usr/share/man/*
+          path-exclude /usr/share/info/*
+          EOF
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86
+      - name: Start opnsense VM
+        id: start-vm
+        run: |
+          qemu-system-x86_64 -m 6144 -smp 2 -hda opnsense-images/opnsense.qcow2 \
+          -netdev user,id=user.0,hostfwd=tcp::${{ env.OPNSENSE_SSH_PORT }}-:22,hostfwd=tcp::${{ env.OPNSENSE_WEB_PORT }}-:443 \
+          -device virtio-net,netdev=user.0 \
+          -chardev socket,path=/tmp/qemu-isa-serial.sock,server=on,wait=off,id=qga0 \
+          -device isa-serial,chardev=qga0 \
+          -device virtio-serial \
+          -chardev socket,path=/tmp/qemu-virtconsole.sock,server=on,wait=off,id=qvt0 \
+          -device virtconsole,chardev=qvt0 \
+          -chardev socket,path=/tmp/qemu-virtserialport.sock,server=on,wait=off,id=qvsp0 \
+          -device virtserialport,chardev=qvsp0,name=org.qemu.guest_agent.0 \
+          -nographic &
+          QEMU_PID="$!"
+          echo "qemu-pid=${QEMU_PID}" >> "$GITHUB_OUTPUT"
+          sleep 180 # Wait for the VM to boot
+          [ -d "/proc/${QEMU_PID}" ] || (echo "QEMU process not found" && exit 1)
+      - name: Wait for QEMU guest agent
+        run: |
+          python3 << 'EOF'
+          import json, os, select, socket, sys, time
+          SOCK = os.environ.get("QEMU_GA_SOCKET", "/tmp/qemu-virtserialport.sock")
+          deadline = time.monotonic() + 180
+          while time.monotonic() < deadline:
+              try:
+                  with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+                      s.settimeout(3)
+                      s.connect(SOCK)
+                      s.sendall((json.dumps({"execute": "guest-ping"}) + "\n").encode())
+                      ready, _, _ = select.select([s], [], [], 3)
+                      if ready and b'"return"' in s.recv(8192):
+                          print("Guest agent is ready", flush=True)
+                          sys.exit(0)
+              except Exception:
+                  pass
+              time.sleep(3)
+          print("ERROR: Guest agent not ready after 180s", file=sys.stderr)
+          sys.exit(1)
+          EOF
+      - name: Create API key
+        id: apikey
+        run: |
+          python3 scripts/create-apikey.py 2> "$GITHUB_OUTPUT"
+      - name: Setup env vars for tests
+        run: |
+          {
+            echo "OPNSENSE_API_KEY=${{ steps.apikey.outputs.key }}";
+            echo "OPNSENSE_API_SECRET=${{ steps.apikey.outputs.secret }}";
+            echo "OPNSENSE_URI=https://localhost:${{ env.OPNSENSE_WEB_PORT }}";
+            echo "OPNSENSE_ALLOW_INSECURE=true";
+          } >> "$GITHUB_ENV"
+      - name: Configure OPNsense for tests
+        run: python3 scripts/configure-opnsense.py
+      - name: Run terraform tests
+        run: |
+          env TF_ACC=1 go test -v -p 1 ${{ inputs.packages }}
+      - name: Stop opnsense VM
+        if: always()
+        run: |
+          kill -9 ${{ steps.start-vm.outputs.qemu-pid }} || true

@@ -2,12 +2,14 @@
 page_title: "opnsense_kea_peer Resource - terraform-provider-opnsense"
 subcategory: Kea
 description: |-
-  Configure HA Peers for Kea.
+  Configure HA Peers for Kea DHCPv4.
 ---
 
 # opnsense_kea_peer (Resource)
 
-Configure HA Peers for Kea.
+~> **Deprecated** Use [`opnsense_kea_dhcpv4_peer`](kea_dhcpv4_peer) instead. This resource will be removed in a future release.
+
+Configure HA Peers for Kea DHCPv4.
 
 ## Example Usage
 

@@ -1,0 +1,21 @@
+name: Pre-release Tests (Tier 3)
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manually triggering this workflow'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    uses: ./.github/workflows/terraform-test-reusable.yml
+    with:
+      packages: './...'

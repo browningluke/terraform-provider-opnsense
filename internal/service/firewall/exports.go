@@ -14,6 +14,7 @@ func Resources(ctx context.Context) []func() resource.Resource {
 		newFilterResource,
 		newNATResource,
 		newNATOneToOneResource,
+		newNATPortForwardResource,
 	}
 }
 
@@ -24,5 +25,6 @@ func DataSources(ctx context.Context) []func() datasource.DataSource {
 		newFilterDataSource,
 		newNATDataSource,
 		newNATOneToOneDataSource,
+		newNATPortForwardDataSource,
 	}
 }

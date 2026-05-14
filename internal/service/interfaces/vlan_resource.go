@@ -128,7 +128,9 @@ func (r *vlanResource) Read(ctx context.Context, req resource.ReadRequest, resp 
 
 	// Handle empty device attribute (i.e. let OPNsense generate a device name)
 	// If the VLAN was created with device == "", then we ignore any changes to device.
-	if data.Device.ValueString() == "" {
+	// During import, data.Device is null (not empty string), so we skip this and
+	// keep the actual device value returned by the API.
+	if !data.Device.IsNull() && data.Device.ValueString() == "" {
 		vlanModel.Device = types.StringValue("")
 	}
 
