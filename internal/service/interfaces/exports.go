@@ -17,5 +17,7 @@ func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newVipDataSource,
 		newVlanDataSource,
+		newOverviewInterfaceDataSource,
+		newOverviewAllDataSource,
 	}
 }

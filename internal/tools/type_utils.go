@@ -94,12 +94,17 @@ func EmptySetValue(t attr.Type) types.Set {
 }
 
 func StringSliceToSet(s []string) basetypes.SetValue {
+	seen := make(map[string]struct{})
 	var list []attr.Value
 	for _, i := range s {
 		// OPNsense API always returns empty string in list of content, skip it.
 		if i == "" {
 			continue
 		}
+		if _, ok := seen[i]; ok {
+			continue
+		}
+		seen[i] = struct{}{}
 		list = append(list, basetypes.NewStringValue(i))
 	}
 	typeList, _ := types.SetValue(types.StringType, list)
