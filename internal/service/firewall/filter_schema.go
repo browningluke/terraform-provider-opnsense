@@ -232,7 +232,7 @@ func filterResourceSchema() schema.Schema {
 						MarkdownDescription: "Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic.",
 						Required:            true,
 						Validators: []validator.String{
-							stringvalidator.OneOf("in", "out"),
+							stringvalidator.OneOf("in", "out", "any"),
 						},
 					},
 					"ip_protocol": schema.StringAttribute{
@@ -1491,7 +1491,7 @@ func filterResourceSchemaV0() schema.Schema {
 				MarkdownDescription: "Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic. Available values: `in`, `out`.",
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.OneOf("in", "out"),
+					stringvalidator.OneOf("in", "out", "any"),
 				},
 			},
 			"ip_protocol": schema.StringAttribute{
