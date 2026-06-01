@@ -16,7 +16,7 @@ func TestAccFirewallNatPortForwardResource(t *testing.T) {
 			// Create and Read testing
 			{
 				Config: testAccFirewallNatPortForwardResourceConfig(
-					true, false, 100, "wan", "inet", "tcp",
+					true, false, 100, `["wan"]`, "inet", "tcp",
 					"192.168.1.0/24", "1024", false,
 					"10.10.10.22/32", "8080", false,
 					"192.168.10.10", "80",
@@ -26,7 +26,8 @@ func TestAccFirewallNatPortForwardResource(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "enabled", "true"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "log", "false"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "sequence", "100"),
-					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "interface", "wan"),
+					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "interface.#", "1"),
+					resource.TestCheckTypeSetElemAttr("opnsense_firewall_nat_port_forward.test", "interface.*", "wan"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "ip_protocol", "inet"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "protocol", "tcp"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "source.net", "192.168.1.0/24"),
@@ -51,7 +52,7 @@ func TestAccFirewallNatPortForwardResource(t *testing.T) {
 			// Update and Read testing
 			{
 				Config: testAccFirewallNatPortForwardResourceConfig(
-					false, true, 200, "wan", "inet", "udp",
+					false, true, 200, `["wan"]`, "inet", "udp",
 					"10.0.0.0/8", "1024-65535", true,
 					"10.10.10.23/32", "53", true,
 					"192.168.10.20", "53",
@@ -92,7 +93,7 @@ func TestAccFirewallNatPortForwardReflectionResource(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config: testAccFirewallNatPortForwardResourceConfig(
-					true, false, 1, "wan", "inet", "tcp",
+					true, false, 1, `["wan"]`, "inet", "tcp",
 					"", "", false,
 					"10.10.10.30/32", "4443", false,
 					"192.168.10.30", "443",
@@ -104,7 +105,7 @@ func TestAccFirewallNatPortForwardReflectionResource(t *testing.T) {
 			},
 			{
 				Config: testAccFirewallNatPortForwardResourceConfig(
-					true, false, 1, "wan", "inet", "tcp",
+					true, false, 1, `["wan"]`, "inet", "tcp",
 					"", "", false,
 					"10.10.10.30/32", "4443", false,
 					"192.168.10.30", "443",
@@ -123,7 +124,7 @@ func TestAccFirewallNatPortForwardReflectionResource(t *testing.T) {
 			},
 			{
 				Config: testAccFirewallNatPortForwardResourceConfig(
-					true, false, 1, "wan", "inet", "tcp",
+					true, false, 1, `["wan"]`, "inet", "tcp",
 					"", "", false,
 					"10.10.10.30/32", "4443", false,
 					"192.168.10.30", "443",
@@ -164,7 +165,7 @@ resource "opnsense_firewall_nat_port_forward" "test" {
   enabled     = %[1]t
   log         = %[2]t
   sequence    = %[3]d
-  interface   = %[4]q
+  interface   = %[4]s
   ip_protocol = %[5]q
   protocol    = %[6]q%[7]s
   destination = {

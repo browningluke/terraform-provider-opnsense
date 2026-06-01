@@ -1,12 +1,15 @@
 package firewall
 
 import (
+	"context"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
+	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -23,6 +26,26 @@ import (
 
 // natPortForwardResourceModel describes the resource data model.
 type natPortForwardResourceModel struct {
+	Enabled types.Bool `tfsdk:"enabled"`
+
+	Sequence  types.Int64 `tfsdk:"sequence"`
+	Interface types.Set   `tfsdk:"interface"`
+
+	IPProtocol types.String `tfsdk:"ip_protocol"`
+	Protocol   types.String `tfsdk:"protocol"`
+
+	Source      *firewallLocation `tfsdk:"source"`
+	Destination *firewallLocation `tfsdk:"destination"`
+	Target      *firewallTarget   `tfsdk:"target"`
+
+	Log           types.Bool   `tfsdk:"log"`
+	NatReflection types.String `tfsdk:"nat_reflection"`
+	Description   types.String `tfsdk:"description"`
+
+	Id types.String `tfsdk:"id"`
+}
+
+type natPortForwardResourceModelV1 struct {
 	Enabled types.Bool `tfsdk:"enabled"`
 
 	Sequence  types.Int64  `tfsdk:"sequence"`
@@ -44,7 +67,7 @@ type natPortForwardResourceModel struct {
 
 func natPortForwardResourceSchema() schema.Schema {
 	return schema.Schema{
-		Version:             1,
+		Version:             2,
 		MarkdownDescription: "Destination NAT (port forwarding) redirects traffic arriving on an external interface to an internal host. Use this to expose internal services (e.g. web servers, SSH) to the outside network.",
 
 		Attributes: map[string]schema.Attribute{
@@ -60,9 +83,13 @@ func natPortForwardResourceSchema() schema.Schema {
 				Computed:            true,
 				Default:             int64default.StaticInt64(1),
 			},
-			"interface": schema.StringAttribute{
-				MarkdownDescription: "Choose on which interface packets must come in to match this rule. Multiple interfaces may be specified as a comma-separated list.",
+			"interface": schema.SetAttribute{
+				MarkdownDescription: "Choose on which interface packets must come in to match this rule. Must specify at least 1.",
 				Required:            true,
+				ElementType:         types.StringType,
+				Validators: []validator.Set{
+					setvalidator.SizeAtLeast(1),
+				},
 			},
 			"ip_protocol": schema.StringAttribute{
 				MarkdownDescription: "Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`. Defaults to `inet`.",
@@ -217,6 +244,16 @@ func natPortForwardResourceSchema() schema.Schema {
 	}
 }
 
+func natPortForwardResourceSchemaV1() schema.Schema {
+	s := natPortForwardResourceSchema()
+	s.Version = 1
+	s.Attributes["interface"] = schema.StringAttribute{
+		MarkdownDescription: "Choose on which interface packets must come in to match this rule.",
+		Required:            true,
+	}
+	return s
+}
+
 func natPortForwardDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
 		MarkdownDescription: "Destination NAT (port forwarding) redirects traffic arriving on an external interface to an internal host. Use this to expose internal services (e.g. web servers, SSH) to the outside network.",
@@ -234,9 +271,10 @@ func natPortForwardDataSourceSchema() dschema.Schema {
 				MarkdownDescription: "The order of this port forwarding rule.",
 				Computed:            true,
 			},
-			"interface": dschema.StringAttribute{
-				MarkdownDescription: "The interface or comma-separated interfaces on which packets must come in to match this rule.",
+			"interface": dschema.SetAttribute{
+				MarkdownDescription: "The interfaces on which packets must come in to match this rule.",
 				Computed:            true,
+				ElementType:         types.StringType,
 			},
 			"ip_protocol": dschema.StringAttribute{
 				MarkdownDescription: "The Internet Protocol version this rule applies to. Available values: `inet`, `inet6`.",
@@ -335,15 +373,22 @@ func natReflectionAPIToSchema(s string) string {
 	}
 }
 
-func natPortForwardInterfaceSchemaToAPI(s string) api.SelectedMap {
+func natPortForwardInterfaceSchemaToAPI(s types.Set) api.SelectedMapList {
 	var interfaces []string
+	s.ElementsAs(context.Background(), &interfaces, false)
+	sort.Strings(interfaces)
+	return api.SelectedMapList(interfaces)
+}
+
+func natPortForwardInterfaceStringToSet(s string) types.Set {
+	var interfaces []attr.Value
 	for _, iface := range strings.Split(s, ",") {
 		iface = strings.TrimSpace(iface)
 		if iface != "" {
-			interfaces = append(interfaces, iface)
+			interfaces = append(interfaces, types.StringValue(iface))
 		}
 	}
-	return api.SelectedMap(strings.Join(interfaces, ","))
+	return types.SetValueMust(types.StringType, interfaces)
 }
 
 func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firewall.NatPortForward, error) {
@@ -351,7 +396,7 @@ func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firew
 		// Schema uses "enabled" (user-friendly), API uses "disabled" (inverted).
 		Disabled:   tools.BoolToString(!d.Enabled.ValueBool()),
 		Sequence:   tools.Int64ToString(d.Sequence.ValueInt64()),
-		Interface:  natPortForwardInterfaceSchemaToAPI(d.Interface.ValueString()),
+		Interface:  natPortForwardInterfaceSchemaToAPI(d.Interface),
 		IPProtocol: api.SelectedMap(d.IPProtocol.ValueString()),
 		Protocol:   api.SelectedMap(d.Protocol.ValueString()),
 		Source: firewall.NatPortForwardLocation{
@@ -386,7 +431,7 @@ func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortFo
 		// API uses "disabled" (inverted), schema uses "enabled" (user-friendly).
 		Enabled:    types.BoolValue(!tools.StringToBool(d.Disabled)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),
-		Interface:  types.StringValue(d.Interface.String()),
+		Interface:  tools.StringSliceToSet([]string(d.Interface)),
 		IPProtocol: types.StringValue(d.IPProtocol.String()),
 		Protocol:   types.StringValue(d.Protocol.String()),
 		Source: &firewallLocation{

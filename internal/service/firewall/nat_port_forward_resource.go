@@ -18,6 +18,7 @@ import (
 var _ resource.Resource = &natPortForwardResource{}
 var _ resource.ResourceWithConfigure = &natPortForwardResource{}
 var _ resource.ResourceWithImportState = &natPortForwardResource{}
+var _ resource.ResourceWithUpgradeState = &natPortForwardResource{}
 
 func newNATPortForwardResource() resource.Resource {
 	return &natPortForwardResource{}
@@ -189,4 +190,48 @@ func (r *natPortForwardResource) Delete(ctx context.Context, req resource.Delete
 
 func (r *natPortForwardResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *natPortForwardResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	schemaV1 := natPortForwardResourceSchemaV1()
+	return map[int64]resource.StateUpgrader{
+		1: {
+			PriorSchema:   &schemaV1,
+			StateUpgrader: upgradeNATPortForwardStateV1toV2,
+		},
+	}
+}
+
+func upgradeNATPortForwardStateV1toV2(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+	tflog.Info(ctx, "Upgrading NAT port forward resource state from v1 to v2")
+
+	var oldState natPortForwardResourceModelV1
+	resp.Diagnostics.Append(req.State.Get(ctx, &oldState)...)
+	if resp.Diagnostics.HasError() {
+		tflog.Error(ctx, "Failed to read old NAT port forward state during upgrade")
+		return
+	}
+
+	newState := &natPortForwardResourceModel{
+		Enabled:       oldState.Enabled,
+		Sequence:      oldState.Sequence,
+		Interface:     natPortForwardInterfaceStringToSet(oldState.Interface.ValueString()),
+		IPProtocol:    oldState.IPProtocol,
+		Protocol:      oldState.Protocol,
+		Source:        oldState.Source,
+		Destination:   oldState.Destination,
+		Target:        oldState.Target,
+		Log:           oldState.Log,
+		NatReflection: oldState.NatReflection,
+		Description:   oldState.Description,
+		Id:            oldState.Id,
+	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+
+	if !resp.Diagnostics.HasError() {
+		tflog.Info(ctx, "Successfully upgraded NAT port forward resource state from v1 to v2", map[string]any{
+			"id": oldState.Id.ValueString(),
+		})
+	}
 }
