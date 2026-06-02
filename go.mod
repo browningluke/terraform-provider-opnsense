@@ -88,5 +88,3 @@ require (
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/browningluke/opnsense-go => github.com/stoffus/opnsense-go v0.18.1-0.20260601141411-cdf2177ba1d7
