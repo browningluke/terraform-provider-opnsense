@@ -373,11 +373,11 @@ func natReflectionAPIToSchema(s string) string {
 	}
 }
 
-func natPortForwardInterfaceSchemaToAPI(s types.Set) api.SelectedMapList {
+func natPortForwardInterfaceSchemaToAPI(s types.Set) api.SelectedMap {
 	var interfaces []string
 	s.ElementsAs(context.Background(), &interfaces, false)
 	sort.Strings(interfaces)
-	return api.SelectedMapList(interfaces)
+	return api.SelectedMap(strings.Join(interfaces, ","))
 }
 
 func natPortForwardInterfaceStringToSet(s string) types.Set {
@@ -431,7 +431,7 @@ func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortFo
 		// API uses "disabled" (inverted), schema uses "enabled" (user-friendly).
 		Enabled:    types.BoolValue(!tools.StringToBool(d.Disabled)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),
-		Interface:  tools.StringSliceToSet([]string(d.Interface)),
+		Interface:  natPortForwardInterfaceStringToSet(d.Interface.String()),
 		IPProtocol: types.StringValue(d.IPProtocol.String()),
 		Protocol:   types.StringValue(d.Protocol.String()),
 		Source: &firewallLocation{

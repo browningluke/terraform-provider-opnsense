@@ -97,7 +97,7 @@ func TestConvertNATPortForwardStructToSchema(t *testing.T) {
 	result, err := convertNATPortForwardStructToSchema(&opnfirewall.NatPortForward{
 		Disabled:   "1",
 		Sequence:   "200",
-		Interface:  api.SelectedMapList{"wan"},
+		Interface:  api.SelectedMap("wan"),
 		IPProtocol: "inet",
 		Protocol:   "tcp",
 		Source: opnfirewall.NatPortForwardLocation{
