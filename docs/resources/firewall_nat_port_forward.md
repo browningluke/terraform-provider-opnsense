@@ -9,8 +9,6 @@ description: |-
 
 Destination NAT (port forwarding) redirects traffic arriving on an external interface to an internal host. Use this to expose internal services (e.g. web servers, SSH) to the outside network.
 
-~> This resource requires the `os-firewall` plugin to be installed. It will *not* behave correctly if it is not installed.
-
 ## Example Usage
 
 ```terraform
