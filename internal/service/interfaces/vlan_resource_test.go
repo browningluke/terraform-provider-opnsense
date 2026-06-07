@@ -17,7 +17,7 @@ func TestAccInterfacesVlanResource(t *testing.T) {
 			{
 				Config: testAccVlanResourceConfig(100, "High VLAN ID test", 4, "vtnet0", "vlan01"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-                    resource.TestCheckResourceAttrSet("opnsense_interfaces_vlan.test", "id"),
+					resource.TestCheckResourceAttrSet("opnsense_interfaces_vlan.test", "id"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "tag", "100"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "description", "High VLAN ID test"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "priority", "4"),
@@ -59,7 +59,7 @@ func TestAccInterfacesVlanResource_HighVlanId(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "description", "High VLAN ID test"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "priority", "6"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "parent", "vtnet0"),
-                    resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "device", "vlan01"),
+					resource.TestCheckResourceAttr("opnsense_interfaces_vlan.test", "device", "vlan01"),
 				),
 			},
 		},
