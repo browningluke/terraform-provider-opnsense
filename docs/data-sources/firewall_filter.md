@@ -76,7 +76,7 @@ Read-Only:
 
 Read-Only:
 
-- `interface` (Set of String) The interfaces the filter rule is applied on.
+- `interface` (Set of String) The interfaces the filter rule is applied on. An empty set indicates a floating rule that applies to all interfaces.
 - `invert` (Boolean) Whether all but selected interfaces are used.
 
 
