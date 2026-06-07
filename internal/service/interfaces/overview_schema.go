@@ -30,7 +30,7 @@ type overviewInterfaceModel struct {
 	VLANTag     types.String `tfsdk:"vlan_tag"`
 	LaggProto   types.String `tfsdk:"lagg_proto"`
 	LaggHash    types.String `tfsdk:"lagg_hash"`
-	LaggOptions types.String `tfsdk:"lagg_options"`
+	LaggOptions types.Object `tfsdk:"lagg_options"`
 
 	Flags          types.Set `tfsdk:"flags"`
 	Capabilities   types.Set `tfsdk:"capabilities"`
@@ -78,6 +78,11 @@ type overviewVLANModel struct {
 	Parent types.String `tfsdk:"parent"`
 }
 
+type overviewLaggOptionsModel struct {
+	Flags       types.Set    `tfsdk:"flags"`
+	FlowIDShift types.String `tfsdk:"flowid_shift"`
+}
+
 var overviewIPv4AttrTypes = map[string]attr.Type{
 	"ipaddr":      types.StringType,
 	"vhid":        types.StringType,
@@ -105,6 +110,11 @@ var overviewVLANAttrTypes = map[string]attr.Type{
 	"parent": types.StringType,
 }
 
+var overviewLaggOptionsAttrTypes = map[string]attr.Type{
+	"flags":        types.SetType{ElemType: types.StringType},
+	"flowid_shift": types.StringType,
+}
+
 var overviewInterfaceAttrTypes = map[string]attr.Type{
 	"identifier":         types.StringType,
 	"description":        types.StringType,
@@ -123,7 +133,7 @@ var overviewInterfaceAttrTypes = map[string]attr.Type{
 	"vlan_tag":           types.StringType,
 	"lagg_proto":         types.StringType,
 	"lagg_hash":          types.StringType,
-	"lagg_options":       types.StringType,
+	"lagg_options":       types.ObjectType{AttrTypes: overviewLaggOptionsAttrTypes},
 	"flags":              types.SetType{ElemType: types.StringType},
 	"capabilities":       types.SetType{ElemType: types.StringType},
 	"options":            types.SetType{ElemType: types.StringType},
@@ -276,9 +286,20 @@ func overviewInterfaceDataSourceSchema() schema.Schema {
 				MarkdownDescription: "LAGG hash configuration.",
 				Computed:            true,
 			},
-			"lagg_options": schema.StringAttribute{
+			"lagg_options": schema.SingleNestedAttribute{
 				MarkdownDescription: "LAGG options.",
 				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+					"flags": schema.SetAttribute{
+						MarkdownDescription: "LAGG option flags.",
+						Computed:            true,
+						ElementType:         types.StringType,
+					},
+					"flowid_shift": schema.StringAttribute{
+						MarkdownDescription: "LAGG flow ID shift.",
+						Computed:            true,
+					},
+				},
 			},
 			"flags": schema.SetAttribute{
 				MarkdownDescription: "Interface flags.",
@@ -399,7 +420,6 @@ func convertOverviewInterfaceStructToSchema(d *interfaces.InterfaceInfo) (*overv
 		VLANTag:           types.StringValue(d.VLANTag),
 		LaggProto:         types.StringValue(d.LaggProto),
 		LaggHash:          types.StringValue(d.LaggHash),
-		LaggOptions:       types.StringValue(d.LaggOptions),
 		Flags:             tools.StringSliceToSet(d.Flags),
 		Capabilities:      tools.StringSliceToSet(d.Capabilities),
 		Options:           tools.StringSliceToSet(d.Options),
@@ -460,6 +480,15 @@ func convertOverviewInterfaceStructToSchema(d *interfaces.InterfaceInfo) (*overv
 			Proto:  types.StringValue(d.VLAN.Proto),
 			PCP:    types.StringValue(d.VLAN.PCP),
 			Parent: types.StringValue(d.VLAN.Parent),
+		},
+	)
+
+	model.LaggOptions, _ = types.ObjectValueFrom(
+		context.Background(),
+		overviewLaggOptionsAttrTypes,
+		overviewLaggOptionsModel{
+			Flags:       tools.StringSliceToSet(d.LaggOptions.Flags),
+			FlowIDShift: types.StringValue(d.LaggOptions.FlowIDShift),
 		},
 	)
 
