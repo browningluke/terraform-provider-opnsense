@@ -4,9 +4,7 @@ on:
   pull_request:
     paths-ignore:
       - 'docs/**'
-      - 'examples/**'
       - 'scripts/**'
-      - 'templates/**'
       - 'README.md'
       - '.github/**'
 
