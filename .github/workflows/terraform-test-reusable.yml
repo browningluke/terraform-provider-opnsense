@@ -12,9 +12,6 @@ permissions:
   contents: read
 
 env:
-  OPNSENSE_VERSION: "26.1"
-  OPNSENSE_URL: "https://files.bsd.ac/opnsense-qemu/opnsense-26.1.qcow2"
-  OPNSENSE_SHA1: 2266a644b1669be1a8d916a0a79fc91ba4be4733
   OPNSENSE_SSH_PORT: 8022
   OPNSENSE_WEB_PORT: 8443
   TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
@@ -39,22 +36,7 @@ jobs:
           path: terraform-provider-opnsense
 
   opnsense-image:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create opnsense image directory
-        run: |
-          mkdir -p opnsense-images
-      - name: Download OPNsense image
-        run: |
-          curl -L "$OPNSENSE_URL" -o opnsense-images/opnsense.qcow2
-      - name: Verify OPNsense image
-        run: |
-          echo "$OPNSENSE_SHA1  opnsense-images/opnsense.qcow2" | sha1sum -c -
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: opnsense-image
-          path: opnsense-images
+    uses: ./.github/workflows/build-opnsense-image-reusable.yml
 
   test:
     runs-on: ubuntu-latest
@@ -74,9 +56,6 @@ jobs:
         run: |
           mkdir -p opnsense-images
           mv opnsense.qcow2 opnsense-images/
-      - name: Verify OPNsense image
-        run: |
-          echo "$OPNSENSE_SHA1  opnsense-images/opnsense.qcow2" | sha1sum -c -
       - name: Disable triggers
         run: |
           mkdir -p /etc/dpkg/dpkg.cfg.d
@@ -107,6 +86,28 @@ jobs:
           echo "qemu-pid=${QEMU_PID}" >> "$GITHUB_OUTPUT"
           sleep 180 # Wait for the VM to boot
           [ -d "/proc/${QEMU_PID}" ] || (echo "QEMU process not found" && exit 1)
+      - name: Wait for QEMU guest agent
+        run: |
+          python3 << 'EOF'
+          import json, os, select, socket, sys, time
+          SOCK = os.environ.get("QEMU_GA_SOCKET", "/tmp/qemu-virtserialport.sock")
+          deadline = time.monotonic() + 180
+          while time.monotonic() < deadline:
+              try:
+                  with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+                      s.settimeout(3)
+                      s.connect(SOCK)
+                      s.sendall((json.dumps({"execute": "guest-ping"}) + "\n").encode())
+                      ready, _, _ = select.select([s], [], [], 3)
+                      if ready and b'"return"' in s.recv(8192):
+                          print("Guest agent is ready", flush=True)
+                          sys.exit(0)
+              except Exception:
+                  pass
+              time.sleep(3)
+          print("ERROR: Guest agent not ready after 180s", file=sys.stderr)
+          sys.exit(1)
+          EOF
       - name: Create API key
         id: apikey
         run: |
@@ -119,6 +120,8 @@ jobs:
             echo "OPNSENSE_URI=https://localhost:${{ env.OPNSENSE_WEB_PORT }}";
             echo "OPNSENSE_ALLOW_INSECURE=true";
           } >> "$GITHUB_ENV"
+      - name: Configure OPNsense for tests
+        run: python3 scripts/configure-opnsense.py
       - name: Run terraform tests
         run: |
           env TF_ACC=1 go test -v -p 1 ${{ inputs.packages }}

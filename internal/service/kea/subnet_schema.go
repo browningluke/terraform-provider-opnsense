@@ -58,7 +58,8 @@ var keaStaticRouteTypes = map[string]attr.Type{
 
 func subnetResourceSchema() schema.Schema {
 	return schema.Schema{
-		MarkdownDescription: "Configure DHCP subnets for Kea.",
+		MarkdownDescription: "Configure DHCPv4 subnets for Kea.",
+		DeprecationMessage:  "Use `opnsense_kea_dhcpv4_subnet` instead. This resource will be removed in a future release.",
 
 		Attributes: map[string]schema.Attribute{
 			"subnet": schema.StringAttribute{
@@ -189,7 +190,8 @@ func subnetResourceSchema() schema.Schema {
 
 func subnetDataSourceSchema() dschema.Schema {
 	return dschema.Schema{
-		MarkdownDescription: "Configure DHCP subnets for Kea.",
+		MarkdownDescription: "Configure DHCPv4 subnets for Kea.",
+		DeprecationMessage:  "Use `opnsense_kea_dhcpv4_subnet` instead. This data source will be removed in a future release.",
 
 		Attributes: map[string]dschema.Attribute{
 			"id": dschema.StringAttribute{
@@ -280,7 +282,7 @@ func subnetDataSourceSchema() dschema.Schema {
 	}
 }
 
-func convertSubnetSchemaToStruct(d *subnetResourceModel) (*kea.Subnet, error) {
+func convertSubnetSchemaToStruct(d *subnetResourceModel) (*kea.SubnetV4, error) {
 	// Parse static routes
 	var routesList []staticRouteModel
 	d.StaticRoutes.ElementsAs(context.Background(), &routesList, false)
@@ -292,13 +294,13 @@ func convertSubnetSchemaToStruct(d *subnetResourceModel) (*kea.Subnet, error) {
 			route.RouterIp.ValueString())
 	}
 
-	return &kea.Subnet{
+	return &kea.SubnetV4{
 		Subnet:                d.Subnet.ValueString(),
 		NextServer:            d.NextServer.ValueString(),
 		Pools:                 tools.SetToString(d.Pools, "\n"),
 		MatchClientId:         tools.BoolToString(d.MatchClientId.ValueBool()),
 		OptionDataAutoCollect: tools.BoolToString(d.AutoCollect.ValueBool()),
-		OptionData: kea.OptionData{
+		OptionData: kea.OptionDataV4{
 			DomainNameServers: tools.SetToStringSlice(d.DomainNameServers),
 			DomainSearch:      tools.SetToStringSlice(d.DomainSearch),
 			Routers:           tools.SetToStringSlice(d.Routers),
@@ -313,7 +315,7 @@ func convertSubnetSchemaToStruct(d *subnetResourceModel) (*kea.Subnet, error) {
 	}, nil
 }
 
-func convertSubnetStructToSchema(d *kea.Subnet) (*subnetResourceModel, error) {
+func convertSubnetStructToSchema(d *kea.SubnetV4) (*subnetResourceModel, error) {
 	model := &subnetResourceModel{
 		Subnet:            types.StringValue(d.Subnet),
 		Pools:             tools.StringSliceToSet(strings.Split(d.Pools, "\n")),

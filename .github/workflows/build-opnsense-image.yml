@@ -1,0 +1,35 @@
+name: Build OPNsense Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'scripts/upgrade-opnsense.py'
+  schedule:
+    - cron: '0 4 */7 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  delete-cache:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete stale OPNsense image caches
+        run: |
+          gh cache list --repo "$GITHUB_REPOSITORY" --json key \
+            --jq '.[] | select(.key | startswith("opnsense-image-")) | .key' | \
+            while IFS= read -r key; do
+              echo "Deleting cache: $key"
+              gh cache delete "$key" --repo "$GITHUB_REPOSITORY"
+            done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  opnsense-image:
+    needs: delete-cache
+    uses: ./.github/workflows/build-opnsense-image-reusable.yml
+
