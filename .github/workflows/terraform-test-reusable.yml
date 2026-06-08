@@ -15,6 +15,7 @@ env:
   OPNSENSE_SSH_PORT: 8022
   OPNSENSE_WEB_PORT: 8443
   TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
+  OPNSENSE_KEA_DHCPV6_IFACE: wan
 
 jobs:
   build:
