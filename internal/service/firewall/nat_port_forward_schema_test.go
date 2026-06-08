@@ -3,7 +3,10 @@ package firewall
 import (
 	"testing"
 
+	"github.com/browningluke/opnsense-go/pkg/api"
 	opnfirewall "github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/require"
 )
@@ -12,7 +15,7 @@ func TestConvertNATPortForwardSchemaToStruct(t *testing.T) {
 	data := &natPortForwardResourceModel{
 		Enabled:    types.BoolValue(true),
 		Sequence:   types.Int64Value(100),
-		Interface:  types.StringValue("wan"),
+		Interface:  types.SetValueMust(types.StringType, []attr.Value{types.StringValue("wan")}),
 		IPProtocol: types.StringValue("inet"),
 		Protocol:   types.StringValue("tcp"),
 		Source: &firewallLocation{
@@ -55,11 +58,46 @@ func TestConvertNATPortForwardSchemaToStruct(t *testing.T) {
 	require.Equal(t, "WAN HTTPS to k3s Traefik ingress VIP", result.Description)
 }
 
+func TestConvertNATPortForwardSchemaToStructWithMultipleInterfaces(t *testing.T) {
+	data := &natPortForwardResourceModel{
+		Enabled:  types.BoolValue(true),
+		Sequence: types.Int64Value(100),
+		Interface: types.SetValueMust(types.StringType, []attr.Value{
+			types.StringValue("wan"),
+			types.StringValue("openvpn"),
+		}),
+		IPProtocol: types.StringValue("inet"),
+		Protocol:   types.StringValue("tcp"),
+		Source: &firewallLocation{
+			Net:    types.StringValue("any"),
+			Port:   types.StringValue(""),
+			Invert: types.BoolValue(false),
+		},
+		Destination: &firewallLocation{
+			Net:    types.StringValue("wanip"),
+			Port:   types.StringValue("443"),
+			Invert: types.BoolValue(false),
+		},
+		Target: &firewallTarget{
+			IP:   types.StringValue("10.1.1.20"),
+			Port: types.StringValue("443"),
+		},
+		Log:           types.BoolValue(false),
+		NatReflection: types.StringValue("default"),
+		Description:   types.StringValue("WAN HTTPS to k3s Traefik ingress VIP"),
+	}
+
+	result, err := convertNATPortForwardSchemaToStruct(data)
+
+	require.NoError(t, err)
+	require.Equal(t, "openvpn,wan", result.Interface.String())
+}
+
 func TestConvertNATPortForwardStructToSchema(t *testing.T) {
 	result, err := convertNATPortForwardStructToSchema(&opnfirewall.NatPortForward{
 		Disabled:   "1",
 		Sequence:   "200",
-		Interface:  "wan",
+		Interface:  api.SelectedMapList{"wan"},
 		IPProtocol: "inet",
 		Protocol:   "tcp",
 		Source: opnfirewall.NatPortForwardLocation{
@@ -82,7 +120,7 @@ func TestConvertNATPortForwardStructToSchema(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, result.Enabled.ValueBool())
 	require.Equal(t, int64(200), result.Sequence.ValueInt64())
-	require.Equal(t, "wan", result.Interface.ValueString())
+	require.ElementsMatch(t, []string{"wan"}, tools.SetToStringSlice(result.Interface))
 	require.Equal(t, "inet", result.IPProtocol.ValueString())
 	require.Equal(t, "tcp", result.Protocol.ValueString())
 	require.Equal(t, "any", result.Source.Net.ValueString())
@@ -96,4 +134,10 @@ func TestConvertNATPortForwardStructToSchema(t *testing.T) {
 	require.False(t, result.Log.ValueBool())
 	require.Equal(t, "default", result.NatReflection.ValueString())
 	require.Equal(t, "Updated WAN HTTPS", result.Description.ValueString())
+}
+
+func TestNatPortForwardInterfaceStringToSet(t *testing.T) {
+	result := natPortForwardInterfaceStringToSet("wan, openvpn,,lan")
+
+	require.ElementsMatch(t, []string{"wan", "openvpn", "lan"}, tools.SetToStringSlice(result))
 }

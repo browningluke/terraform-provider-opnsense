@@ -21,7 +21,7 @@ Destination NAT (port forwarding) redirects traffic arriving on an external inte
 - `description` (String) Optional description for reference.
 - `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `enabled` (Boolean) Whether this port forwarding rule is enabled.
-- `interface` (String) The interface on which packets must come in to match this rule.
+- `interface` (Set of String) The interfaces on which packets must come in to match this rule.
 - `ip_protocol` (String) The Internet Protocol version this rule applies to. Available values: `inet`, `inet6`.
 - `log` (Boolean) Whether packets handled by this rule are logged.
 - `nat_reflection` (String) NAT reflection mode. One of `default`, `enable`, or `disable`.

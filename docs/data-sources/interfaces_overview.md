@@ -49,7 +49,7 @@ output "wan_ip" {
 - `ipv6` (Attributes List) IPv6 addresses assigned to the interface, including CARP virtual IPs. (see [below for nested schema](#nestedatt--ipv6))
 - `is_physical` (Boolean) Whether the interface is a physical interface.
 - `lagg_hash` (String) LAGG hash configuration.
-- `lagg_options` (String) LAGG options.
+- `lagg_options` (Attributes) LAGG options. (see [below for nested schema](#nestedatt--lagg_options))
 - `lagg_proto` (String) LAGG aggregation protocol (e.g. `"lacp"`).
 - `link_type` (String) Link type of the interface (e.g. `"ether"`, `"dhcp"`).
 - `macaddr` (String) Current MAC address of the interface.
@@ -91,6 +91,15 @@ Read-Only:
 - `peer` (String) CARP peer address.
 - `peer6` (String) CARP peer IPv6 address.
 - `vhid` (String) CARP virtual host ID.
+
+
+<a id="nestedatt--lagg_options"></a>
+### Nested Schema for `lagg_options`
+
+Read-Only:
+
+- `flags` (Set of String) LAGG option flags.
+- `flowid_shift` (String) LAGG flow ID shift.
 
 
 <a id="nestedatt--vlan"></a>

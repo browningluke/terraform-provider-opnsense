@@ -1,7 +1,7 @@
 resource "opnsense_firewall_nat_port_forward" "wan_https_k3s_ingress" {
   enabled     = true
   sequence    = 100
-  interface   = "wan"
+  interface   = ["wan"]
   ip_protocol = "inet"
   protocol    = "tcp"
 
