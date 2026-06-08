@@ -197,12 +197,11 @@ func filterResourceSchema() schema.Schema {
 						Default:             booldefault.StaticBool(false),
 					},
 					"interface": schema.SetAttribute{
-						MarkdownDescription: "The interfaces to apply the filter rule on.",
-						Required:            true,
+						MarkdownDescription: "The interfaces to apply the filter rule on. Leave empty (`[]`) for a floating rule that applies to all interfaces.",
+						Optional:            true,
+						Computed:            true,
 						ElementType:         types.StringType,
-						Validators: []validator.Set{
-							setvalidator.SizeAtLeast(1),
-						},
+						Default:             setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 					},
 				},
 			},
@@ -984,7 +983,7 @@ func filterDataSourceSchema() dschema.Schema {
 						Computed:            true,
 					},
 					"interface": dschema.SetAttribute{
-						MarkdownDescription: "The interfaces the filter rule is applied on.",
+						MarkdownDescription: "The interfaces the filter rule is applied on. An empty set indicates a floating rule that applies to all interfaces.",
 						Computed:            true,
 						ElementType:         types.StringType,
 					},

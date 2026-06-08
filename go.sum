@@ -27,6 +27,8 @@ github.com/bmatcuk/doublestar/v4 v4.10.0 h1:zU9WiOla1YA122oLM6i4EXvGW62DvKZVxIe6
 github.com/bmatcuk/doublestar/v4 v4.10.0/go.mod h1:xBQ8jztBU6kakFMg+8WGxn0c6z1fTSPVIjEY1Wr7jzc=
 github.com/browningluke/opnsense-go v0.18.1-0.20260607102520-ed1f829d2335 h1:owdPnfWt40ft7ALxFMld1z1lndDt4obNl05sCk3x3lI=
 github.com/browningluke/opnsense-go v0.18.1-0.20260607102520-ed1f829d2335/go.mod h1:zh2ofl18Q4soldkfczxgbHddNU7NoCDyIuutVN6sOrM=
+github.com/browningluke/opnsense-go v0.19.1-0.20260607102520-ed1f829d2335 h1:kBOgx3pk6n0ghNBbwfkIUQindokanC7fX4aGZ0gb16k=
+github.com/browningluke/opnsense-go v0.19.1-0.20260607102520-ed1f829d2335/go.mod h1:zh2ofl18Q4soldkfczxgbHddNU7NoCDyIuutVN6sOrM=
 github.com/bufbuild/protocompile v0.14.1 h1:iA73zAf/fyljNjQKwYzUHD6AD4R8KMasmwa/FBatYVw=
 github.com/bufbuild/protocompile v0.14.1/go.mod h1:ppVdAIhbr2H8asPk6k4pY7t9zB1OU5DoEw9xY/FUi1c=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
