@@ -16,7 +16,26 @@ resource "opnsense_firewall_filter" "minimal" {
   }
 }
 
-# Example 2: Typical use case: Allow HTTPS traffic from specific source to web server
+# Example 2: Floating firewall rule (applies to all interfaces)
+resource "opnsense_firewall_filter" "floating_icmpv6" {
+  enabled     = true
+  sequence    = 1
+  description = "Allow ICMPv6 on all interfaces"
+
+  interface = {
+    interface = []
+  }
+
+  filter = {
+    quick       = true
+    action      = "pass"
+    direction   = "in"
+    protocol    = "IPV6-ICMP"
+    ip_protocol = "inet6"
+  }
+}
+
+# Example 4: Typical use case: Allow HTTPS traffic from specific source to web server
 resource "opnsense_firewall_filter" "allow_https" {
   enabled     = true
   sequence    = 100
@@ -53,7 +72,7 @@ resource "opnsense_firewall_filter" "allow_https" {
   }
 }
 
-# Example 3: Comprehensive example with all attributes explicitly configured
+# Example 5: Comprehensive example with all attributes explicitly configured
 resource "opnsense_firewall_filter" "comprehensive" {
   enabled        = true
   sequence       = 200
