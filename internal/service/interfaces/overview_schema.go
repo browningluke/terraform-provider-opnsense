@@ -26,11 +26,12 @@ type overviewInterfaceModel struct {
 	Media     types.String `tfsdk:"media"`
 	MediaRaw  types.String `tfsdk:"media_raw"`
 
-	IsPhysical  types.Bool   `tfsdk:"is_physical"`
-	VLANTag     types.String `tfsdk:"vlan_tag"`
-	LaggProto   types.String `tfsdk:"lagg_proto"`
-	LaggHash    types.String `tfsdk:"lagg_hash"`
-	LaggOptions types.Object `tfsdk:"lagg_options"`
+	IsPhysical      types.Bool   `tfsdk:"is_physical"`
+	VLANTag         types.String `tfsdk:"vlan_tag"`
+	LaggProto       types.String `tfsdk:"lagg_proto"`
+	LaggHash        types.String `tfsdk:"lagg_hash"`
+	LaggOptions     types.Object `tfsdk:"lagg_options"`
+	LaggStatistics  types.Object `tfsdk:"lagg_statistics"`
 
 	Flags          types.Set `tfsdk:"flags"`
 	Capabilities   types.Set `tfsdk:"capabilities"`
@@ -83,6 +84,11 @@ type overviewLaggOptionsModel struct {
 	FlowIDShift types.String `tfsdk:"flowid_shift"`
 }
 
+type overviewLaggStatisticsModel struct {
+	ActivePorts types.String `tfsdk:"active_ports"`
+	Flapping    types.String `tfsdk:"flapping"`
+}
+
 var overviewIPv4AttrTypes = map[string]attr.Type{
 	"ipaddr":      types.StringType,
 	"vhid":        types.StringType,
@@ -115,6 +121,11 @@ var overviewLaggOptionsAttrTypes = map[string]attr.Type{
 	"flowid_shift": types.StringType,
 }
 
+var overviewLaggStatisticsAttrTypes = map[string]attr.Type{
+	"active_ports": types.StringType,
+	"flapping":     types.StringType,
+}
+
 var overviewInterfaceAttrTypes = map[string]attr.Type{
 	"identifier":         types.StringType,
 	"description":        types.StringType,
@@ -134,6 +145,7 @@ var overviewInterfaceAttrTypes = map[string]attr.Type{
 	"lagg_proto":         types.StringType,
 	"lagg_hash":          types.StringType,
 	"lagg_options":       types.ObjectType{AttrTypes: overviewLaggOptionsAttrTypes},
+	"lagg_statistics":    types.ObjectType{AttrTypes: overviewLaggStatisticsAttrTypes},
 	"flags":              types.SetType{ElemType: types.StringType},
 	"capabilities":       types.SetType{ElemType: types.StringType},
 	"options":            types.SetType{ElemType: types.StringType},
@@ -296,7 +308,21 @@ func overviewInterfaceDataSourceSchema() schema.Schema {
 						ElementType:         types.StringType,
 					},
 					"flowid_shift": schema.StringAttribute{
-						MarkdownDescription: "LAGG flow ID shift.",
+						MarkdownDescription: "LAGG flow ID shift value.",
+						Computed:            true,
+					},
+				},
+			},
+			"lagg_statistics": schema.SingleNestedAttribute{
+				MarkdownDescription: "LAGG statistics.",
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+					"active_ports": schema.StringAttribute{
+						MarkdownDescription: "Number of active LAGG ports.",
+						Computed:            true,
+					},
+					"flapping": schema.StringAttribute{
+						MarkdownDescription: "LAGG flapping count.",
 						Computed:            true,
 					},
 				},
@@ -418,9 +444,17 @@ func convertOverviewInterfaceStructToSchema(d *interfaces.InterfaceInfo) (*overv
 		MediaRaw:          types.StringValue(d.MediaRaw),
 		IsPhysical:        types.BoolValue(d.IsPhysical),
 		VLANTag:           types.StringValue(d.VLANTag),
-		LaggProto:         types.StringValue(d.LaggProto),
-		LaggHash:          types.StringValue(d.LaggHash),
-		Flags:             tools.StringSliceToSet(d.Flags),
+		LaggProto: types.StringValue(d.LaggProto),
+		LaggHash:  types.StringValue(d.LaggHash),
+		LaggOptions: types.ObjectValueMust(overviewLaggOptionsAttrTypes, map[string]attr.Value{
+			"flags":        tools.StringSliceToSet(d.LaggOptions.Flags),
+			"flowid_shift": types.StringValue(d.LaggOptions.FlowIDShift),
+		}),
+		LaggStatistics: types.ObjectValueMust(overviewLaggStatisticsAttrTypes, map[string]attr.Value{
+			"active_ports": types.StringValue(d.LaggStatistics.ActivePorts),
+			"flapping":     types.StringValue(d.LaggStatistics.Flapping),
+		}),
+		Flags: tools.StringSliceToSet(d.Flags),
 		Capabilities:      tools.StringSliceToSet(d.Capabilities),
 		Options:           tools.StringSliceToSet(d.Options),
 		SupportedMedia:    tools.StringSliceToSet(d.SupportedMedia),
@@ -480,15 +514,6 @@ func convertOverviewInterfaceStructToSchema(d *interfaces.InterfaceInfo) (*overv
 			Proto:  types.StringValue(d.VLAN.Proto),
 			PCP:    types.StringValue(d.VLAN.PCP),
 			Parent: types.StringValue(d.VLAN.Parent),
-		},
-	)
-
-	model.LaggOptions, _ = types.ObjectValueFrom(
-		context.Background(),
-		overviewLaggOptionsAttrTypes,
-		overviewLaggOptionsModel{
-			Flags:       tools.StringSliceToSet(d.LaggOptions.Flags),
-			FlowIDShift: types.StringValue(d.LaggOptions.FlowIDShift),
 		},
 	)
 

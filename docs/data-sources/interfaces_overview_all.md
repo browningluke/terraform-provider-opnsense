@@ -66,6 +66,7 @@ Read-Only:
 - `lagg_hash` (String) LAGG hash configuration.
 - `lagg_options` (Attributes) LAGG options. (see [below for nested schema](#nestedatt--interfaces--lagg_options))
 - `lagg_proto` (String) LAGG aggregation protocol (e.g. `"lacp"`).
+- `lagg_statistics` (Attributes) LAGG statistics. (see [below for nested schema](#nestedatt--interfaces--lagg_statistics))
 - `link_type` (String) Link type of the interface (e.g. `"ether"`, `"dhcp"`).
 - `macaddr` (String) Current MAC address of the interface.
 - `macaddr_hw` (String) Hardware MAC address of the interface.
@@ -114,7 +115,16 @@ Read-Only:
 Read-Only:
 
 - `flags` (Set of String) LAGG option flags.
-- `flowid_shift` (String) LAGG flow ID shift.
+- `flowid_shift` (String) LAGG flow ID shift value.
+
+
+<a id="nestedatt--interfaces--lagg_statistics"></a>
+### Nested Schema for `interfaces.lagg_statistics`
+
+Read-Only:
+
+- `active_ports` (String) Number of active LAGG ports.
+- `flapping` (String) LAGG flapping count.
 
 
 <a id="nestedatt--interfaces--vlan"></a>
