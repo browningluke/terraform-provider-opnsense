@@ -75,6 +75,22 @@ func (r *authLocalResource) Create(ctx context.Context, req resource.CreateReque
 	// Add IPsec Auth Local to OPNsense
 	id, err := r.client.Ipsec().AddIPsecAuthLocal(ctx, authLocal)
 	if err != nil {
+		if id != "" {
+			data.Id = types.StringValue(id)
+
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if readStruct, readErr := r.client.Ipsec().GetIPsecAuthLocal(ctx, id); readErr == nil {
+				if readModel, convErr := convertAuthLocalStructToSchema(readStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create ipsec auth local, got error: %s", err))
 		return

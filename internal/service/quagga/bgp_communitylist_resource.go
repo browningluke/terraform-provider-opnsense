@@ -75,6 +75,22 @@ func (r *bgpCommunityListResource) Create(ctx context.Context, req resource.Crea
 	// Add bgp community list to unbound
 	id, err := r.client.Quagga().AddBGPCommunityList(ctx, bgpCommunityList)
 	if err != nil {
+		if id != "" {
+			data.Id = types.StringValue(id)
+
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if readStruct, readErr := r.client.Quagga().GetBGPCommunityList(ctx, id); readErr == nil {
+				if readModel, convErr := convertBGPCommunityListStructToSchema(readStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create bgp community list, got error: %s", err))
 		return
