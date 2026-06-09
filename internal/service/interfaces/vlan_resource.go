@@ -75,6 +75,22 @@ func (r *vlanResource) Create(ctx context.Context, req resource.CreateRequest, r
 	// Add VLAN to OPNsense interfaces
 	id, err := r.client.Interfaces().AddVlan(ctx, vlan)
 	if err != nil {
+		if id != "" {
+			data.Id = types.StringValue(id)
+
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if readStruct, readErr := r.client.Interfaces().GetVlan(ctx, id); readErr == nil {
+				if readModel, convErr := convertVlanStructToSchema(readStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create vlan, got error: %s", err))
 		return

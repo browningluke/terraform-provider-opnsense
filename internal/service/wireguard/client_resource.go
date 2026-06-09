@@ -75,6 +75,22 @@ func (r *clientResource) Create(ctx context.Context, req resource.CreateRequest,
 	// Add wg client to unbound
 	id, err := r.client.Wireguard().AddClient(ctx, wgClient)
 	if err != nil {
+		if id != "" {
+			data.Id = types.StringValue(id)
+
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if readStruct, readErr := r.client.Wireguard().GetClient(ctx, id); readErr == nil {
+				if readModel, convErr := convertClientStructToSchema(readStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create wg client, got error: %s", err))
 		return

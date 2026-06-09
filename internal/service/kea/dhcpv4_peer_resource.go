@@ -70,6 +70,22 @@ func (r *dhcpv4PeerResource) Create(ctx context.Context, req resource.CreateRequ
 
 	id, err := r.client.Kea().AddPeerV4(ctx, peer)
 	if err != nil {
+		if id != "" {
+			data.Id = types.StringValue(id)
+
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if readStruct, readErr := r.client.Kea().GetPeerV4(ctx, id); readErr == nil {
+				if readModel, convErr := convertDhcpv4PeerStructToSchema(readStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
+			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+		}
+
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create peer, got error: %s", err))
 		return
