@@ -124,7 +124,7 @@ func hostDataSourceSchema() dschema.Schema {
 		Attributes: map[string]dschema.Attribute{
 			"hostname": dschema.StringAttribute{
 				MarkdownDescription: "Name of the host, without the domain part.",
-				Required:            true,
+				Computed:            true,
 			},
 			"domain": dschema.StringAttribute{
 				MarkdownDescription: "Domain of the host.",
@@ -137,7 +137,7 @@ func hostDataSourceSchema() dschema.Schema {
 			"ip_addresses": dschema.SetAttribute{
 				MarkdownDescription: "IP addresses of the host.",
 				ElementType:         types.StringType,
-				Required:            true,
+				Computed:            true,
 			},
 			"alias_records": dschema.SetAttribute{
 				MarkdownDescription: "Alias records of the host.",

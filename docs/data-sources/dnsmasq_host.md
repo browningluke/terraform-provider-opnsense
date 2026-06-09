@@ -17,9 +17,7 @@ Configure hosts override for dnsmasq.
 
 ### Required
 
-- `hostname` (String) Name of the host, without the domain part.
 - `id` (String) UUID of the host.
-- `ip_addresses` (Set of String) IP addresses of the host.
 
 ### Read-Only
 
@@ -30,6 +28,8 @@ Configure hosts override for dnsmasq.
 - `description` (String) Optional description.
 - `domain` (String) Domain of the host.
 - `hardware_addresses` (Set of String) Hardware addresses of the host.
+- `hostname` (String) Name of the host, without the domain part.
+- `ip_addresses` (Set of String) IP addresses of the host.
 - `is_ignored` (Boolean) Whether DHCP packet is ignored for this host.
 - `is_local_domain` (Boolean) Whether this is a local domain.
 - `tag` (String) UUID of the dnsmasq tag associated with this host.
