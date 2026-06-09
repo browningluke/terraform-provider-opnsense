@@ -2,6 +2,7 @@ package firewall_test
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/browningluke/terraform-provider-opnsense/internal/acctest"
@@ -141,6 +142,45 @@ func TestAccFirewallAliasResource_URLJson(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "URL JSON alias updated"),
 					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "path_expression", ".web | .[]"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccFirewallAliasResource_PathExpressionWrongType(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+resource "opnsense_firewall_alias" "test" {
+  name            = "badalias"
+  type            = "host"
+  content         = ["192.168.1.100"]
+  path_expression = ".foo"
+}
+`,
+				ExpectError: regexp.MustCompile(`(?s)path_expression.*type.*urljson`),
+			},
+		},
+	})
+}
+
+func TestAccFirewallAliasResource_URLJsonMissingPathExpression(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: `
+resource "opnsense_firewall_alias" "test" {
+  name    = "urljsonmissing"
+  type    = "urljson"
+  content = ["https://api.github.com/meta"]
+}
+`,
+				ExpectError: regexp.MustCompile(`(?s)path_expression must be set.*type.*urljson`),
 			},
 		},
 	})

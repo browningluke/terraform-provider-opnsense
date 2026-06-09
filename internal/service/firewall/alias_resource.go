@@ -8,6 +8,7 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -18,6 +19,7 @@ import (
 var _ resource.Resource = &aliasResource{}
 var _ resource.ResourceWithConfigure = &aliasResource{}
 var _ resource.ResourceWithImportState = &aliasResource{}
+var _ resource.ResourceWithConfigValidators = &aliasResource{}
 
 func newAliasResource() resource.Resource {
 	return &aliasResource{}
@@ -34,6 +36,23 @@ func (r *aliasResource) Metadata(ctx context.Context, req resource.MetadataReque
 
 func (r *aliasResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = aliasResourceSchema()
+}
+
+func (r *aliasResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		// path_expression only applies when type = "urljson"
+		validators.RequiresStringEqualsOneOf(
+			path.MatchRoot("path_expression"),
+			path.MatchRoot("type"),
+			[]string{"urljson"},
+		),
+		// path_expression must be set when type = "urljson"
+		validators.RequiredWhenStringEqualsOneOf(
+			path.MatchRoot("path_expression"),
+			path.MatchRoot("type"),
+			[]string{"urljson"},
+		),
+	}
 }
 
 func (r *aliasResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
