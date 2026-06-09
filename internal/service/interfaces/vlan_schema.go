@@ -119,10 +119,15 @@ func convertVlanSchemaToStruct(d *vlanResourceModel) (*interfaces.Vlan, error) {
 }
 
 func convertVlanStructToSchema(d *interfaces.Vlan) (*vlanResourceModel, error) {
+	priority := int64(0)
+	if s := d.Priority.String(); s != "" {
+		priority = tools.StringToInt64(s)
+	}
+
 	return &vlanResourceModel{
 		Description: tools.StringOrNull(d.Description),
 		Tag:         tools.StringToInt64Null(d.Tag),
-		Priority:    tools.StringToInt64Null(d.Priority.String()),
+		Priority:    types.Int64Value(priority),
 		Parent:      types.StringValue(d.Parent.String()),
 		Device:      types.StringValue(d.Device),
 	}, nil
