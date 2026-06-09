@@ -103,6 +103,49 @@ func TestAccFirewallAliasResource_Port(t *testing.T) {
 	})
 }
 
+func TestAccFirewallAliasResource_URLJson(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAliasResourceConfigURLJson(
+					"urljsonalias",
+					"URL JSON alias",
+					"https://api.github.com/meta",
+					".web + .api + .git | .[]",
+				),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "name", "urljsonalias"),
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "URL JSON alias"),
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "type", "urljson"),
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "content.#", "1"),
+					resource.TestCheckTypeSetElemAttr("opnsense_firewall_alias.test", "content.*", "https://api.github.com/meta"),
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "path_expression", ".web + .api + .git | .[]"),
+					resource.TestCheckResourceAttrSet("opnsense_firewall_alias.test", "id"),
+				),
+			},
+			{
+				ResourceName:      "opnsense_firewall_alias.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccAliasResourceConfigURLJson(
+					"urljsonalias",
+					"URL JSON alias updated",
+					"https://api.github.com/meta",
+					".web | .[]",
+				),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "description", "URL JSON alias updated"),
+					resource.TestCheckResourceAttr("opnsense_firewall_alias.test", "path_expression", ".web | .[]"),
+				),
+			},
+		},
+	})
+}
+
 func testAccAliasResourceConfig(name, description, aliasType, content string) string {
 	return fmt.Sprintf(`
 resource "opnsense_firewall_alias" "test" {
@@ -112,6 +155,18 @@ resource "opnsense_firewall_alias" "test" {
   content     = [%[4]q]
 }
 `, name, description, aliasType, content)
+}
+
+func testAccAliasResourceConfigURLJson(name, description, content, pathExpression string) string {
+	return fmt.Sprintf(`
+resource "opnsense_firewall_alias" "test" {
+  name            = %[1]q
+  description     = %[2]q
+  type            = "urljson"
+  content         = [%[3]q]
+  path_expression = %[4]q
+}
+`, name, description, content, pathExpression)
 }
 
 func testAccAliasResourceConfigMultiple(name, description, aliasType string) string {

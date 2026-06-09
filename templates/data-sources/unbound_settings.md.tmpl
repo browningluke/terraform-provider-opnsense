@@ -1,6 +1,6 @@
 ---
 page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
-subcategory: Firewall
+subcategory: Unbound
 description: |-
 {{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
 ---
@@ -9,12 +9,8 @@ description: |-
 
 {{ .Description | trimspace }}
 
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/data-sources/" .Name "/data-source.tf") }}
+
 {{ .SchemaMarkdown | trimspace }}
-
-{{ if .HasImport -}}
-## Import
-
-Import is supported using the following syntax:
-
-{{ printf "{{codefile \"shell\" %q}}" .ImportFile }}
-{{- end }}

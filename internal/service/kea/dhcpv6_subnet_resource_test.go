@@ -10,7 +10,7 @@ import (
 
 func TestAccKeaDhcpv6SubnetResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		PreCheck:                 func() { acctest.KeaDhcpv6PreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing

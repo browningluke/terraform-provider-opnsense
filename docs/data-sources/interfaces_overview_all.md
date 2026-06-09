@@ -64,8 +64,9 @@ Read-Only:
 - `ipv6` (Attributes List) IPv6 addresses assigned to the interface, including CARP virtual IPs. (see [below for nested schema](#nestedatt--interfaces--ipv6))
 - `is_physical` (Boolean) Whether the interface is a physical interface.
 - `lagg_hash` (String) LAGG hash configuration.
-- `lagg_options` (String) LAGG options.
+- `lagg_options` (Attributes) LAGG options. (see [below for nested schema](#nestedatt--interfaces--lagg_options))
 - `lagg_proto` (String) LAGG aggregation protocol (e.g. `"lacp"`).
+- `lagg_statistics` (Attributes) LAGG statistics. (see [below for nested schema](#nestedatt--interfaces--lagg_statistics))
 - `link_type` (String) Link type of the interface (e.g. `"ether"`, `"dhcp"`).
 - `macaddr` (String) Current MAC address of the interface.
 - `macaddr_hw` (String) Hardware MAC address of the interface.
@@ -106,6 +107,24 @@ Read-Only:
 - `peer` (String) CARP peer address.
 - `peer6` (String) CARP peer IPv6 address.
 - `vhid` (String) CARP virtual host ID.
+
+
+<a id="nestedatt--interfaces--lagg_options"></a>
+### Nested Schema for `interfaces.lagg_options`
+
+Read-Only:
+
+- `flags` (Set of String) LAGG option flags.
+- `flowid_shift` (String) LAGG flow ID shift value.
+
+
+<a id="nestedatt--interfaces--lagg_statistics"></a>
+### Nested Schema for `interfaces.lagg_statistics`
+
+Read-Only:
+
+- `active_ports` (String) Number of active LAGG ports.
+- `flapping` (String) LAGG flapping count.
 
 
 <a id="nestedatt--interfaces--vlan"></a>

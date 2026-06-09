@@ -197,12 +197,11 @@ func filterResourceSchema() schema.Schema {
 						Default:             booldefault.StaticBool(false),
 					},
 					"interface": schema.SetAttribute{
-						MarkdownDescription: "The interfaces to apply the filter rule on.",
-						Required:            true,
+						MarkdownDescription: "The interfaces to apply the filter rule on. Leave empty (`[]`) for a floating rule that applies to all interfaces.",
+						Optional:            true,
+						Computed:            true,
 						ElementType:         types.StringType,
-						Validators: []validator.Set{
-							setvalidator.SizeAtLeast(1),
-						},
+						Default:             setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 					},
 				},
 			},
@@ -232,7 +231,7 @@ func filterResourceSchema() schema.Schema {
 						MarkdownDescription: "Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic.",
 						Required:            true,
 						Validators: []validator.String{
-							stringvalidator.OneOf("in", "out"),
+							stringvalidator.OneOf("in", "out", "any"),
 						},
 					},
 					"ip_protocol": schema.StringAttribute{
@@ -984,7 +983,7 @@ func filterDataSourceSchema() dschema.Schema {
 						Computed:            true,
 					},
 					"interface": dschema.SetAttribute{
-						MarkdownDescription: "The interfaces the filter rule is applied on.",
+						MarkdownDescription: "The interfaces the filter rule is applied on. An empty set indicates a floating rule that applies to all interfaces.",
 						Computed:            true,
 						ElementType:         types.StringType,
 					},
@@ -1491,7 +1490,7 @@ func filterResourceSchemaV0() schema.Schema {
 				MarkdownDescription: "Direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic. Available values: `in`, `out`.",
 				Required:            true,
 				Validators: []validator.String{
-					stringvalidator.OneOf("in", "out"),
+					stringvalidator.OneOf("in", "out", "any"),
 				},
 			},
 			"ip_protocol": schema.StringAttribute{

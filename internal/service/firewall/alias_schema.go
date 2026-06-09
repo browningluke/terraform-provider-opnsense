@@ -34,7 +34,8 @@ type aliasResourceModel struct {
 	Content    types.Set `tfsdk:"content"`
 	Categories types.Set `tfsdk:"categories"`
 
-	UpdateFreq types.Float64 `tfsdk:"update_freq"`
+	UpdateFreq     types.Float64 `tfsdk:"update_freq"`
+	PathExpression types.String  `tfsdk:"path_expression"`
 
 	Statistics  types.Bool   `tfsdk:"stats"`
 	Description types.String `tfsdk:"description"`
@@ -65,7 +66,7 @@ func aliasResourceSchema() schema.Schema {
 				Required:            true,
 				Validators: []validator.String{
 					stringvalidator.OneOf(
-						"host", "network", "port", "url", "urltable", "geoip", "networkgroup",
+						"host", "network", "port", "url", "urltable", "urljson", "geoip", "networkgroup",
 						"mac", "asn", "dynipv6host", "authgroup", "internal", "external",
 					),
 				},
@@ -105,6 +106,12 @@ func aliasResourceSchema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				Default:             float64default.StaticFloat64(-1),
+			},
+			"path_expression": schema.StringAttribute{
+				MarkdownDescription: "A `jq` expression to extract IP addresses from the downloaded JSON. Only applies (and must be set) when `type = \"urljson\"`. Defaults to `\"\"`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"stats": schema.BoolAttribute{
 				MarkdownDescription: "Whether to maintain a set of counters for each table entry.",
@@ -171,6 +178,10 @@ func aliasDataSourceSchema() dschema.Schema {
 				MarkdownDescription: "The frequency that the list will be refreshed, in days (e.g. for 30 hours, enter `1.25`). Only applies (and must be set) when `type = \"urltable\"`.",
 				Computed:            true,
 			},
+			"path_expression": dschema.StringAttribute{
+				MarkdownDescription: "A `jq` expression to extract IP addresses from the downloaded JSON. Only applies (and must be set) when `type = \"urljson\"`.",
+				Computed:            true,
+			},
 			"stats": dschema.BoolAttribute{
 				MarkdownDescription: "Whether to maintain a set of counters for each table entry.",
 				Computed:            true,
@@ -197,31 +208,33 @@ func convertAliasSchemaToStruct(d *aliasResourceModel) (*firewall.Alias, error) 
 	d.Categories.ElementsAs(context.Background(), &categoriesList, false)
 
 	return &firewall.Alias{
-		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
-		Name:        d.Name.ValueString(),
-		Type:        api.SelectedMap(d.Type.ValueString()),
-		IPProtocol:  protocolList,
-		Interface:   api.SelectedMap(d.Interface.ValueString()),
-		Content:     contentList,
-		Categories:  categoriesList,
-		UpdateFreq:  tools.Float64ToStringNegative(d.UpdateFreq.ValueFloat64()),
-		Statistics:  tools.BoolToString(d.Statistics.ValueBool()),
-		Description: d.Description.ValueString(),
+		Enabled:        tools.BoolToString(d.Enabled.ValueBool()),
+		Name:           d.Name.ValueString(),
+		Type:           api.SelectedMap(d.Type.ValueString()),
+		IPProtocol:     protocolList,
+		Interface:      api.SelectedMap(d.Interface.ValueString()),
+		Content:        contentList,
+		Categories:     categoriesList,
+		UpdateFreq:     tools.Float64ToStringNegative(d.UpdateFreq.ValueFloat64()),
+		PathExpression: d.PathExpression.ValueString(),
+		Statistics:     tools.BoolToString(d.Statistics.ValueBool()),
+		Description:    d.Description.ValueString(),
 	}, nil
 }
 
 func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) {
 	model := &aliasResourceModel{
-		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
-		Name:        types.StringValue(d.Name),
-		Type:        types.StringValue(d.Type.String()),
-		IPProtocol:  types.SetNull(types.StringType),
-		Interface:   types.StringValue(d.Interface.String()),
-		Content:     types.SetNull(types.StringType),
-		Categories:  types.SetNull(types.StringType),
-		UpdateFreq:  types.Float64Value(tools.StringToFloat64(d.UpdateFreq)),
-		Statistics:  types.BoolValue(tools.StringToBool(d.Statistics)),
-		Description: tools.StringOrNull(d.Description),
+		Enabled:        types.BoolValue(tools.StringToBool(d.Enabled)),
+		Name:           types.StringValue(d.Name),
+		Type:           types.StringValue(d.Type.String()),
+		IPProtocol:     types.SetNull(types.StringType),
+		Interface:      types.StringValue(d.Interface.String()),
+		Content:        types.SetNull(types.StringType),
+		Categories:     types.SetNull(types.StringType),
+		UpdateFreq:     types.Float64Value(tools.StringToFloat64(d.UpdateFreq)),
+		PathExpression: types.StringValue(d.PathExpression),
+		Statistics:     types.BoolValue(tools.StringToBool(d.Statistics)),
+		Description:    tools.StringOrNull(d.Description),
 	}
 
 	// Parse 'IPProtocol'

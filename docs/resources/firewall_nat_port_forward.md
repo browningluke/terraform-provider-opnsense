@@ -9,15 +9,13 @@ description: |-
 
 Destination NAT (port forwarding) redirects traffic arriving on an external interface to an internal host. Use this to expose internal services (e.g. web servers, SSH) to the outside network.
 
-~> This resource requires the `os-firewall` plugin to be installed. It will *not* behave correctly if it is not installed.
-
 ## Example Usage
 
 ```terraform
 resource "opnsense_firewall_nat_port_forward" "wan_https_k3s_ingress" {
   enabled     = true
   sequence    = 100
-  interface   = "wan"
+  interface   = ["wan"]
   ip_protocol = "inet"
   protocol    = "tcp"
 
@@ -44,7 +42,7 @@ resource "opnsense_firewall_nat_port_forward" "wan_https_k3s_ingress" {
 
 ### Required
 
-- `interface` (String) Choose on which interface packets must come in to match this rule.
+- `interface` (Set of String) Choose on which interface packets must come in to match this rule. Must specify at least 1.
 - `protocol` (String) Choose which IP protocol this rule should match.
 - `target` (Attributes) (see [below for nested schema](#nestedatt--target))
 

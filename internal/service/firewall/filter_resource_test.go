@@ -252,7 +252,103 @@ func TestAccFirewallFilterResource_Comprehensive(t *testing.T) {
 	})
 }
 
+func TestAccFirewallFilterResource_Floating(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create floating rule (empty interface list)
+			{
+				Config: testAccFirewallFilterResourceConfigFloating("pass", "in", "any"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "enabled", "true"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "interface.interface.#", "0"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.action", "pass"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.direction", "in"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.protocol", "any"),
+					resource.TestCheckResourceAttrSet("opnsense_firewall_filter.test", "id"),
+				),
+			},
+			// ImportState testing
+			{
+				ResourceName:      "opnsense_firewall_filter.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Update floating rule
+			{
+				Config: testAccFirewallFilterResourceConfigFloating("block", "out", "TCP"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "interface.interface.#", "0"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.action", "block"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.direction", "out"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.protocol", "TCP"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+func TestAccFirewallFilterResource_DirectionAny(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			// Create with direction "any"
+			{
+				Config: testAccFirewallFilterResourceConfigMinimal("wan", "pass", "any", "any"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.direction", "any"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.action", "pass"),
+					resource.TestCheckResourceAttrSet("opnsense_firewall_filter.test", "id"),
+				),
+			},
+			// ImportState testing
+			{
+				ResourceName:      "opnsense_firewall_filter.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			// Update from direction "any" to "in"
+			{
+				Config: testAccFirewallFilterResourceConfigMinimal("wan", "pass", "in", "any"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.direction", "in"),
+				),
+			},
+			// Update from direction "in" to "any"
+			{
+				Config: testAccFirewallFilterResourceConfigMinimal("wan", "block", "any", "TCP"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.direction", "any"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.action", "block"),
+					resource.TestCheckResourceAttr("opnsense_firewall_filter.test", "filter.protocol", "TCP"),
+				),
+			},
+			// Delete testing automatically occurs in TestCase
+		},
+	})
+}
+
+
 // Helper functions to generate test configurations
+
+func testAccFirewallFilterResourceConfigFloating(action, direction, protocol string) string {
+	return fmt.Sprintf(`
+resource "opnsense_firewall_filter" "test" {
+  interface = {
+    interface = []
+  }
+
+  filter = {
+    action    = %[1]q
+    direction = %[2]q
+    protocol  = %[3]q
+  }
+}
+`, action, direction, protocol)
+}
 
 func testAccFirewallFilterResourceConfigMinimal(iface, action, direction, protocol string) string {
 	return fmt.Sprintf(`
