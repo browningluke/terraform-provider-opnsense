@@ -108,10 +108,18 @@ func (r *filterResource) Create(ctx context.Context, req resource.CreateRequest,
 	id, err := r.client.Firewall().AddFilter(ctx, resourceStruct)
 	if err != nil {
 		if id != "" {
-			// Tag new resource with ID from OPNsense
 			data.Id = types.StringValue(id)
 
-			// Save data into Terraform state
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if resourceStruct, readErr := r.client.Firewall().GetFilter(ctx, id); readErr == nil {
+				if readModel, convErr := convertFilterStructToSchema(resourceStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		}
 

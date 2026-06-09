@@ -77,10 +77,18 @@ func (r *natPortForwardResource) Create(ctx context.Context, req resource.Create
 	id, err := r.client.Firewall().AddNatPortForward(ctx, portForward)
 	if err != nil {
 		if id != "" {
-			// Tag new resource with ID from OPNsense
 			data.Id = types.StringValue(id)
 
-			// Save data into Terraform state
+			// Read back so state captures API-normalised values (defaults,
+			// sorting, trimming); fall back to plan-only state if the
+			// read-back fails so the upstream resource isn't orphaned.
+			if resourceStruct, readErr := r.client.Firewall().GetNatPortForward(ctx, id); readErr == nil {
+				if readModel, convErr := convertNATPortForwardStructToSchema(resourceStruct); convErr == nil {
+					readModel.Id = data.Id
+					data = readModel
+				}
+			}
+
 			resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 		}
 
