@@ -5,7 +5,7 @@ import (
 
 	"github.com/browningluke/opnsense-go/pkg/wireguard"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -106,9 +106,7 @@ func serverResourceSchema() schema.Schema {
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 				Validators: []validator.String{
-					stringvalidator.AlsoRequires(path.Expressions{
-						path.MatchRoot("disable_routes"),
-					}...),
+					validators.RequiredWhenBool(path.MatchRoot("disable_routes"), true),
 				},
 			},
 			"instance": schema.StringAttribute{
