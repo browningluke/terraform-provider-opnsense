@@ -55,6 +55,7 @@ resource "opnsense_dnsmasq_host" "test_xl" {
 - `hardware_addresses` (Set of String) Hardware addresses of the host.
 - `is_ignored` (Boolean) Whether DHCP packet is ignored for this host.
 - `is_local_domain` (Boolean) Whether this is a local domain.
+- `tag` (String) UUID of the dnsmasq tag to associate with this host. Defaults to `""`.
 
 ### Read-Only
 

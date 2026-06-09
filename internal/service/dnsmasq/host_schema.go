@@ -1,6 +1,7 @@
 package dnsmasq
 
 import (
+	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/dnsmasq"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -22,6 +23,7 @@ type hostResourceModel struct {
 	CnameRecords    types.Set    `tfsdk:"cname_records"`
 	ClientID        types.String `tfsdk:"client_id"`
 	HarwareAdresses types.Set    `tfsdk:"hardware_addresses"`
+	Tag             types.String `tfsdk:"tag"`
 	IsIgnored       types.Bool   `tfsdk:"is_ignored"`
 	Description     types.String `tfsdk:"description"`
 	Comment         types.String `tfsdk:"comment"`
@@ -80,6 +82,12 @@ func hostResourceSchema() schema.Schema {
 				Optional:            true,
 				Computed:            true,
 				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
+			},
+			"tag": schema.StringAttribute{
+				MarkdownDescription: "UUID of the dnsmasq tag to associate with this host. Defaults to `\"\"`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             stringdefault.StaticString(""),
 			},
 			"is_ignored": schema.BoolAttribute{
 				MarkdownDescription: "Whether DHCP packet is ignored for this host.",
@@ -150,6 +158,10 @@ func hostDataSourceSchema() dschema.Schema {
 				ElementType:         types.StringType,
 				Computed:            true,
 			},
+			"tag": dschema.StringAttribute{
+				MarkdownDescription: "UUID of the dnsmasq tag associated with this host.",
+				Computed:            true,
+			},
 			"is_ignored": dschema.BoolAttribute{
 				MarkdownDescription: "Whether DHCP packet is ignored for this host.",
 				Computed:            true,
@@ -181,6 +193,7 @@ func convertHostSchemaToStruct(d *hostResourceModel) (*dnsmasq.Host, error) {
 		CnameRecords:      tools.SetToStringSlice(d.CnameRecords),
 		ClientId:          d.ClientID.ValueString(),
 		HardwareAddresses: tools.SetToStringSlice(d.HarwareAdresses),
+		Tag:               api.SelectedMap(d.Tag.ValueString()),
 		IsIgnored:         tools.BoolToString(d.IsIgnored.ValueBool()),
 		Description:       d.Description.ValueString(),
 		Comments:          d.Comment.ValueString(),
@@ -197,6 +210,7 @@ func convertHostStructToSchema(d *dnsmasq.Host) (*hostResourceModel, error) {
 		CnameRecords:    tools.StringSliceToSet(d.CnameRecords),
 		ClientID:        types.StringValue(d.ClientId),
 		HarwareAdresses: tools.StringSliceToSet(d.HardwareAddresses),
+		Tag:             types.StringValue(d.Tag.String()),
 		IsIgnored:       types.BoolValue(tools.StringToBool(d.IsIgnored)),
 		Description:     types.StringValue(d.Description),
 		Comment:         types.StringValue(d.Comments),
