@@ -14,6 +14,15 @@ type interfaceAllDataSourceModel struct {
 }
 
 func interfaceAllDataSourceSchema() schema.Schema {
+	// The single-interface schema declares device as Required because it is
+	// the lookup key there. Inside a fully-Computed nested list, Required is
+	// not a legal mode, so override device to Computed for the list view.
+	listItemAttrs := interfaceDataSourceSchema().Attributes
+	listItemAttrs["device"] = schema.StringAttribute{
+		MarkdownDescription: "Name of the interface device.",
+		Computed:            true,
+	}
+
 	return schema.Schema{
 		MarkdownDescription: "InterfacesAll can be used to get a list of all configurations of OPNsense interfaces. Allows for custom filtering.",
 
@@ -21,7 +30,7 @@ func interfaceAllDataSourceSchema() schema.Schema {
 			"interfaces": schema.ListNestedAttribute{
 				MarkdownDescription: "A list of all interfaces present in OPNsense.",
 				NestedObject: schema.NestedAttributeObject{
-					Attributes: interfaceDataSourceSchema().Attributes,
+					Attributes: listItemAttrs,
 				},
 				Computed: true,
 			},
