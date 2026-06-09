@@ -32,3 +32,4 @@ Configure hosts override for dnsmasq.
 - `hardware_addresses` (Set of String) Hardware addresses of the host.
 - `is_ignored` (Boolean) Whether DHCP packet is ignored for this host.
 - `is_local_domain` (Boolean) Whether this is a local domain.
+- `tag` (String) UUID of the dnsmasq tag associated with this host.
