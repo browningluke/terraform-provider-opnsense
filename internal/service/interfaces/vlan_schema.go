@@ -119,6 +119,9 @@ func convertVlanSchemaToStruct(d *vlanResourceModel) (*interfaces.Vlan, error) {
 }
 
 func convertVlanStructToSchema(d *interfaces.Vlan) (*vlanResourceModel, error) {
+	// priority is Optional+Computed with Default(0), so returning Null here
+	// would violate the Computed contract. Fall back to the schema default
+	// when the upstream API responds with an empty string.
 	priority := int64(0)
 	if s := d.Priority.String(); s != "" {
 		priority = tools.StringToInt64(s)
