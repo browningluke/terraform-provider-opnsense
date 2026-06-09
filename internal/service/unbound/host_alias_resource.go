@@ -123,12 +123,11 @@ func (r *hostAliasResource) Read(ctx context.Context, req resource.ReadRequest, 
 		return
 	}
 
-	// ID & Override cannot be added by convert... func, have to add here
+	// ID cannot be added by convert... func, have to add here
 	aliasModel.Id = data.Id
-	aliasModel.Override = data.Override
 
 	// Save updated data into Terraform state
-	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &aliasModel)...)
 }
 
 func (r *hostAliasResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
