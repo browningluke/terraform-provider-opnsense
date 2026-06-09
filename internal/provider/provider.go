@@ -221,7 +221,7 @@ func (p *opnsenseProvider) Configure(ctx context.Context, req provider.Configure
 		minBackoff = 0
 	}
 	if !data.MinBackoff.IsNull() {
-		maxBackoff = data.MinBackoff.ValueInt64()
+		minBackoff = data.MinBackoff.ValueInt64()
 	}
 
 	retriesStr := os.Getenv("OPNSENSE_RETRIES")
