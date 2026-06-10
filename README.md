@@ -161,7 +161,7 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Openvpn/Client Overwrites`      | ✅        | ✅           |
 | `Openvpn/Instances`              | ✅        | ✅           |
 | `Openvpn/Instances/Static Key`   | ✅        | ✅           |
-| `Openvpn/Instances/Generate Key` | ❌        |             |
+| `Openvpn/Instances/Generate Key` | ✅ (ephemeral) |        |
 | `Routes/Route`                   | 🚧       | 🚧          |
 | `Routing/Gateway`                | ❌        | ❌           |
 | `Syslog/Settings`                | ❌        | ❌           |
