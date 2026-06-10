@@ -115,7 +115,7 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Dnsmasq/Settings`               | ❌        | ❌           |
 | `Dnsmasq/Settings/Boot`          | ❌        | ❌           |
 | `Dnsmasq/Settings/Domain`        | ❌        | ❌           |
-| `Dnsmasq/Settings/Host`          | ❌        | ❌           |
+| `Dnsmasq/Settings/Host`          | ✅        | ✅           |
 | `Dnsmasq/Settings/Option`        | ❌        | ❌           |
 | `Dnsmasq/Settings/Range`         | ❌        | ❌           |
 | `Dnsmasq/Settings/Tag`           | ❌        | ❌           |
@@ -124,7 +124,7 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Firewall/Filter`                | ✅        | ✅           |
 | `Firewall/Group`                 | ❌        | ❌           |
 | `Firewall/NPTv6`                 | ❌        | ❌           |
-| `Firewall/Source NAT`            | 🚧       | 🚧          |
+| `Firewall/Source NAT`            | ✅        | ✅           |
 | `Firewall/One-to-One NAT`        | ✅        | ✅           |
 | `Interfaces/Bridge`              | ❌        | ❌           |
 | `Interfaces/Gif`                 | ❌        | ❌           |
@@ -132,7 +132,7 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Interfaces/Lagg`                | ❌        | ❌           |
 | `Interfaces/Loopback`            | ❌        | ❌           |
 | `Interfaces/Neighbor`            | ❌        | ❌           |
-| `Interfaces/Overview`            |          | ❌           |
+| `Interfaces/Overview`            |          | ✅           |
 | `Interfaces/Vip`                 | ✅        | ✅           |
 | `Interfaces/Vlan`                | ✅        | ✅           |
 | `Interfaces/Vxlan`               | ❌        | ❌           |
@@ -147,13 +147,13 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Ipsec/Psk`                      | ✅        | ❌           |
 | `Ipsec/Vti`                      | ✅        | ❌           |
 | `Kea/CtrlAgent`                  | ❌        | ❌           |
-| `Kea/Dhcpv4/Peer`                | 🚧       | 🚧          |
-| `Kea/Dhcpv4/Reservation`         | 🚧       | 🚧          |
-| `Kea/Dhcpv4/Subnet`              | 🚧       | 🚧          |
-| `Kea/Dhcpv6/PD Pool`             | ❌        | ❌           |
-| `Kea/Dhcpv6/Peer`                | ❌        | ❌           |
-| `Kea/Dhcpv6/Reservation`         | ❌        | ❌           |
-| `Kea/Dhcpv6/Subnet`              | ❌        | ❌           |
+| `Kea/Dhcpv4/Peer`                | ✅        | ✅           |
+| `Kea/Dhcpv4/Reservation`         | ✅        | ✅           |
+| `Kea/Dhcpv4/Subnet`              | ✅        | ✅           |
+| `Kea/Dhcpv6/PD Pool`             | ✅        | ✅           |
+| `Kea/Dhcpv6/Peer`                | ✅        | ✅           |
+| `Kea/Dhcpv6/Reservation`         | ✅        | ✅           |
+| `Kea/Dhcpv6/Subnet`              | ✅        | ✅           |
 | `Monit/Settings`                 | ❌        | ❌           |
 | `Monit/Settings/Alert`           | ❌        | ❌           |
 | `Monit/Settings/Service`         | ❌        | ❌           |
@@ -172,10 +172,11 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Trust/Settings`                 | ❌        | ❌           |
 | `Trust/CA`                       | ❌        | ❌           |
 | `Trust/Cert`                     | ❌        | ❌           |
-| `Unbound/Settings`               | ❌        | ❌           |
-| `Unbound/Settings/Forward`       | 🚧       | 🚧          |
-| `Unbound/Settings/Host Alias`    | 🚧       | 🚧          |
-| `Unbound/Settings/Host Override` | 🚧       | 🚧          |
+| `Unbound/Settings`               | ✅        | ✅           |
+| `Unbound/Settings/Domain Override` | ✅      | ✅           |
+| `Unbound/Settings/Forward`       | ✅        | ✅           |
+| `Unbound/Settings/Host Alias`    | ✅        | ✅           |
+| `Unbound/Settings/Host Override` | ✅        | ✅           |
 | `Unbound/Settings/ACL`           | ❌        | ❌           |
 | `Wireguard/Settings`             | ❌        | ❌           |
 | `Wireguard/Client`               | 🚧       | 🚧          |
