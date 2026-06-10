@@ -158,9 +158,9 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Monit/Settings/Alert`           | ❌        | ❌           |
 | `Monit/Settings/Service`         | ❌        | ❌           |
 | `Monit/Settings/Test`            | ❌        | ❌           |
-| `Openvpn/Client Overwrites`      | ❌        | ❌           |
-| `Openvpn/Instances`              | ❌        | ❌           |
-| `Openvpn/Instances/Static Key`   | ❌        | ❌           |
+| `Openvpn/Client Overwrites`      | ✅        | ✅           |
+| `Openvpn/Instances`              | ✅        | ✅           |
+| `Openvpn/Instances/Static Key`   | ✅        | ✅           |
 | `Openvpn/Instances/Generate Key` | ❌        |             |
 | `Routes/Route`                   | 🚧       | 🚧          |
 | `Routing/Gateway`                | ❌        | ❌           |
