@@ -1,0 +1,45 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Wireguard
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+~> **Terraform Convention Violation** This resource is a **singleton** — it manages global WireGuard configuration that already exists in OPNsense and cannot be created or destroyed through Terraform. This violates the standard Terraform resource contract, where a resource is expected to be creatable and destroyable. Use with caution and ensure your team understands the implications described below.
+
+{{ .Description | trimspace }}
+
+## Singleton Behavior
+
+Unlike regular Terraform resources, `opnsense_wireguard_settings` behaves as follows:
+
+- **Create is blocked.** Running `terraform apply` on a new (non-imported) configuration will fail with an error. You **must** import the resource first.
+- **Delete removes state only.** Running `terraform destroy` removes the resource from Terraform state but does **not** modify or reset the upstream OPNsense configuration. The WireGuard settings remain active.
+- **There can only be one.** Only a single instance of this resource should exist in your Terraform configuration. Managing multiple instances against the same OPNsense appliance will result in conflicting state.
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+This resource **must** be imported before it can be managed. The import ID is always the fixed string `wireguard_settings`.
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import):
+
+```terraform
+import {
+  to = opnsense_wireguard_settings.settings
+  id = "wireguard_settings"
+}
+```
+
+Using `terraform import`:
+
+```console
+% terraform import opnsense_wireguard_settings.settings wireguard_settings
+```

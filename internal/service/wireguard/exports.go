@@ -11,6 +11,7 @@ func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		newClientResource,
 		newServerResource,
+		newSettingsResource,
 	}
 }
 
@@ -18,5 +19,6 @@ func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		newClientDataSource,
 		newServerDataSource,
+		newSettingsDataSource,
 	}
 }
