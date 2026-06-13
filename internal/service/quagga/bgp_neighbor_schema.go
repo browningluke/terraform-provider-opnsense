@@ -359,7 +359,7 @@ func convertBGPNeighborSchemaToStruct(d *bgpNeighborResourceModel) (*quagga.BGPN
 		DefaultRoute:          tools.BoolToString(d.DefaultRoute.ValueBool()),
 		ASOverride:            tools.BoolToString(d.ASOverride.ValueBool()),
 		DisableConnectedCheck: tools.BoolToString(d.DisableConnectedCheck.ValueBool()),
-		AttributeUnchanged:    api.SelectedMap(d.AttributeUnchanged.ValueString()),
+		AttributeUnchanged:    api.SelectedMapList([]string{d.AttributeUnchanged.ValueString()}),
 		PrefixListIn:          api.SelectedMap(d.PrefixListIn.ValueString()),
 		PrefixListOut:         api.SelectedMap(d.PrefixListOut.ValueString()),
 		RouteMapIn:            api.SelectedMap(d.RouteMapIn.ValueString()),

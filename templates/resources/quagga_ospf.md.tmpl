@@ -1,0 +1,37 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Quagga
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+~> **Singleton Resource** This resource manages existing upstream Quagga configuration that cannot be created or destroyed through Terraform. You **must** import it before managing. Running `terraform destroy` removes the resource from state only and does **not** modify the upstream configuration.
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+This resource **must** be imported before it can be managed. The import ID is always the fixed string `quagga_ospf`.
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import):
+
+```terraform
+import {
+  to = opnsense_quagga_ospf.settings
+  id = "quagga_ospf"
+}
+```
+
+Using `terraform import`:
+
+```console
+% terraform import opnsense_quagga_ospf.settings quagga_ospf
+```
