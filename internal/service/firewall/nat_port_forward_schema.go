@@ -401,11 +401,8 @@ func natPortForwardInterfaceSliceToSet(s []string) types.Set {
 		seen[iface] = struct{}{}
 		list = append(list, types.StringValue(iface))
 	}
-	if len(list) == 0 {
-		sv, _ := types.SetValue(types.StringType, []attr.Value{})
-		return sv
-	}
-	return types.SetValueMust(types.StringType, list)
+	sv, _ := types.SetValue(types.StringType, list)
+	return sv
 }
 
 func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firewall.NatPortForward, error) {
