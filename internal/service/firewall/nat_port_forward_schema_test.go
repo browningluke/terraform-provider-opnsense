@@ -136,6 +136,34 @@ func TestConvertNATPortForwardStructToSchema(t *testing.T) {
 	require.Equal(t, "Updated WAN HTTPS", result.Description.ValueString())
 }
 
+func TestConvertNATPortForwardStructToSchemaAnyInterface(t *testing.T) {
+	result, err := convertNATPortForwardStructToSchema(&opnfirewall.NatPortForward{
+		Disabled:   "0",
+		Sequence:   "1",
+		Interface:  api.SelectedMapList{""},
+		IPProtocol: "inet",
+		Protocol:   "tcp",
+		Source: opnfirewall.NatPortForwardLocation{
+			Network: "",
+			Port:    "",
+			Invert:  "0",
+		},
+		Destination: opnfirewall.NatPortForwardLocation{
+			Network: "wanip",
+			Port:    "443",
+			Invert:  "0",
+		},
+		Target:        "10.0.0.1",
+		TargetPort:    "443",
+		Log:           "0",
+		NatReflection: "",
+		Description:   "Example",
+	})
+
+	require.NoError(t, err)
+	require.ElementsMatch(t, []string{""}, tools.SetToStringSlice(result.Interface))
+}
+
 func TestNatPortForwardInterfaceStringToSet(t *testing.T) {
 	result := natPortForwardInterfaceStringToSet("wan, openvpn,,lan")
 

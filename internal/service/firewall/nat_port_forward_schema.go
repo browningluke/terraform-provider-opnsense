@@ -391,6 +391,23 @@ func natPortForwardInterfaceStringToSet(s string) types.Set {
 	return types.SetValueMust(types.StringType, interfaces)
 }
 
+func natPortForwardInterfaceSliceToSet(s []string) types.Set {
+	seen := make(map[string]struct{})
+	var list []attr.Value
+	for _, iface := range s {
+		if _, ok := seen[iface]; ok {
+			continue
+		}
+		seen[iface] = struct{}{}
+		list = append(list, types.StringValue(iface))
+	}
+	if len(list) == 0 {
+		sv, _ := types.SetValue(types.StringType, []attr.Value{})
+		return sv
+	}
+	return types.SetValueMust(types.StringType, list)
+}
+
 func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firewall.NatPortForward, error) {
 	return &firewall.NatPortForward{
 		// Schema uses "enabled" (user-friendly), API uses "disabled" (inverted).
@@ -431,7 +448,7 @@ func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortFo
 		// API uses "disabled" (inverted), schema uses "enabled" (user-friendly).
 		Enabled:    types.BoolValue(!tools.StringToBool(d.Disabled)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),
-		Interface:  tools.StringSliceToSet([]string(d.Interface)),
+		Interface:  natPortForwardInterfaceSliceToSet([]string(d.Interface)),
 		IPProtocol: types.StringValue(d.IPProtocol.String()),
 		Protocol:   types.StringValue(d.Protocol.String()),
 		Source: &firewallLocation{
