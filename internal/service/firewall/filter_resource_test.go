@@ -331,7 +331,6 @@ func TestAccFirewallFilterResource_DirectionAny(t *testing.T) {
 	})
 }
 
-
 // Helper functions to generate test configurations
 
 func testAccFirewallFilterResourceConfigFloating(action, direction, protocol string) string {

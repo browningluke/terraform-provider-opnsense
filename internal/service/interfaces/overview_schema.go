@@ -26,12 +26,12 @@ type overviewInterfaceModel struct {
 	Media     types.String `tfsdk:"media"`
 	MediaRaw  types.String `tfsdk:"media_raw"`
 
-	IsPhysical      types.Bool   `tfsdk:"is_physical"`
-	VLANTag         types.String `tfsdk:"vlan_tag"`
-	LaggProto       types.String `tfsdk:"lagg_proto"`
-	LaggHash        types.String `tfsdk:"lagg_hash"`
-	LaggOptions     types.Object `tfsdk:"lagg_options"`
-	LaggStatistics  types.Object `tfsdk:"lagg_statistics"`
+	IsPhysical     types.Bool   `tfsdk:"is_physical"`
+	VLANTag        types.String `tfsdk:"vlan_tag"`
+	LaggProto      types.String `tfsdk:"lagg_proto"`
+	LaggHash       types.String `tfsdk:"lagg_hash"`
+	LaggOptions    types.Object `tfsdk:"lagg_options"`
+	LaggStatistics types.Object `tfsdk:"lagg_statistics"`
 
 	Flags          types.Set `tfsdk:"flags"`
 	Capabilities   types.Set `tfsdk:"capabilities"`
@@ -429,23 +429,23 @@ func overviewInterfaceDataSourceSchema() schema.Schema {
 
 func convertOverviewInterfaceStructToSchema(d *interfaces.InterfaceInfo) (*overviewInterfaceModel, error) {
 	model := &overviewInterfaceModel{
-		Identifier:        types.StringValue(d.Identifier),
-		Description:       types.StringValue(d.Description),
-		Device:            types.StringValue(d.Device),
-		Enabled:           types.BoolValue(d.Enabled),
-		LinkType:          types.StringValue(d.LinkType),
-		Addr4:             types.StringValue(d.Addr4),
-		Addr6:             types.StringValue(d.Addr6),
-		MacAddr:           types.StringValue(d.MacAddr),
-		MacAddrHw:         types.StringValue(d.MacAddrHw),
-		MTU:               types.StringValue(d.MTU),
-		Status:            types.StringValue(d.Status),
-		Media:             types.StringValue(d.Media),
-		MediaRaw:          types.StringValue(d.MediaRaw),
-		IsPhysical:        types.BoolValue(d.IsPhysical),
-		VLANTag:           types.StringValue(d.VLANTag),
-		LaggProto: types.StringValue(d.LaggProto),
-		LaggHash:  types.StringValue(d.LaggHash),
+		Identifier:  types.StringValue(d.Identifier),
+		Description: types.StringValue(d.Description),
+		Device:      types.StringValue(d.Device),
+		Enabled:     types.BoolValue(d.Enabled),
+		LinkType:    types.StringValue(d.LinkType),
+		Addr4:       types.StringValue(d.Addr4),
+		Addr6:       types.StringValue(d.Addr6),
+		MacAddr:     types.StringValue(d.MacAddr),
+		MacAddrHw:   types.StringValue(d.MacAddrHw),
+		MTU:         types.StringValue(d.MTU),
+		Status:      types.StringValue(d.Status),
+		Media:       types.StringValue(d.Media),
+		MediaRaw:    types.StringValue(d.MediaRaw),
+		IsPhysical:  types.BoolValue(d.IsPhysical),
+		VLANTag:     types.StringValue(d.VLANTag),
+		LaggProto:   types.StringValue(d.LaggProto),
+		LaggHash:    types.StringValue(d.LaggHash),
 		LaggOptions: types.ObjectValueMust(overviewLaggOptionsAttrTypes, map[string]attr.Value{
 			"flags":        tools.StringSliceToSet(d.LaggOptions.Flags),
 			"flowid_shift": types.StringValue(d.LaggOptions.FlowIDShift),
@@ -454,7 +454,7 @@ func convertOverviewInterfaceStructToSchema(d *interfaces.InterfaceInfo) (*overv
 			"active_ports": types.StringValue(d.LaggStatistics.ActivePorts),
 			"flapping":     types.StringValue(d.LaggStatistics.Flapping),
 		}),
-		Flags: tools.StringSliceToSet(d.Flags),
+		Flags:             tools.StringSliceToSet(d.Flags),
 		Capabilities:      tools.StringSliceToSet(d.Capabilities),
 		Options:           tools.StringSliceToSet(d.Options),
 		SupportedMedia:    tools.StringSliceToSet(d.SupportedMedia),
