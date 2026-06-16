@@ -15,6 +15,7 @@ import (
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/openvpn"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/routes"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/trust"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/unbound"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/wireguard"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -297,6 +298,7 @@ func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		openvpn.Resources(ctx),
 		quagga.Resources(ctx),
 		routes.Resources(ctx),
+		trust.Resources(ctx),
 		unbound.Resources(ctx),
 		wireguard.Resources(ctx),
 	}
@@ -319,6 +321,7 @@ func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		openvpn.DataSources(ctx),
 		quagga.DataSources(ctx),
 		routes.DataSources(ctx),
+		trust.DataSources(ctx),
 		unbound.DataSources(ctx),
 		wireguard.DataSources(ctx),
 	}
