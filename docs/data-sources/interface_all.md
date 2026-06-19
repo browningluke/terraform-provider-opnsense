@@ -36,13 +36,10 @@ output "specific_mac" {
 <a id="nestedatt--interfaces"></a>
 ### Nested Schema for `interfaces`
 
-Required:
-
-- `device` (String) Name of the interface device.
-
 Read-Only:
 
 - `capabilities` (Set of String) List of capabilities the interface supports.
+- `device` (String) Name of the interface device.
 - `flags` (Set of String) List of flags configured on the interface (equiv. to flags=xxxx in output of ifconfig).
 - `groups` (Set of String) List of groups the interface is a member of.
 - `ipv4` (Attributes List) (see [below for nested schema](#nestedatt--interfaces--ipv4))
