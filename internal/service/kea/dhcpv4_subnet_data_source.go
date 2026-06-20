@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &dhcpv4SubnetDataSource{}
 var _ datasource.DataSourceWithConfigure = &dhcpv4SubnetDataSource{}
 
-func newDhcpv4SubnetDataSource() datasource.DataSource {
-	return &dhcpv4SubnetDataSource{}
-}
 
 // dhcpv4SubnetDataSource defines the data source implementation.
 type dhcpv4SubnetDataSource struct {

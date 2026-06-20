@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &overviewInterfaceDataSource{}
 var _ datasource.DataSourceWithConfigure = &overviewInterfaceDataSource{}
 
-func newOverviewInterfaceDataSource() datasource.DataSource {
-	return &overviewInterfaceDataSource{}
-}
 
 // overviewInterfaceDataSource defines the data source implementation.
 type overviewInterfaceDataSource struct {

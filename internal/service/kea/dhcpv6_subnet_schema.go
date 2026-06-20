@@ -1,6 +1,7 @@
 package kea
 
 import (
+	"context"
 	"strings"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -145,11 +146,14 @@ func dhcpv6SubnetDataSourceSchema() dschema.Schema {
 }
 
 func convertDhcpv6SubnetSchemaToStruct(d *dhcpv6SubnetResourceModel) (*kea.SubnetV6, error) {
+	var poolsList []string
+	d.Pools.ElementsAs(context.Background(), &poolsList, false)
+
 	return &kea.SubnetV6{
 		Subnet:      d.Subnet.ValueString(),
 		Allocator:   api.SelectedMap(d.Allocator.ValueString()),
 		PDAllocator: api.SelectedMap(d.PDAllocator.ValueString()),
-		Pools:       tools.SetToString(d.Pools, "\n"),
+		Pools:       strings.Join(poolsList, "\n"),
 		Interface:   api.SelectedMap(d.Interface.ValueString()),
 		OptionData: kea.OptionDataV6{
 			DomainNameServers: tools.SetToStringSlice(d.DnsServers),

@@ -19,9 +19,6 @@ var _ resource.Resource = &dhcpv6PdPoolResource{}
 var _ resource.ResourceWithConfigure = &dhcpv6PdPoolResource{}
 var _ resource.ResourceWithImportState = &dhcpv6PdPoolResource{}
 
-func newDhcpv6PdPoolResource() resource.Resource {
-	return &dhcpv6PdPoolResource{}
-}
 
 // dhcpv6PdPoolResource defines the resource implementation.
 type dhcpv6PdPoolResource struct {

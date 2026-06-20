@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &natDataSource{}
 var _ datasource.DataSourceWithConfigure = &natDataSource{}
 
-func newNATDataSource() datasource.DataSource {
-	return &natDataSource{}
-}
 
 // natDataSource defines the data source implementation.
 type natDataSource struct {

@@ -16,9 +16,6 @@ import (
 var _ datasource.DataSource = &overviewAllDataSource{}
 var _ datasource.DataSourceWithConfigure = &overviewAllDataSource{}
 
-func newOverviewAllDataSource() datasource.DataSource {
-	return &overviewAllDataSource{}
-}
 
 // overviewAllDataSource defines the data source implementation.
 type overviewAllDataSource struct {

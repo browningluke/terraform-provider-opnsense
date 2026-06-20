@@ -14,9 +14,6 @@ import (
 var _ datasource.DataSource = &caDataSource{}
 var _ datasource.DataSourceWithConfigure = &caDataSource{}
 
-func newCaDataSource() datasource.DataSource {
-	return &caDataSource{}
-}
 
 type caDataSource struct {
 	client opnsense.Client

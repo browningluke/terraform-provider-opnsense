@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &bgpPrefixListDataSource{}
 var _ datasource.DataSourceWithConfigure = &bgpPrefixListDataSource{}
 
-func newBGPPrefixListDataSource() datasource.DataSource {
-	return &bgpPrefixListDataSource{}
-}
 
 // bgpPrefixListDataSource defines the data source implementation.
 type bgpPrefixListDataSource struct {

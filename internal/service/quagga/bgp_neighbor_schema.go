@@ -1,6 +1,8 @@
 package quagga
 
 import (
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -341,7 +343,7 @@ func convertBGPNeighborSchemaToStruct(d *bgpNeighborResourceModel) (*quagga.BGPN
 		Enabled:               tools.BoolToString(d.Enabled.ValueBool()),
 		Description:           d.Description.ValueString(),
 		PeerIP:                d.PeerIP.ValueString(),
-		RemoteAS:              tools.Int64ToString(d.RemoteAS.ValueInt64()),
+		RemoteAS:              strconv.FormatInt(d.RemoteAS.ValueInt64(), 10),
 		Password:              d.Password.ValueString(),
 		Weight:                tools.Int64ToStringNegative(d.Weight.ValueInt64()),
 		LocalIP:               d.LocalIP.ValueString(),
@@ -353,8 +355,8 @@ func convertBGPNeighborSchemaToStruct(d *bgpNeighborResourceModel) (*quagga.BGPN
 		MultiProtocol:         tools.BoolToString(d.MultiProtocol.ValueBool()),
 		RRClient:              tools.BoolToString(d.RRClient.ValueBool()),
 		BFD:                   tools.BoolToString(d.BFD.ValueBool()),
-		KeepAlive:             tools.Int64ToString(d.KeepAlive.ValueInt64()),
-		HoldDown:              tools.Int64ToString(d.HoldDown.ValueInt64()),
+		KeepAlive:             strconv.FormatInt(d.KeepAlive.ValueInt64(), 10),
+		HoldDown:              strconv.FormatInt(d.HoldDown.ValueInt64(), 10),
 		ConnectTimer:          tools.Int64ToStringNegative(d.ConnectTimer.ValueInt64()),
 		DefaultRoute:          tools.BoolToString(d.DefaultRoute.ValueBool()),
 		ASOverride:            tools.BoolToString(d.ASOverride.ValueBool()),

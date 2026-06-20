@@ -24,9 +24,6 @@ var _ resource.ResourceWithImportState = &filterResource{}
 var _ resource.ResourceWithConfigValidators = &filterResource{}
 var _ resource.ResourceWithUpgradeState = &filterResource{}
 
-func newFilterResource() resource.Resource {
-	return &filterResource{}
-}
 
 // filterResource defines the resource implementation.
 type filterResource struct {

@@ -19,9 +19,6 @@ var _ resource.Resource = &pskResource{}
 var _ resource.ResourceWithConfigure = &pskResource{}
 var _ resource.ResourceWithImportState = &pskResource{}
 
-func newPskResource() resource.Resource {
-	return &pskResource{}
-}
 
 // pskResource defines the resource implementation.
 type pskResource struct {

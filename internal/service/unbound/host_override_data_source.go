@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &hostOverrideDataSource{}
 var _ datasource.DataSourceWithConfigure = &hostOverrideDataSource{}
 
-func newHostOverrideDataSource() datasource.DataSource {
-	return &hostOverrideDataSource{}
-}
 
 // hostOverrideDataSource defines the data source implementation.
 type hostOverrideDataSource struct {

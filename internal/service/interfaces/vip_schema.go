@@ -3,7 +3,6 @@ package interfaces
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
-	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -118,11 +117,23 @@ func convertVipSchemaToStruct(d *vipResourceModel) (*interfaces.Vip, error) {
 }
 
 func convertVipStructToSchema(d *interfaces.Vip) (*vipResourceModel, error) {
+	var gateway types.String
+	if d.Gateway != "" {
+		gateway = types.StringValue(d.Gateway)
+	} else {
+		gateway = types.StringNull()
+	}
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &vipResourceModel{
 		Mode:        types.StringValue(d.Mode.String()),
 		Interface:   types.StringValue(d.Interface.String()),
 		Network:     types.StringValue(d.Network),
-		Gateway:     tools.StringOrNull(d.Gateway),
-		Description: tools.StringOrNull(d.Description),
+		Gateway:     gateway,
+		Description: description,
 	}, nil
 }

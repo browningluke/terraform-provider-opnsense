@@ -3,7 +3,6 @@ package trust
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/trust"
-	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -326,13 +325,11 @@ func convertCaSchemaToStruct(d *caResourceModel) (*trust.Ca, error) {
 }
 
 func convertCaStructToSchema(d *trust.Ca) (*caResourceModel, error) {
-	return &caResourceModel{
-		RefId:              tools.StringOrNull(d.RefId),
+	model := &caResourceModel{
 		Description:        types.StringValue(d.Description),
 		Action:             types.StringValue(d.Action.String()),
 		Crt:                types.StringValue(d.Crt),
 		Prv:                types.StringValue(d.Prv),
-		Serial:             tools.StringOrNull(d.Serial),
 		CaRef:              types.StringValue(d.CaRef.String()),
 		KeyType:            types.StringValue(d.KeyType.String()),
 		Lifetime:           types.StringValue(d.Lifetime),
@@ -345,10 +342,41 @@ func convertCaStructToSchema(d *trust.Ca) (*caResourceModel, error) {
 		Email:              types.StringValue(d.Email),
 		CommonName:         types.StringValue(d.CommonName),
 		OcspUri:            types.StringValue(d.OcspUri),
-		CrtPayload:         tools.StringOrNull(d.CrtPayload),
-		PrvPayload:         tools.StringOrNull(d.PrvPayload),
-		Name:               tools.StringOrNull(d.Name),
-		ValidFrom:          tools.StringOrNull(d.ValidFrom),
-		ValidTo:            tools.StringOrNull(d.ValidTo),
-	}, nil
+	}
+	if d.RefId != "" {
+		model.RefId = types.StringValue(d.RefId)
+	} else {
+		model.RefId = types.StringNull()
+	}
+	if d.Serial != "" {
+		model.Serial = types.StringValue(d.Serial)
+	} else {
+		model.Serial = types.StringNull()
+	}
+	if d.CrtPayload != "" {
+		model.CrtPayload = types.StringValue(d.CrtPayload)
+	} else {
+		model.CrtPayload = types.StringNull()
+	}
+	if d.PrvPayload != "" {
+		model.PrvPayload = types.StringValue(d.PrvPayload)
+	} else {
+		model.PrvPayload = types.StringNull()
+	}
+	if d.Name != "" {
+		model.Name = types.StringValue(d.Name)
+	} else {
+		model.Name = types.StringNull()
+	}
+	if d.ValidFrom != "" {
+		model.ValidFrom = types.StringValue(d.ValidFrom)
+	} else {
+		model.ValidFrom = types.StringNull()
+	}
+	if d.ValidTo != "" {
+		model.ValidTo = types.StringValue(d.ValidTo)
+	} else {
+		model.ValidTo = types.StringNull()
+	}
+	return model, nil
 }

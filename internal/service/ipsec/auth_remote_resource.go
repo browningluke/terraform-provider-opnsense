@@ -19,9 +19,6 @@ var _ resource.Resource = &authRemoteResource{}
 var _ resource.ResourceWithConfigure = &authRemoteResource{}
 var _ resource.ResourceWithImportState = &authRemoteResource{}
 
-func newAuthRemoteResource() resource.Resource {
-	return &authRemoteResource{}
-}
 
 // authRemoteResource defines the resource implementation.
 type authRemoteResource struct {

@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &aclDataSource{}
 var _ datasource.DataSourceWithConfigure = &aclDataSource{}
 
-func newAclDataSource() datasource.DataSource {
-	return &aclDataSource{}
-}
 
 // aclDataSource defines the data source implementation.
 type aclDataSource struct {

@@ -13,7 +13,7 @@ func Resources(ctx context.Context) []func() resource.Resource {
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newInterfaceDataSource,
-		newInterfaceAllDataSource,
+		func() datasource.DataSource { return &interfaceDataSource{} },
+		func() datasource.DataSource { return &interfaceAllDataSource{} },
 	}
 }

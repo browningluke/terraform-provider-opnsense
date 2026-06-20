@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &domainOverrideDataSource{}
 var _ datasource.DataSourceWithConfigure = &domainOverrideDataSource{}
 
-func newDomainOverrideDataSource() datasource.DataSource {
-	return &domainOverrideDataSource{}
-}
 
 // domainOverrideDataSource defines the data source implementation.
 type domainOverrideDataSource struct {

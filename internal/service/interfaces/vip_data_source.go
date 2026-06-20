@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &vipDataSource{}
 var _ datasource.DataSourceWithConfigure = &vipDataSource{}
 
-func newVipDataSource() datasource.DataSource {
-	return &vipDataSource{}
-}
 
 // vipDataSource defines the data source implementation.
 type vipDataSource struct {

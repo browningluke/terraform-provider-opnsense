@@ -19,9 +19,6 @@ var _ resource.Resource = &vtiResource{}
 var _ resource.ResourceWithConfigure = &vtiResource{}
 var _ resource.ResourceWithImportState = &vtiResource{}
 
-func newVtiResource() resource.Resource {
-	return &vtiResource{}
-}
 
 // vtiResource defines the resource implementation.
 type vtiResource struct {

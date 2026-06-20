@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &hostAliasDataSource{}
 var _ datasource.DataSourceWithConfigure = &hostAliasDataSource{}
 
-func newHostAliasDataSource() datasource.DataSource {
-	return &hostAliasDataSource{}
-}
 
 // hostAliasDataSource defines the data source implementation.
 type hostAliasDataSource struct {

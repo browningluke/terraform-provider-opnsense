@@ -9,12 +9,12 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewHostResource,
+		func() resource.Resource { return &hostResource{} },
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newClientDataSource,
+		func() datasource.DataSource { return &hostDataSource{} },
 	}
 }

@@ -19,9 +19,6 @@ var _ resource.Resource = &childResource{}
 var _ resource.ResourceWithConfigure = &childResource{}
 var _ resource.ResourceWithImportState = &childResource{}
 
-func newChildResource() resource.Resource {
-	return &childResource{}
-}
 
 // childResource defines the resource implementation.
 type childResource struct {

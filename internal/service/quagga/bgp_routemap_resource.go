@@ -19,9 +19,6 @@ var _ resource.Resource = &bgpRouteMapResource{}
 var _ resource.ResourceWithConfigure = &bgpRouteMapResource{}
 var _ resource.ResourceWithImportState = &bgpRouteMapResource{}
 
-func newBGPRouteMapResource() resource.Resource {
-	return &bgpRouteMapResource{}
-}
 
 // bgpRouteMapResource defines the resource implementation.
 type bgpRouteMapResource struct {

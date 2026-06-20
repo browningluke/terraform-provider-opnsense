@@ -18,9 +18,6 @@ var _ resource.Resource = &staticKeyResource{}
 var _ resource.ResourceWithConfigure = &staticKeyResource{}
 var _ resource.ResourceWithImportState = &staticKeyResource{}
 
-func newStaticKeyResource() resource.Resource {
-	return &staticKeyResource{}
-}
 
 type staticKeyResource struct {
 	client opnsense.Client

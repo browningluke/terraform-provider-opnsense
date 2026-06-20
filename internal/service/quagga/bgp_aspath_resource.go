@@ -19,9 +19,6 @@ var _ resource.Resource = &bgpASPathResource{}
 var _ resource.ResourceWithConfigure = &bgpASPathResource{}
 var _ resource.ResourceWithImportState = &bgpASPathResource{}
 
-func newBGPASPathResource() resource.Resource {
-	return &bgpASPathResource{}
-}
 
 // bgpASPathResource defines the resource implementation.
 type bgpASPathResource struct {

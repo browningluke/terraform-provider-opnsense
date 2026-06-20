@@ -19,9 +19,6 @@ var _ resource.Resource = &natOneToOneResource{}
 var _ resource.ResourceWithConfigure = &natOneToOneResource{}
 var _ resource.ResourceWithImportState = &natOneToOneResource{}
 
-func newNATOneToOneResource() resource.Resource {
-	return &natOneToOneResource{}
-}
 
 // natOneToOneResource defines the resource implementation.
 type natOneToOneResource struct {

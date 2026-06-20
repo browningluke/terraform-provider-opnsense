@@ -19,9 +19,6 @@ var _ resource.Resource = &natResource{}
 var _ resource.ResourceWithConfigure = &natResource{}
 var _ resource.ResourceWithImportState = &natResource{}
 
-func newNATResource() resource.Resource {
-	return &natResource{}
-}
 
 // natResource defines the resource implementation.
 type natResource struct {

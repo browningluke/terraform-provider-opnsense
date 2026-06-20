@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &categoryDataSource{}
 var _ datasource.DataSourceWithConfigure = &categoryDataSource{}
 
-func newCategoryDataSource() datasource.DataSource {
-	return &categoryDataSource{}
-}
 
 // categoryDataSource defines the data source implementation.
 type categoryDataSource struct {

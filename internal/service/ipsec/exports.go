@@ -9,12 +9,12 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		newAuthLocalResource,
-		newAuthRemoteResource,
-		newChildResource,
-		newConnectionResource,
-		newPskResource,
-		newVtiResource,
+		func() resource.Resource { return &authLocalResource{} },
+		func() resource.Resource { return &authRemoteResource{} },
+		func() resource.Resource { return &childResource{} },
+		func() resource.Resource { return &connectionResource{} },
+		func() resource.Resource { return &pskResource{} },
+		func() resource.Resource { return &vtiResource{} },
 	}
 }
 

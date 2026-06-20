@@ -19,9 +19,6 @@ var _ resource.Resource = &reservationResource{}
 var _ resource.ResourceWithConfigure = &reservationResource{}
 var _ resource.ResourceWithImportState = &reservationResource{}
 
-func newReservationResource() resource.Resource {
-	return &reservationResource{}
-}
 
 // reservationResource defines the resource implementation.
 type reservationResource struct {

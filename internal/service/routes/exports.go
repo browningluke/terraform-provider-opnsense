@@ -9,12 +9,12 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		newRouteResource,
+		func() resource.Resource { return &routeResource{} },
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newRouteDataSource,
+		func() datasource.DataSource { return &routeDataSource{} },
 	}
 }

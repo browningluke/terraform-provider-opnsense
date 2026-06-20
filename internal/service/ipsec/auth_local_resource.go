@@ -19,9 +19,6 @@ var _ resource.Resource = &authLocalResource{}
 var _ resource.ResourceWithConfigure = &authLocalResource{}
 var _ resource.ResourceWithImportState = &authLocalResource{}
 
-func newAuthLocalResource() resource.Resource {
-	return &authLocalResource{}
-}
 
 // authLocalResource defines the resource implementation.
 type authLocalResource struct {

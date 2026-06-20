@@ -19,9 +19,6 @@ var _ resource.Resource = &dhcpv4SubnetResource{}
 var _ resource.ResourceWithConfigure = &dhcpv4SubnetResource{}
 var _ resource.ResourceWithImportState = &dhcpv4SubnetResource{}
 
-func newDhcpv4SubnetResource() resource.Resource {
-	return &dhcpv4SubnetResource{}
-}
 
 // dhcpv4SubnetResource defines the resource implementation.
 type dhcpv4SubnetResource struct {

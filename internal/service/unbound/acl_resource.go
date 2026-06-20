@@ -19,9 +19,6 @@ var _ resource.Resource = &aclResource{}
 var _ resource.ResourceWithConfigure = &aclResource{}
 var _ resource.ResourceWithImportState = &aclResource{}
 
-func newAclResource() resource.Resource {
-	return &aclResource{}
-}
 
 // aclResource defines the resource implementation.
 type aclResource struct {

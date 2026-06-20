@@ -19,9 +19,6 @@ var _ resource.Resource = &vlanResource{}
 var _ resource.ResourceWithConfigure = &vlanResource{}
 var _ resource.ResourceWithImportState = &vlanResource{}
 
-func newVlanResource() resource.Resource {
-	return &vlanResource{}
-}
 
 // vlanResource defines the resource implementation.
 type vlanResource struct {

@@ -19,9 +19,6 @@ var _ resource.Resource = &categoryResource{}
 var _ resource.ResourceWithConfigure = &categoryResource{}
 var _ resource.ResourceWithImportState = &categoryResource{}
 
-func newCategoryResource() resource.Resource {
-	return &categoryResource{}
-}
 
 // categoryResource defines the resource implementation.
 type categoryResource struct {

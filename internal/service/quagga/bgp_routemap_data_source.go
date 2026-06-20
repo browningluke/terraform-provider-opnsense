@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &bgpRouteMapDataSource{}
 var _ datasource.DataSourceWithConfigure = &bgpRouteMapDataSource{}
 
-func newBGPRouteMapDataSource() datasource.DataSource {
-	return &bgpRouteMapDataSource{}
-}
 
 // bgpRouteMapDataSource defines the data source implementation.
 type bgpRouteMapDataSource struct {

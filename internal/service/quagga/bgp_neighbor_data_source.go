@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &bgpNeighborDataSource{}
 var _ datasource.DataSourceWithConfigure = &bgpNeighborDataSource{}
 
-func newBGPNeighborDataSource() datasource.DataSource {
-	return &bgpNeighborDataSource{}
-}
 
 // bgpNeighborDataSource defines the data source implementation.
 type bgpNeighborDataSource struct {

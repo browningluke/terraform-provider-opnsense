@@ -19,9 +19,6 @@ var _ resource.Resource = &bgpCommunityListResource{}
 var _ resource.ResourceWithConfigure = &bgpCommunityListResource{}
 var _ resource.ResourceWithImportState = &bgpCommunityListResource{}
 
-func newBGPCommunityListResource() resource.Resource {
-	return &bgpCommunityListResource{}
-}
 
 // bgpCommunityListResource defines the resource implementation.
 type bgpCommunityListResource struct {

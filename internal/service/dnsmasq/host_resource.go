@@ -18,9 +18,6 @@ var _ resource.Resource = &hostResource{}
 var _ resource.ResourceWithConfigure = &hostResource{}
 var _ resource.ResourceWithImportState = &hostResource{}
 
-func NewHostResource() resource.Resource {
-	return &hostResource{}
-}
 
 type hostResource struct {
 	client opnsense.Client

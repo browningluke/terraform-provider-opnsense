@@ -19,9 +19,6 @@ var _ resource.Resource = &clientResource{}
 var _ resource.ResourceWithConfigure = &clientResource{}
 var _ resource.ResourceWithImportState = &clientResource{}
 
-func newClientResource() resource.Resource {
-	return &clientResource{}
-}
 
 // clientResource defines the resource implementation.
 type clientResource struct {

@@ -130,11 +130,17 @@ func convertAclSchemaToStruct(d *aclResourceModel) (*unbound.Acl, error) {
 }
 
 func convertAclStructToSchema(d *unbound.Acl) (*aclResourceModel, error) {
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &aclResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Name:        types.StringValue(d.Name),
 		Action:      types.StringValue(d.Action.String()),
 		Networks:    tools.StringSliceToSet(d.Networks),
-		Description: tools.StringOrNull(d.Description),
+		Description: description,
 	}, nil
 }

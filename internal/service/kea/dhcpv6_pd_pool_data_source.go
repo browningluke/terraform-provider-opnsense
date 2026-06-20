@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &dhcpv6PdPoolDataSource{}
 var _ datasource.DataSourceWithConfigure = &dhcpv6PdPoolDataSource{}
 
-func newDhcpv6PdPoolDataSource() datasource.DataSource {
-	return &dhcpv6PdPoolDataSource{}
-}
 
 // dhcpv6PdPoolDataSource defines the data source implementation.
 type dhcpv6PdPoolDataSource struct {

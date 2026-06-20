@@ -19,9 +19,6 @@ var _ resource.Resource = &domainOverrideResource{}
 var _ resource.ResourceWithConfigure = &domainOverrideResource{}
 var _ resource.ResourceWithImportState = &domainOverrideResource{}
 
-func newDomainOverrideResource() resource.Resource {
-	return &domainOverrideResource{}
-}
 
 // domainOverrideResource defines the resource implementation.
 type domainOverrideResource struct {

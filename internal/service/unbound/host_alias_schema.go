@@ -108,11 +108,17 @@ func convertHostAliasSchemaToStruct(d *hostAliasResourceModel) (*unbound.HostAli
 }
 
 func convertHostAliasStructToSchema(d *unbound.HostAlias) (*hostAliasResourceModel, error) {
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &hostAliasResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Hostname:    types.StringValue(d.Hostname),
 		Domain:      types.StringValue(d.Domain),
-		Description: tools.StringOrNull(d.Description),
+		Description: description,
 		Override:    types.StringValue(d.Host.String()),
 	}, nil
 }

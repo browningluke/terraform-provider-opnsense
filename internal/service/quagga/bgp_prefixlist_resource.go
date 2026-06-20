@@ -19,9 +19,6 @@ var _ resource.Resource = &bgpPrefixListResource{}
 var _ resource.ResourceWithConfigure = &bgpPrefixListResource{}
 var _ resource.ResourceWithImportState = &bgpPrefixListResource{}
 
-func newBGPPrefixListResource() resource.Resource {
-	return &bgpPrefixListResource{}
-}
 
 // bgpPrefixListResource defines the resource implementation.
 type bgpPrefixListResource struct {

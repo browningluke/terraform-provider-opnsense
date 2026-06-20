@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &bgpCommunityListDataSource{}
 var _ datasource.DataSourceWithConfigure = &bgpCommunityListDataSource{}
 
-func newBGPCommunityListDataSource() datasource.DataSource {
-	return &bgpCommunityListDataSource{}
-}
 
 // bgpCommunityListDataSource defines the data source implementation.
 type bgpCommunityListDataSource struct {

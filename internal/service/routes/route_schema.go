@@ -95,9 +95,15 @@ func convertRouteSchemaToStruct(d *routeResourceModel) (*routes.Route, error) {
 }
 
 func convertRouteStructToSchema(d *routes.Route) (*routeResourceModel, error) {
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &routeResourceModel{
 		Enabled:     types.BoolValue(!tools.StringToBool(d.Disabled)),
-		Description: tools.StringOrNull(d.Description),
+		Description: description,
 		Gateway:     types.StringValue(d.Gateway.String()),
 		Network:     types.StringValue(d.Network),
 	}, nil

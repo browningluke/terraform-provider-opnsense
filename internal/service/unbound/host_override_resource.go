@@ -19,9 +19,6 @@ var _ resource.Resource = &hostOverrideResource{}
 var _ resource.ResourceWithConfigure = &hostOverrideResource{}
 var _ resource.ResourceWithImportState = &hostOverrideResource{}
 
-func newHostOverrideResource() resource.Resource {
-	return &hostOverrideResource{}
-}
 
 // hostOverrideResource defines the resource implementation.
 type hostOverrideResource struct {

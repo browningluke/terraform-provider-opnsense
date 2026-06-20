@@ -19,9 +19,6 @@ var _ resource.Resource = &vipResource{}
 var _ resource.ResourceWithConfigure = &vipResource{}
 var _ resource.ResourceWithImportState = &vipResource{}
 
-func newVipResource() resource.Resource {
-	return &vipResource{}
-}
 
 // vipResource defines the resource implementation.
 type vipResource struct {

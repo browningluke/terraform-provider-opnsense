@@ -19,9 +19,6 @@ var _ resource.Resource = &peerResource{}
 var _ resource.ResourceWithConfigure = &peerResource{}
 var _ resource.ResourceWithImportState = &peerResource{}
 
-func newPeerResource() resource.Resource {
-	return &peerResource{}
-}
 
 // peerResource defines the resource implementation.
 type peerResource struct {

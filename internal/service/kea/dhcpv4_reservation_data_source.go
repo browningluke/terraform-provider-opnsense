@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &dhcpv4ReservationDataSource{}
 var _ datasource.DataSourceWithConfigure = &dhcpv4ReservationDataSource{}
 
-func newDhcpv4ReservationDataSource() datasource.DataSource {
-	return &dhcpv4ReservationDataSource{}
-}
 
 // dhcpv4ReservationDataSource defines the data source implementation.
 type dhcpv4ReservationDataSource struct {

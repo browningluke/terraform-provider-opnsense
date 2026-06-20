@@ -12,9 +12,6 @@ import (
 var _ datasource.DataSource = &instanceDataSource{}
 var _ datasource.DataSourceWithConfigure = &instanceDataSource{}
 
-func newInstanceDataSource() datasource.DataSource {
-	return &instanceDataSource{}
-}
 
 type instanceDataSource struct {
 	client opnsense.Client

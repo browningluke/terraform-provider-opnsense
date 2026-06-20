@@ -14,9 +14,6 @@ import (
 var _ datasource.DataSource = &vlanDataSource{}
 var _ datasource.DataSourceWithConfigure = &vlanDataSource{}
 
-func newVlanDataSource() datasource.DataSource {
-	return &vlanDataSource{}
-}
 
 // vlanDataSource defines the data source implementation.
 type vlanDataSource struct {

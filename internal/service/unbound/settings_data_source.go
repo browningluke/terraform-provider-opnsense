@@ -14,9 +14,6 @@ import (
 var _ datasource.DataSource = &settingsDataSource{}
 var _ datasource.DataSourceWithConfigure = &settingsDataSource{}
 
-func newSettingsDataSource() datasource.DataSource {
-	return &settingsDataSource{}
-}
 
 // settingsDataSource defines the data source implementation.
 type settingsDataSource struct {

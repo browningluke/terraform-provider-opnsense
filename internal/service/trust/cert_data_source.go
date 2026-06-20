@@ -14,9 +14,6 @@ import (
 var _ datasource.DataSource = &certDataSource{}
 var _ datasource.DataSourceWithConfigure = &certDataSource{}
 
-func newCertDataSource() datasource.DataSource {
-	return &certDataSource{}
-}
 
 type certDataSource struct {
 	client opnsense.Client

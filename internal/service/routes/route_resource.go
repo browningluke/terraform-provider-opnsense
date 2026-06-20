@@ -19,9 +19,6 @@ var _ resource.Resource = &routeResource{}
 var _ resource.ResourceWithConfigure = &routeResource{}
 var _ resource.ResourceWithImportState = &routeResource{}
 
-func newRouteResource() resource.Resource {
-	return &routeResource{}
-}
 
 // routeResource defines the resource implementation.
 type routeResource struct {

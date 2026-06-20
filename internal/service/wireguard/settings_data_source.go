@@ -15,9 +15,6 @@ import (
 var _ datasource.DataSource = &settingsDataSource{}
 var _ datasource.DataSourceWithConfigure = &settingsDataSource{}
 
-func newSettingsDataSource() datasource.DataSource {
-	return &settingsDataSource{}
-}
 
 type settingsDataSource struct {
 	client opnsense.Client

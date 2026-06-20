@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &bgpASPathDataSource{}
 var _ datasource.DataSourceWithConfigure = &bgpASPathDataSource{}
 
-func newBGPASPathDataSource() datasource.DataSource {
-	return &bgpASPathDataSource{}
-}
 
 // bgpASPathDataSource defines the data source implementation.
 type bgpASPathDataSource struct {

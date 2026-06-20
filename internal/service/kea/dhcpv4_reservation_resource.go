@@ -19,9 +19,6 @@ var _ resource.Resource = &dhcpv4ReservationResource{}
 var _ resource.ResourceWithConfigure = &dhcpv4ReservationResource{}
 var _ resource.ResourceWithImportState = &dhcpv4ReservationResource{}
 
-func newDhcpv4ReservationResource() resource.Resource {
-	return &dhcpv4ReservationResource{}
-}
 
 // dhcpv4ReservationResource defines the resource implementation.
 type dhcpv4ReservationResource struct {

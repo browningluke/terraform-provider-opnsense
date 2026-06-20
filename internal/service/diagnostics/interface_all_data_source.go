@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &interfaceAllDataSource{}
 var _ datasource.DataSourceWithConfigure = &interfaceAllDataSource{}
 
-func newInterfaceAllDataSource() datasource.DataSource {
-	return &interfaceAllDataSource{}
-}
 
 // interfaceAllDataSource defines the data source implementation.
 type interfaceAllDataSource struct {

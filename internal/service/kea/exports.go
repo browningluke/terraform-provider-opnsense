@@ -10,35 +10,35 @@ import (
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		// Deprecated: use dhcpv4 variants
-		newPeerResource,
-		newReservationResource,
-		newSubnetResource,
+		func() resource.Resource { return &peerResource{} },
+		func() resource.Resource { return &reservationResource{} },
+		func() resource.Resource { return &subnetResource{} },
 		// DHCPv4
-		newDhcpv4PeerResource,
-		newDhcpv4ReservationResource,
-		newDhcpv4SubnetResource,
+		func() resource.Resource { return &dhcpv4PeerResource{} },
+		func() resource.Resource { return &dhcpv4ReservationResource{} },
+		func() resource.Resource { return &dhcpv4SubnetResource{} },
 		// DHCPv6
-		newDhcpv6PeerResource,
-		newDhcpv6ReservationResource,
-		newDhcpv6SubnetResource,
-		newDhcpv6PdPoolResource,
+		func() resource.Resource { return &dhcpv6PeerResource{} },
+		func() resource.Resource { return &dhcpv6ReservationResource{} },
+		func() resource.Resource { return &dhcpv6SubnetResource{} },
+		func() resource.Resource { return &dhcpv6PdPoolResource{} },
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		// Deprecated: use dhcpv4 variants
-		newPeerDataSource,
-		newReservationDataSource,
-		newSubnetDataSource,
+		func() datasource.DataSource { return &peerDataSource{} },
+		func() datasource.DataSource { return &reservationDataSource{} },
+		func() datasource.DataSource { return &subnetDataSource{} },
 		// DHCPv4
-		newDhcpv4PeerDataSource,
-		newDhcpv4ReservationDataSource,
-		newDhcpv4SubnetDataSource,
+		func() datasource.DataSource { return &dhcpv4PeerDataSource{} },
+		func() datasource.DataSource { return &dhcpv4ReservationDataSource{} },
+		func() datasource.DataSource { return &dhcpv4SubnetDataSource{} },
 		// DHCPv6
-		newDhcpv6PeerDataSource,
-		newDhcpv6ReservationDataSource,
-		newDhcpv6SubnetDataSource,
-		newDhcpv6PdPoolDataSource,
+		func() datasource.DataSource { return &dhcpv6PeerDataSource{} },
+		func() datasource.DataSource { return &dhcpv6ReservationDataSource{} },
+		func() datasource.DataSource { return &dhcpv6SubnetDataSource{} },
+		func() datasource.DataSource { return &dhcpv6PdPoolDataSource{} },
 	}
 }

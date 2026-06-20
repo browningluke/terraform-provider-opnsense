@@ -19,9 +19,6 @@ var _ resource.Resource = &forwardResource{}
 var _ resource.ResourceWithConfigure = &forwardResource{}
 var _ resource.ResourceWithImportState = &forwardResource{}
 
-func newForwardResource() resource.Resource {
-	return &forwardResource{}
-}
 
 // forwardResource defines the resource implementation.
 type forwardResource struct {

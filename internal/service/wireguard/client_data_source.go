@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &clientDataSource{}
 var _ datasource.DataSourceWithConfigure = &clientDataSource{}
 
-func newClientDataSource() datasource.DataSource {
-	return &clientDataSource{}
-}
 
 // clientDataSource defines the data source implementation.
 type clientDataSource struct {
