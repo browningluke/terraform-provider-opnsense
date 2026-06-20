@@ -7,14 +7,8 @@ import (
 	"regexp"
 )
 
-type ipOrCIDRValidator struct{}
-
-func (validator ipOrCIDRValidator) Description(_ context.Context) string {
-	return "must be a valid IPv4 or IPv6 address or CIDR (e.g. 192.168.0.1, 192.168.0.0/24, 2001:db8::1, 2001:db8::/64)"
-}
-
-func (validator ipOrCIDRValidator) MarkdownDescription(ctx context.Context) string {
-	return validator.Description(ctx)
+type ipOrCIDRValidator struct {
+	descriptionValidator
 }
 
 func (validator ipOrCIDRValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
@@ -33,17 +27,13 @@ func (validator ipOrCIDRValidator) ValidateString(ctx context.Context, request v
 }
 
 func IpOrCIDR() validator.String {
-	return ipOrCIDRValidator{}
+	return ipOrCIDRValidator{
+		descriptionValidator{"must be a valid IPv4 or IPv6 address or CIDR (e.g. 192.168.0.1, 192.168.0.0/24, 2001:db8::1, 2001:db8::/64)"},
+	}
 }
 
-type cidrValidator struct{}
-
-func (validator cidrValidator) Description(_ context.Context) string {
-	return "must be a valid IPv4 or IPv6 CIDR (e.g. 192.168.0.0/24, 2001:db8::/64)"
-}
-
-func (validator cidrValidator) MarkdownDescription(ctx context.Context) string {
-	return validator.Description(ctx)
+type cidrValidator struct {
+	descriptionValidator
 }
 
 func (validator cidrValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
@@ -62,5 +52,7 @@ func (validator cidrValidator) ValidateString(ctx context.Context, request valid
 }
 
 func CIDR() validator.String {
-	return cidrValidator{}
+	return cidrValidator{
+		descriptionValidator{"must be a valid IPv4 or IPv6 CIDR (e.g. 192.168.0.0/24, 2001:db8::/64)"},
+	}
 }
