@@ -115,7 +115,7 @@ func TestConvertIpsecPskStructToSchema(t *testing.T) {
 			assert.Equal(t, tt.expected.IdentityRemote, result.IdentityRemote)
 			assert.Equal(t, tt.expected.PreSharedKey, result.PreSharedKey)
 			assert.Equal(t, tt.expected.Type, result.Type)
-			// Description comparison depends on tools.StringOrNull behavior
+			// Description is null when empty, non-null when set
 		})
 	}
 }

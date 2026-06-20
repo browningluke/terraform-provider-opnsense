@@ -95,10 +95,16 @@ func convertDomainOverrideSchemaToStruct(d *domainOverrideResourceModel) (*unbou
 }
 
 func convertDomainOverrideStructToSchema(d *unbound.DomainOverride) (*domainOverrideResourceModel, error) {
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &domainOverrideResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Domain:      types.StringValue(d.Domain),
 		Server:      types.StringValue(d.Server),
-		Description: tools.StringOrNull(d.Description),
+		Description: description,
 	}, nil
 }

@@ -7,14 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"strconv"
-	"strings"
 )
 
 // Ints
-
-func Int64ToString(i int64) string {
-	return fmt.Sprintf("%d", i)
-}
 
 func StringToInt64(s string) int64 {
 	i, err := strconv.ParseInt(s, 10, 64)
@@ -76,16 +71,6 @@ func StringToBool(s string) bool {
 	return s == "1"
 }
 
-// Strings
-
-func StringOrNull(s string) types.String {
-	if s != "" {
-		return types.StringValue(s)
-	} else {
-		return types.StringNull()
-	}
-}
-
 // Sets
 
 func EmptySetValue(t attr.Type) types.Set {
@@ -110,12 +95,6 @@ func StringSliceToSet(s []string) basetypes.SetValue {
 	typeList, _ := types.SetValue(types.StringType, list)
 
 	return typeList
-}
-
-func SetToString(set types.Set, delim string) string {
-	var strList []string
-	set.ElementsAs(context.Background(), &strList, false)
-	return strings.Join(strList, delim)
 }
 
 func SetToStringSlice(set types.Set) []string {

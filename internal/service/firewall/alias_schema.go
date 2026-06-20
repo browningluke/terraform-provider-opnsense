@@ -234,7 +234,11 @@ func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) 
 		UpdateFreq:     types.Float64Value(tools.StringToFloat64(d.UpdateFreq)),
 		PathExpression: types.StringValue(d.PathExpression),
 		Statistics:     types.BoolValue(tools.StringToBool(d.Statistics)),
-		Description:    tools.StringOrNull(d.Description),
+	}
+	if d.Description != "" {
+		model.Description = types.StringValue(d.Description)
+	} else {
+		model.Description = types.StringNull()
 	}
 
 	// Parse 'IPProtocol'

@@ -1,6 +1,8 @@
 package interfaces
 
 import (
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -111,8 +113,8 @@ func vlanDataSourceSchema() dschema.Schema {
 func convertVlanSchemaToStruct(d *vlanResourceModel) (*interfaces.Vlan, error) {
 	return &interfaces.Vlan{
 		Description: d.Description.ValueString(),
-		Tag:         tools.Int64ToString(d.Tag.ValueInt64()),
-		Priority:    api.SelectedMap(tools.Int64ToString(d.Priority.ValueInt64())),
+		Tag:         strconv.FormatInt(d.Tag.ValueInt64(), 10),
+		Priority:    api.SelectedMap(strconv.FormatInt(d.Priority.ValueInt64(), 10)),
 		Parent:      api.SelectedMap(d.Parent.ValueString()),
 		Device:      d.Device.ValueString(),
 	}, nil
@@ -127,8 +129,14 @@ func convertVlanStructToSchema(d *interfaces.Vlan) (*vlanResourceModel, error) {
 		priority = tools.StringToInt64(s)
 	}
 
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &vlanResourceModel{
-		Description: tools.StringOrNull(d.Description),
+		Description: description,
 		Tag:         tools.StringToInt64Null(d.Tag),
 		Priority:    types.Int64Value(priority),
 		Parent:      types.StringValue(d.Parent.String()),

@@ -2,6 +2,7 @@ package firewall
 
 import (
 	"regexp"
+	"strconv"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
@@ -313,7 +314,7 @@ func convertNATSchemaToStruct(d *natResourceModel) (*firewall.NAT, error) {
 	return &firewall.NAT{
 		Enabled:           tools.BoolToString(d.Enabled.ValueBool()),
 		DisableNAT:        tools.BoolToString(d.DisableNAT.ValueBool()),
-		Sequence:          tools.Int64ToString(d.Sequence.ValueInt64()),
+		Sequence:          strconv.FormatInt(d.Sequence.ValueInt64(), 10),
 		Interface:         api.SelectedMap(d.Interface.ValueString()),
 		IPProtocol:        api.SelectedMap(d.IPProtocol.ValueString()),
 		Protocol:          api.SelectedMap(d.Protocol.ValueString()),
@@ -331,7 +332,7 @@ func convertNATSchemaToStruct(d *natResourceModel) (*firewall.NAT, error) {
 }
 
 func convertNATStructToSchema(d *firewall.NAT) (*natResourceModel, error) {
-	return &natResourceModel{
+	model := &natResourceModel{
 		Enabled:    types.BoolValue(tools.StringToBool(d.Enabled)),
 		DisableNAT: types.BoolValue(tools.StringToBool(d.DisableNAT)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),
@@ -352,7 +353,12 @@ func convertNATStructToSchema(d *firewall.NAT) (*natResourceModel, error) {
 			IP:   types.StringValue(d.Target),
 			Port: types.StringValue(d.TargetPort),
 		},
-		Log:         types.BoolValue(tools.StringToBool(d.Log)),
-		Description: tools.StringOrNull(d.Description),
-	}, nil
+		Log: types.BoolValue(tools.StringToBool(d.Log)),
+	}
+	if d.Description != "" {
+		model.Description = types.StringValue(d.Description)
+	} else {
+		model.Description = types.StringNull()
+	}
+	return model, nil
 }

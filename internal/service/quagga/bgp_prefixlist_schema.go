@@ -1,6 +1,8 @@
 package quagga
 
 import (
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -137,7 +139,7 @@ func convertBGPPrefixListSchemaToStruct(d *bgpPrefixListResourceModel) (*quagga.
 		Description:    d.Description.ValueString(),
 		Name:           d.Name.ValueString(),
 		IPVersion:      api.SelectedMap(d.IPVersion.ValueString()),
-		SequenceNumber: tools.Int64ToString(d.Number.ValueInt64()),
+		SequenceNumber: strconv.FormatInt(d.Number.ValueInt64(), 10),
 		Action:         api.SelectedMap(d.Action.ValueString()),
 		Network:        d.Network.ValueString(),
 	}, nil

@@ -3,6 +3,7 @@ package firewall
 import (
 	"context"
 	"regexp"
+	"strconv"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
@@ -262,7 +263,7 @@ func convertNATOneToOneSchemaToStruct(d *natOneToOneResourceModel) (*firewall.Na
 
 	return &firewall.NatOneToOne{
 		Enabled:           tools.BoolToString(d.Enabled.ValueBool()),
-		Sequence:          tools.Int64ToString(d.Sequence.ValueInt64()),
+		Sequence:          strconv.FormatInt(d.Sequence.ValueInt64(), 10),
 		Interface:         api.SelectedMap(d.Interface.ValueString()),
 		Type:              api.SelectedMap(d.Type.ValueString()),
 		SourceNet:         d.Source.Net.ValueString(),
@@ -302,7 +303,11 @@ func convertNATOneToOneStructToSchema(d *firewall.NatOneToOne) (*natOneToOneReso
 		ExternalNet:   types.StringValue(d.ExternalNet),
 		NatReflection: types.StringValue(natReflection),
 		Categories:    types.SetNull(types.StringType),
-		Description:   tools.StringOrNull(d.Description),
+	}
+	if d.Description != "" {
+		model.Description = types.StringValue(d.Description)
+	} else {
+		model.Description = types.StringNull()
 	}
 
 	// Parse 'Categories'

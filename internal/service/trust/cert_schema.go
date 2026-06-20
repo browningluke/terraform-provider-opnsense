@@ -3,7 +3,6 @@ package trust
 import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/trust"
-	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -419,8 +418,7 @@ func convertCertSchemaToStruct(d *certResourceModel) (*trust.Cert, error) {
 }
 
 func convertCertStructToSchema(d *trust.Cert) (*certResourceModel, error) {
-	return &certResourceModel{
-		RefId:              tools.StringOrNull(d.RefId),
+	model := &certResourceModel{
 		Description:        types.StringValue(d.Description),
 		CaRef:              types.StringValue(d.CaRef.String()),
 		Crt:                types.StringValue(d.Crt),
@@ -445,13 +443,51 @@ func convertCertStructToSchema(d *trust.Cert) (*certResourceModel, error) {
 		AltnamesUri:        types.StringValue(d.AltnamesUri),
 		AltnamesEmail:      types.StringValue(d.AltnamesEmail),
 		Rfc3280Purpose:     types.StringValue(d.Rfc3280Purpose),
-		InUse:              tools.StringOrNull(d.InUse),
-		IsUser:             tools.StringOrNull(d.IsUser),
-		CrtPayload:         tools.StringOrNull(d.CrtPayload),
-		CsrPayload:         tools.StringOrNull(d.CsrPayload),
-		PrvPayload:         tools.StringOrNull(d.PrvPayload),
-		Name:               tools.StringOrNull(d.Name),
-		ValidFrom:          tools.StringOrNull(d.ValidFrom),
-		ValidTo:            tools.StringOrNull(d.ValidTo),
-	}, nil
+	}
+	if d.RefId != "" {
+		model.RefId = types.StringValue(d.RefId)
+	} else {
+		model.RefId = types.StringNull()
+	}
+	if d.InUse != "" {
+		model.InUse = types.StringValue(d.InUse)
+	} else {
+		model.InUse = types.StringNull()
+	}
+	if d.IsUser != "" {
+		model.IsUser = types.StringValue(d.IsUser)
+	} else {
+		model.IsUser = types.StringNull()
+	}
+	if d.CrtPayload != "" {
+		model.CrtPayload = types.StringValue(d.CrtPayload)
+	} else {
+		model.CrtPayload = types.StringNull()
+	}
+	if d.CsrPayload != "" {
+		model.CsrPayload = types.StringValue(d.CsrPayload)
+	} else {
+		model.CsrPayload = types.StringNull()
+	}
+	if d.PrvPayload != "" {
+		model.PrvPayload = types.StringValue(d.PrvPayload)
+	} else {
+		model.PrvPayload = types.StringNull()
+	}
+	if d.Name != "" {
+		model.Name = types.StringValue(d.Name)
+	} else {
+		model.Name = types.StringNull()
+	}
+	if d.ValidFrom != "" {
+		model.ValidFrom = types.StringValue(d.ValidFrom)
+	} else {
+		model.ValidFrom = types.StringNull()
+	}
+	if d.ValidTo != "" {
+		model.ValidTo = types.StringValue(d.ValidTo)
+	} else {
+		model.ValidTo = types.StringNull()
+	}
+	return model, nil
 }

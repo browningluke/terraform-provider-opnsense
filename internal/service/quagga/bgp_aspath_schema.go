@@ -1,6 +1,8 @@
 package quagga
 
 import (
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -112,7 +114,7 @@ func convertBGPASPathSchemaToStruct(d *bgpASPathResourceModel) (*quagga.BGPASPat
 	return &quagga.BGPASPath{
 		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Description: d.Description.ValueString(),
-		Number:      tools.Int64ToString(d.Number.ValueInt64()),
+		Number:      strconv.FormatInt(d.Number.ValueInt64(), 10),
 		Action:      api.SelectedMap(d.Action.ValueString()),
 		AS:          d.AS.ValueString(),
 	}, nil

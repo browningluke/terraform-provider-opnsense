@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -409,7 +410,7 @@ func convertNATPortForwardSchemaToStruct(d *natPortForwardResourceModel) (*firew
 	return &firewall.NatPortForward{
 		// Schema uses "enabled" (user-friendly), API uses "disabled" (inverted).
 		Disabled:   tools.BoolToString(!d.Enabled.ValueBool()),
-		Sequence:   tools.Int64ToString(d.Sequence.ValueInt64()),
+		Sequence:   strconv.FormatInt(d.Sequence.ValueInt64(), 10),
 		Interface:  natPortForwardInterfaceSchemaToAPI(d.Interface),
 		IPProtocol: api.SelectedMap(d.IPProtocol.ValueString()),
 		Protocol:   api.SelectedMap(d.Protocol.ValueString()),
@@ -441,7 +442,7 @@ func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortFo
 		destinationNet = "any"
 	}
 
-	return &natPortForwardResourceModel{
+	model := &natPortForwardResourceModel{
 		// API uses "disabled" (inverted), schema uses "enabled" (user-friendly).
 		Enabled:    types.BoolValue(!tools.StringToBool(d.Disabled)),
 		Sequence:   tools.StringToInt64Null(d.Sequence),
@@ -464,6 +465,11 @@ func convertNATPortForwardStructToSchema(d *firewall.NatPortForward) (*natPortFo
 		},
 		Log:           types.BoolValue(tools.StringToBool(d.Log)),
 		NatReflection: types.StringValue(natReflectionAPIToSchema(d.NatReflection.String())),
-		Description:   tools.StringOrNull(d.Description),
-	}, nil
+	}
+	if d.Description != "" {
+		model.Description = types.StringValue(d.Description)
+	} else {
+		model.Description = types.StringNull()
+	}
+	return model, nil
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"sort"
+	"strconv"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/unbound"
@@ -1300,7 +1301,7 @@ func convertSettingsSchemaToStruct(d *settingsResourceModel) (*unbound.Settings,
 	// Parse 'General' block
 	if d.General != nil {
 		result.General.Enabled = tools.BoolToString(d.General.Enabled.ValueBool())
-		result.General.Port = tools.Int64ToString(d.General.Port.ValueInt64())
+		result.General.Port = strconv.FormatInt(d.General.Port.ValueInt64(), 10)
 		result.General.DNSSEC = tools.BoolToString(d.General.EnableDNSSEC.ValueBool())
 		result.General.DNS64 = tools.BoolToString(d.General.EnableDNS64.ValueBool())
 		result.General.DNS64Prefix = d.General.DNS64Prefix.ValueString()

@@ -1,6 +1,8 @@
 package quagga
 
 import (
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -124,8 +126,8 @@ func convertBGPCommunityListSchemaToStruct(d *bgpCommunityListResourceModel) (*q
 	return &quagga.BGPCommunityList{
 		Enabled:        tools.BoolToString(d.Enabled.ValueBool()),
 		Description:    d.Description.ValueString(),
-		Number:         tools.Int64ToString(d.Number.ValueInt64()),
-		SequenceNumber: tools.Int64ToString(d.SequenceNumber.ValueInt64()),
+		Number:         strconv.FormatInt(d.Number.ValueInt64(), 10),
+		SequenceNumber: strconv.FormatInt(d.SequenceNumber.ValueInt64(), 10),
 		Action:         api.SelectedMap(d.Action.ValueString()),
 		Community:      d.Community.ValueString(),
 	}, nil

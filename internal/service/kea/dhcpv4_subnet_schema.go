@@ -274,10 +274,13 @@ func convertDhcpv4SubnetSchemaToStruct(d *dhcpv4SubnetResourceModel) (*kea.Subne
 			route.RouterIp.ValueString())
 	}
 
+	var poolsList []string
+	d.Pools.ElementsAs(context.Background(), &poolsList, false)
+
 	return &kea.SubnetV4{
 		Subnet:                d.Subnet.ValueString(),
 		NextServer:            d.NextServer.ValueString(),
-		Pools:                 tools.SetToString(d.Pools, "\n"),
+		Pools:                 strings.Join(poolsList, "\n"),
 		MatchClientId:         tools.BoolToString(d.MatchClientId.ValueBool()),
 		OptionDataAutoCollect: tools.BoolToString(d.AutoCollect.ValueBool()),
 		OptionData: kea.OptionDataV4{

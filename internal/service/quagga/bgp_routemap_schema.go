@@ -2,6 +2,8 @@ package quagga
 
 import (
 	"context"
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -178,7 +180,7 @@ func convertBGPRouteMapSchemaToStruct(d *bgpRouteMapResourceModel) (*quagga.BGPR
 		Description:   d.Description.ValueString(),
 		Name:          d.Name.ValueString(),
 		Action:        api.SelectedMap(d.Action.ValueString()),
-		RouteMapID:    tools.Int64ToString(d.RouteMapID.ValueInt64()),
+		RouteMapID:    strconv.FormatInt(d.RouteMapID.ValueInt64(), 10),
 		ASPathList:    asPathList,
 		PrefixList:    prefixList,
 		CommunityList: communityList,

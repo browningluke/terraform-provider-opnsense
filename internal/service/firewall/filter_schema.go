@@ -4,6 +4,7 @@ import (
 	"context"
 	"regexp"
 	"sort"
+	"strconv"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
@@ -1211,7 +1212,7 @@ func filterDataSourceSchema() dschema.Schema {
 func convertFilterSchemaToStruct(d *filterResourceModel) (*firewall.Filter, error) {
 	result := &firewall.Filter{
 		Enabled:      tools.BoolToString(d.Enabled.ValueBool()),
-		Sequence:     tools.Int64ToString(d.Sequence.ValueInt64()),
+		Sequence:     strconv.FormatInt(d.Sequence.ValueInt64(), 10),
 		NoXMLRPCSync: tools.BoolToString(d.NoXMLRPCSync.ValueBool()),
 		Description:  d.Description.ValueString(),
 	}
@@ -1344,7 +1345,11 @@ func convertFilterStructToSchema(d *firewall.Filter) (*filterResourceModel, erro
 		Enabled:      types.BoolValue(tools.StringToBool(d.Enabled)),
 		Sequence:     tools.StringToInt64Null(d.Sequence),
 		NoXMLRPCSync: types.BoolValue(tools.StringToBool(d.NoXMLRPCSync)),
-		Description:  tools.StringOrNull(d.Description),
+	}
+	if d.Description != "" {
+		model.Description = types.StringValue(d.Description)
+	} else {
+		model.Description = types.StringNull()
 	}
 
 	// Parse 'Categories'

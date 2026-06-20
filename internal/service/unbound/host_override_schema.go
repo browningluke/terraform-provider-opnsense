@@ -163,6 +163,12 @@ func convertHostOverrideSchemaToStruct(d *hostOverrideResourceModel) (*unbound.H
 }
 
 func convertHostOverrideStructToSchema(d *unbound.HostOverride) (*hostOverrideResourceModel, error) {
+	var description types.String
+	if d.Description != "" {
+		description = types.StringValue(d.Description)
+	} else {
+		description = types.StringNull()
+	}
 	return &hostOverrideResourceModel{
 		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Hostname:    types.StringValue(d.Hostname),
@@ -171,6 +177,6 @@ func convertHostOverrideStructToSchema(d *unbound.HostOverride) (*hostOverrideRe
 		Server:      types.StringValue(d.Server),
 		MXPriority:  types.Int64Value(tools.StringToInt64(d.MXPriority)),
 		MXDomain:    types.StringValue(d.MXDomain),
-		Description: tools.StringOrNull(d.Description),
+		Description: description,
 	}, nil
 }

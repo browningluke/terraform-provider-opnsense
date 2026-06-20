@@ -1,6 +1,8 @@
 package unbound
 
 import (
+	"strconv"
+
 	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -104,7 +106,7 @@ func convertForwardSchemaToStruct(d *forwardResourceModel) (*unbound.Forward, er
 		Enabled:  tools.BoolToString(d.Enabled.ValueBool()),
 		Domain:   d.Domain.ValueString(),
 		Server:   d.ServerIP.ValueString(),
-		Port:     tools.Int64ToString(d.ServerPort.ValueInt64()),
+		Port:     strconv.FormatInt(d.ServerPort.ValueInt64(), 10),
 		VerifyCN: d.VerifyCN.ValueString(),
 	}, nil
 }
