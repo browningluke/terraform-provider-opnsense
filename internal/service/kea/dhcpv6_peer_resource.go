@@ -19,9 +19,6 @@ var _ resource.Resource = &dhcpv6PeerResource{}
 var _ resource.ResourceWithConfigure = &dhcpv6PeerResource{}
 var _ resource.ResourceWithImportState = &dhcpv6PeerResource{}
 
-func newDhcpv6PeerResource() resource.Resource {
-	return &dhcpv6PeerResource{}
-}
 
 // dhcpv6PeerResource defines the resource implementation.
 type dhcpv6PeerResource struct {

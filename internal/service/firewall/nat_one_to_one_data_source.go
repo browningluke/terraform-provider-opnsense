@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &natOneToOneDataSource{}
 var _ datasource.DataSourceWithConfigure = &natOneToOneDataSource{}
 
-func newNATOneToOneDataSource() datasource.DataSource {
-	return &natOneToOneDataSource{}
-}
 
 // natOneToOneDataSource defines the data source implementation.
 type natOneToOneDataSource struct {

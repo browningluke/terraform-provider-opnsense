@@ -21,9 +21,6 @@ var _ resource.ResourceWithConfigure = &aliasResource{}
 var _ resource.ResourceWithImportState = &aliasResource{}
 var _ resource.ResourceWithConfigValidators = &aliasResource{}
 
-func newAliasResource() resource.Resource {
-	return &aliasResource{}
-}
 
 // aliasResource defines the resource implementation.
 type aliasResource struct {

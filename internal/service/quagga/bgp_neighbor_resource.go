@@ -19,9 +19,6 @@ var _ resource.Resource = &bgpNeighborResource{}
 var _ resource.ResourceWithConfigure = &bgpNeighborResource{}
 var _ resource.ResourceWithImportState = &bgpNeighborResource{}
 
-func newBGPNeighborResource() resource.Resource {
-	return &bgpNeighborResource{}
-}
 
 // bgpNeighborResource defines the resource implementation.
 type bgpNeighborResource struct {

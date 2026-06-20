@@ -19,9 +19,6 @@ var _ resource.Resource = &subnetResource{}
 var _ resource.ResourceWithConfigure = &subnetResource{}
 var _ resource.ResourceWithImportState = &subnetResource{}
 
-func newSubnetResource() resource.Resource {
-	return &subnetResource{}
-}
 
 // subnetResource defines the resource implementation.
 type subnetResource struct {

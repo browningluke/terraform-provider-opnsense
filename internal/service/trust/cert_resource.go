@@ -18,9 +18,6 @@ var _ resource.Resource = &certResource{}
 var _ resource.ResourceWithConfigure = &certResource{}
 var _ resource.ResourceWithImportState = &certResource{}
 
-func newCertResource() resource.Resource {
-	return &certResource{}
-}
 
 type certResource struct {
 	client opnsense.Client

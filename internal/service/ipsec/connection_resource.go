@@ -19,9 +19,6 @@ var _ resource.Resource = &connectionResource{}
 var _ resource.ResourceWithConfigure = &connectionResource{}
 var _ resource.ResourceWithImportState = &connectionResource{}
 
-func newConnectionResource() resource.Resource {
-	return &connectionResource{}
-}
 
 // connectionResource defines the resource implementation.
 type connectionResource struct {

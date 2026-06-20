@@ -16,9 +16,6 @@ import (
 var _ ephemeral.EphemeralResource = &generateKeyEphemeral{}
 var _ ephemeral.EphemeralResourceWithConfigure = &generateKeyEphemeral{}
 
-func newGenerateKeyEphemeral() ephemeral.EphemeralResource {
-	return &generateKeyEphemeral{}
-}
 
 type generateKeyEphemeral struct {
 	client opnsense.Client

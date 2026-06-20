@@ -20,9 +20,6 @@ var _ resource.ResourceWithConfigure = &natPortForwardResource{}
 var _ resource.ResourceWithImportState = &natPortForwardResource{}
 var _ resource.ResourceWithUpgradeState = &natPortForwardResource{}
 
-func newNATPortForwardResource() resource.Resource {
-	return &natPortForwardResource{}
-}
 
 // natPortForwardResource defines the resource implementation.
 type natPortForwardResource struct {

@@ -16,9 +16,6 @@ var _ resource.Resource = &settingsResource{}
 var _ resource.ResourceWithConfigure = &settingsResource{}
 var _ resource.ResourceWithImportState = &settingsResource{}
 
-func newSettingsResource() resource.Resource {
-	return &settingsResource{}
-}
 
 // settingsResource defines the resource implementation.
 // This is a SINGLETON resource - it manages existing upstream configuration

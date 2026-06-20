@@ -19,9 +19,6 @@ var _ resource.Resource = &dhcpv6ReservationResource{}
 var _ resource.ResourceWithConfigure = &dhcpv6ReservationResource{}
 var _ resource.ResourceWithImportState = &dhcpv6ReservationResource{}
 
-func newDhcpv6ReservationResource() resource.Resource {
-	return &dhcpv6ReservationResource{}
-}
 
 // dhcpv6ReservationResource defines the resource implementation.
 type dhcpv6ReservationResource struct {

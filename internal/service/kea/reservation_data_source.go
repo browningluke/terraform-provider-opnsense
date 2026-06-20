@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &reservationDataSource{}
 var _ datasource.DataSourceWithConfigure = &reservationDataSource{}
 
-func newReservationDataSource() datasource.DataSource {
-	return &reservationDataSource{}
-}
 
 // reservationDataSource defines the data source implementation.
 type reservationDataSource struct {

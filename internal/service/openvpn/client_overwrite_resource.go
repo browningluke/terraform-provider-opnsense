@@ -18,9 +18,6 @@ var _ resource.Resource = &clientOverwriteResource{}
 var _ resource.ResourceWithConfigure = &clientOverwriteResource{}
 var _ resource.ResourceWithImportState = &clientOverwriteResource{}
 
-func newClientOverwriteResource() resource.Resource {
-	return &clientOverwriteResource{}
-}
 
 type clientOverwriteResource struct {
 	client opnsense.Client

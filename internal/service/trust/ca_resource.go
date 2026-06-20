@@ -18,9 +18,6 @@ var _ resource.Resource = &caResource{}
 var _ resource.ResourceWithConfigure = &caResource{}
 var _ resource.ResourceWithImportState = &caResource{}
 
-func newCaResource() resource.Resource {
-	return &caResource{}
-}
 
 type caResource struct {
 	client opnsense.Client

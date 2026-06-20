@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &forwardDataSource{}
 var _ datasource.DataSourceWithConfigure = &forwardDataSource{}
 
-func newForwardDataSource() datasource.DataSource {
-	return &forwardDataSource{}
-}
 
 // forwardDataSource defines the data source implementation.
 type forwardDataSource struct {

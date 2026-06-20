@@ -10,22 +10,22 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		newInstanceResource,
-		newStaticKeyResource,
-		newClientOverwriteResource,
+		func() resource.Resource { return &instanceResource{} },
+		func() resource.Resource { return &staticKeyResource{} },
+		func() resource.Resource { return &clientOverwriteResource{} },
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newInstanceDataSource,
-		newStaticKeyDataSource,
-		newClientOverwriteDataSource,
+		func() datasource.DataSource { return &instanceDataSource{} },
+		func() datasource.DataSource { return &staticKeyDataSource{} },
+		func() datasource.DataSource { return &clientOverwriteDataSource{} },
 	}
 }
 
 func EphemeralResources(ctx context.Context) []func() ephemeral.EphemeralResource {
 	return []func() ephemeral.EphemeralResource{
-		newGenerateKeyEphemeral,
+		func() ephemeral.EphemeralResource { return &generateKeyEphemeral{} },
 	}
 }

@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &peerDataSource{}
 var _ datasource.DataSourceWithConfigure = &peerDataSource{}
 
-func newPeerDataSource() datasource.DataSource {
-	return &peerDataSource{}
-}
 
 // peerDataSource defines the data source implementation.
 type peerDataSource struct {

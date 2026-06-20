@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &dhcpv6PeerDataSource{}
 var _ datasource.DataSourceWithConfigure = &dhcpv6PeerDataSource{}
 
-func newDhcpv6PeerDataSource() datasource.DataSource {
-	return &dhcpv6PeerDataSource{}
-}
 
 // dhcpv6PeerDataSource defines the data source implementation.
 type dhcpv6PeerDataSource struct {

@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &natPortForwardDataSource{}
 var _ datasource.DataSourceWithConfigure = &natPortForwardDataSource{}
 
-func newNATPortForwardDataSource() datasource.DataSource {
-	return &natPortForwardDataSource{}
-}
 
 // natPortForwardDataSource defines the data source implementation.
 type natPortForwardDataSource struct {

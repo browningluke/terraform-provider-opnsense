@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &hostDataSource{}
 var _ datasource.DataSourceWithConfigure = &hostDataSource{}
 
-func newClientDataSource() datasource.DataSource {
-	return &hostDataSource{}
-}
 
 type hostDataSource struct {
 	client opnsense.Client

@@ -19,9 +19,6 @@ var _ resource.Resource = &dhcpv4PeerResource{}
 var _ resource.ResourceWithConfigure = &dhcpv4PeerResource{}
 var _ resource.ResourceWithImportState = &dhcpv4PeerResource{}
 
-func newDhcpv4PeerResource() resource.Resource {
-	return &dhcpv4PeerResource{}
-}
 
 // dhcpv4PeerResource defines the resource implementation.
 type dhcpv4PeerResource struct {

@@ -9,22 +9,22 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		newAclResource,
-		newDomainOverrideResource,
-		newForwardResource,
-		newHostAliasResource,
-		newHostOverrideResource,
-		newSettingsResource,
+		func() resource.Resource { return &aclResource{} },
+		func() resource.Resource { return &domainOverrideResource{} },
+		func() resource.Resource { return &forwardResource{} },
+		func() resource.Resource { return &hostAliasResource{} },
+		func() resource.Resource { return &hostOverrideResource{} },
+		func() resource.Resource { return &settingsResource{} },
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newAclDataSource,
-		newDomainOverrideDataSource,
-		newForwardDataSource,
-		newHostAliasDataSource,
-		newHostOverrideDataSource,
-		newSettingsDataSource,
+		func() datasource.DataSource { return &aclDataSource{} },
+		func() datasource.DataSource { return &domainOverrideDataSource{} },
+		func() datasource.DataSource { return &forwardDataSource{} },
+		func() datasource.DataSource { return &hostAliasDataSource{} },
+		func() datasource.DataSource { return &hostOverrideDataSource{} },
+		func() datasource.DataSource { return &settingsDataSource{} },
 	}
 }

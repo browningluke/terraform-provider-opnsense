@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &filterDataSource{}
 var _ datasource.DataSourceWithConfigure = &filterDataSource{}
 
-func newFilterDataSource() datasource.DataSource {
-	return &filterDataSource{}
-}
 
 // filterDataSource defines the data source implementation.
 type filterDataSource struct {

@@ -9,20 +9,20 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		newBGPASPathResource,
-		newBGPCommunityListResource,
-		newBGPNeighborResource,
-		newBGPPrefixListResource,
-		newBGPRouteMapResource,
+		func() resource.Resource { return &bgpASPathResource{} },
+		func() resource.Resource { return &bgpCommunityListResource{} },
+		func() resource.Resource { return &bgpNeighborResource{} },
+		func() resource.Resource { return &bgpPrefixListResource{} },
+		func() resource.Resource { return &bgpRouteMapResource{} },
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newBGPASPathDataSource,
-		newBGPCommunityListDataSource,
-		newBGPNeighborDataSource,
-		newBGPPrefixListDataSource,
-		newBGPRouteMapDataSource,
+		func() datasource.DataSource { return &bgpASPathDataSource{} },
+		func() datasource.DataSource { return &bgpCommunityListDataSource{} },
+		func() datasource.DataSource { return &bgpNeighborDataSource{} },
+		func() datasource.DataSource { return &bgpPrefixListDataSource{} },
+		func() datasource.DataSource { return &bgpRouteMapDataSource{} },
 	}
 }

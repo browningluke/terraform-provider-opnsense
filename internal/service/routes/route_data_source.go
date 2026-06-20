@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &routeDataSource{}
 var _ datasource.DataSourceWithConfigure = &routeDataSource{}
 
-func newRouteDataSource() datasource.DataSource {
-	return &routeDataSource{}
-}
 
 // routeDataSource defines the data source implementation.
 type routeDataSource struct {

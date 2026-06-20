@@ -12,9 +12,6 @@ import (
 var _ datasource.DataSource = &clientOverwriteDataSource{}
 var _ datasource.DataSourceWithConfigure = &clientOverwriteDataSource{}
 
-func newClientOverwriteDataSource() datasource.DataSource {
-	return &clientOverwriteDataSource{}
-}
 
 type clientOverwriteDataSource struct {
 	client opnsense.Client

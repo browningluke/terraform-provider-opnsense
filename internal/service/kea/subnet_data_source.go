@@ -13,9 +13,6 @@ import (
 var _ datasource.DataSource = &subnetDataSource{}
 var _ datasource.DataSourceWithConfigure = &subnetDataSource{}
 
-func newSubnetDataSource() datasource.DataSource {
-	return &subnetDataSource{}
-}
 
 // subnetDataSource defines the data source implementation.
 type subnetDataSource struct {

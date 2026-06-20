@@ -12,9 +12,6 @@ import (
 var _ datasource.DataSource = &staticKeyDataSource{}
 var _ datasource.DataSourceWithConfigure = &staticKeyDataSource{}
 
-func newStaticKeyDataSource() datasource.DataSource {
-	return &staticKeyDataSource{}
-}
 
 type staticKeyDataSource struct {
 	client opnsense.Client

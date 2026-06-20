@@ -19,9 +19,6 @@ var _ resource.Resource = &hostAliasResource{}
 var _ resource.ResourceWithConfigure = &hostAliasResource{}
 var _ resource.ResourceWithImportState = &hostAliasResource{}
 
-func newHostAliasResource() resource.Resource {
-	return &hostAliasResource{}
-}
 
 // hostAliasResource defines the resource implementation.
 type hostAliasResource struct {

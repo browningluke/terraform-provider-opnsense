@@ -9,16 +9,16 @@ import (
 
 func Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		newCaResource,
-		newCertResource,
-		newSettingsResource,
+		func() resource.Resource { return &caResource{} },
+		func() resource.Resource { return &certResource{} },
+		func() resource.Resource { return &settingsResource{} },
 	}
 }
 
 func DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newCaDataSource,
-		newCertDataSource,
-		newSettingsDataSource,
+		func() datasource.DataSource { return &caDataSource{} },
+		func() datasource.DataSource { return &certDataSource{} },
+		func() datasource.DataSource { return &settingsDataSource{} },
 	}
 }
