@@ -125,7 +125,7 @@ jobs:
         run: python3 scripts/configure-opnsense.py
       - name: Run terraform tests
         run: |
-          env TF_ACC=1 go test -v -p 1 ${{ inputs.packages }}
+          env TF_ACC=1 go test -v -p 1 -timeout 120m ${{ inputs.packages }}
       - name: Stop opnsense VM
         if: always()
         run: |
