@@ -110,6 +110,23 @@ The OPNsense API represents booleans as `"0"`/`"1"` and unset numbers as empty s
 
 Use **`-1` as the sentinel null value** for numeric attributes — never store literal `null` for numbers.
 
+### Renamed OPNsense API Fields (dual-key writes)
+When an OPNsense release renames a model field (e.g. 26.1.10 renamed the route model's `disabled` to `enabled`), opnsense-go keeps **both** fields on the struct. In the conversion functions, set both on writes (OPNsense ignores the key it doesn't know, so this works on either side of the rename) and prefer the new field on reads, falling back to the old one when empty:
+
+```go
+// SchemaToStruct: set both
+Enabled:  tools.BoolToString(d.Enabled.ValueBool()),
+Disabled: tools.BoolToString(!d.Enabled.ValueBool()),
+
+// StructToSchema: new key wins, old key is the fallback
+enabled := tools.StringToBool(d.Enabled)
+if d.Enabled == "" {
+    enabled = !tools.StringToBool(d.Disabled)
+}
+```
+
+`internal/service/routes/route_schema.go` is the reference example. Cover both response shapes with unit tests (see `route_schema_test.go`) — CI only runs against one OPNsense version.
+
 ### Schema Documentation
 
 - Source `MarkdownDescription` text from the OPNsense UI help text for that field
