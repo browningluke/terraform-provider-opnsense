@@ -87,7 +87,7 @@ func routeDataSourceSchema() dschema.Schema {
 
 func convertRouteSchemaToStruct(d *routeResourceModel) (*routes.Route, error) {
 	return &routes.Route{
-		Disabled:    tools.BoolToString(!d.Enabled.ValueBool()),
+		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Description: d.Description.ValueString(),
 		Gateway:     api.SelectedMap(d.Gateway.ValueString()),
 		Network:     d.Network.ValueString(),
@@ -96,7 +96,7 @@ func convertRouteSchemaToStruct(d *routeResourceModel) (*routes.Route, error) {
 
 func convertRouteStructToSchema(d *routes.Route) (*routeResourceModel, error) {
 	return &routeResourceModel{
-		Enabled:     types.BoolValue(!tools.StringToBool(d.Disabled)),
+		Enabled:     types.BoolValue(tools.StringToBool(d.Enabled)),
 		Description: tools.StringOrNull(d.Description),
 		Gateway:     types.StringValue(d.Gateway.String()),
 		Network:     types.StringValue(d.Network),
