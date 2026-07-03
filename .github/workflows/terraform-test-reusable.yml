@@ -39,11 +39,88 @@ jobs:
   opnsense-image:
     uses: ./.github/workflows/build-opnsense-image-reusable.yml
 
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Compute test shards
+        id: plan
+        env:
+          PACKAGES: ${{ inputs.packages }}
+        run: |
+          python3 << 'EOF'
+          import json, os, sys
+
+          # Each shard runs on its own runner with its own OPNsense VM, so
+          # shards run in parallel while tests within a shard stay serial.
+          # Long-running suites get a dedicated shard; everything else shares
+          # "other". Every internal/service/<pkg> directory MUST be assigned
+          # to a shard — the check below fails the run otherwise.
+          SHARDS = {
+              "firewall": ["firewall"],
+              "unbound": ["unbound"],
+              "ipsec": ["ipsec"],
+              "other": ["diagnostics", "dnsmasq", "interfaces", "kea",
+                        "openvpn", "quagga", "routes", "trust", "wireguard"],
+          }
+          # Non-service packages, tested with "other" on full-suite runs.
+          EXTRA_OTHER = ["./internal/provider/...", "./internal/tools/...",
+                         "./internal/validators/..."]
+
+          assigned = {p for pkgs in SHARDS.values() for p in pkgs}
+          on_disk = {d for d in os.listdir("internal/service")
+                     if os.path.isdir(os.path.join("internal/service", d))}
+          unassigned = sorted(on_disk - assigned)
+          if unassigned:
+              sys.exit("internal/service packages not assigned to any shard: "
+                       f"{unassigned}. Add them to SHARDS in "
+                       ".github/workflows/terraform-test-reusable.yml.")
+
+          requested = os.environ["PACKAGES"].split()
+          matrix = []
+          if requested == ["./..."]:
+              for name, pkgs in SHARDS.items():
+                  paths = [f"./internal/service/{p}/..." for p in pkgs]
+                  if name == "other":
+                      paths += EXTRA_OTHER
+                  matrix.append({"name": name, "packages": " ".join(paths)})
+          else:
+              services = []
+              for path in requested:
+                  parts = path.split("/")
+                  if parts[1:3] != ["internal", "service"] or len(parts) < 4:
+                      sys.exit(f"unexpected package path: {path}")
+                  services.append(parts[3])
+              unknown = sorted(set(services) - assigned)
+              if unknown:
+                  sys.exit(f"requested packages not assigned to any shard: {unknown}")
+              for name, pkgs in SHARDS.items():
+                  hit = [p for p in pkgs if p in services]
+                  if hit:
+                      matrix.append({"name": name,
+                                     "packages": " ".join(f"./internal/service/{p}/..." for p in hit)})
+
+          if not matrix:
+              sys.exit("no test shards matched the requested packages")
+          print(json.dumps(matrix, indent=2))
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write("matrix=" + json.dumps(matrix) + "\n")
+          EOF
+
   test:
+    name: test (${{ matrix.name }})
     runs-on: ubuntu-latest
     needs:
       - build
       - opnsense-image
+      - plan
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -125,7 +202,7 @@ jobs:
         run: python3 scripts/configure-opnsense.py
       - name: Run terraform tests
         run: |
-          env TF_ACC=1 go test -v -p 1 -timeout 120m ${{ inputs.packages }}
+          env TF_ACC=1 go test -v -p 1 -timeout 120m ${{ matrix.packages }}
       - name: Stop opnsense VM
         if: always()
         run: |

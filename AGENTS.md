@@ -41,6 +41,8 @@ Always use `-p 1` when running `go test` directly for acceptance tests — the s
 
 The CI OPNsense VM only has a single `wan` interface. Tests referencing interfaces must work with this minimal setup.
 
+CI runs the acceptance suite as parallel shards — one runner + one OPNsense VM per shard, defined in the `SHARDS` map in the `plan` job of `.github/workflows/terraform-test-reusable.yml`. **If you add a new `internal/service/<pkg>` package, you must assign it to a shard there** (usually the `other` bucket; give it a dedicated shard if its suite runs long). The `plan` job fails the build if a service package is unassigned.
+
 ## Architecture
 
 This is a Terraform Plugin Framework (v6) provider for OPNsense. The API client lives in the separate [`opnsense-go`](https://github.com/browningluke/opnsense-go) module (`github.com/browningluke/opnsense-go`). To develop against a local copy, add to `go.mod`:
