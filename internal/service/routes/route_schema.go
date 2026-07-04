@@ -86,7 +86,11 @@ func routeDataSourceSchema() dschema.Schema {
 }
 
 func convertRouteSchemaToStruct(d *routeResourceModel) (*routes.Route, error) {
+	// OPNsense 26.1.10 renamed the route model's 'disabled' field to
+	// 'enabled'. Unknown fields are ignored, so sending both keys works on
+	// either side of the rename.
 	return &routes.Route{
+		Enabled:     tools.BoolToString(d.Enabled.ValueBool()),
 		Disabled:    tools.BoolToString(!d.Enabled.ValueBool()),
 		Description: d.Description.ValueString(),
 		Gateway:     api.SelectedMap(d.Gateway.ValueString()),
@@ -95,8 +99,13 @@ func convertRouteSchemaToStruct(d *routeResourceModel) (*routes.Route, error) {
 }
 
 func convertRouteStructToSchema(d *routes.Route) (*routeResourceModel, error) {
+	enabled := tools.StringToBool(d.Enabled)
+	if d.Enabled == "" {
+		// Pre-26.1.10 responses only carry 'disabled'.
+		enabled = !tools.StringToBool(d.Disabled)
+	}
 	return &routeResourceModel{
-		Enabled:     types.BoolValue(!tools.StringToBool(d.Disabled)),
+		Enabled:     types.BoolValue(enabled),
 		Description: tools.StringOrNull(d.Description),
 		Gateway:     types.StringValue(d.Gateway.String()),
 		Network:     types.StringValue(d.Network),
