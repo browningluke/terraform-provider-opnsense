@@ -41,6 +41,8 @@ Always use `-p 1` when running `go test` directly for acceptance tests — the s
 
 The CI OPNsense VM only has a single `wan` interface. Tests referencing interfaces must work with this minimal setup.
 
+CI runs the acceptance suite as parallel shards — one runner + one OPNsense VM per shard, defined in the `SHARDS` map in the `plan` job of `.github/workflows/terraform-test-reusable.yml`. **If you add a new `internal/service/<pkg>` package, you must assign it to a shard there** (usually the `other` bucket; give it a dedicated shard if its suite runs long). The `plan` job fails the build if a service package is unassigned.
+
 ## Architecture
 
 This is a Terraform Plugin Framework (v6) provider for OPNsense. The API client lives in the separate [`opnsense-go`](https://github.com/browningluke/opnsense-go) module (`github.com/browningluke/opnsense-go`). To develop against a local copy, add to `go.mod`:
@@ -109,6 +111,23 @@ The OPNsense API represents booleans as `"0"`/`"1"` and unset numbers as empty s
 | `[]string` → `types.Set` (deduped, skips `""`) | `tools.StringSliceToSet(s)` |
 
 Use **`-1` as the sentinel null value** for numeric attributes — never store literal `null` for numbers.
+
+### Renamed OPNsense API Fields (dual-key writes)
+When an OPNsense release renames a model field (e.g. 26.1.10 renamed the route model's `disabled` to `enabled`), opnsense-go keeps **both** fields on the struct. In the conversion functions, set both on writes (OPNsense ignores the key it doesn't know, so this works on either side of the rename) and prefer the new field on reads, falling back to the old one when empty:
+
+```go
+// SchemaToStruct: set both
+Enabled:  tools.BoolToString(d.Enabled.ValueBool()),
+Disabled: tools.BoolToString(!d.Enabled.ValueBool()),
+
+// StructToSchema: new key wins, old key is the fallback
+enabled := tools.StringToBool(d.Enabled)
+if d.Enabled == "" {
+    enabled = !tools.StringToBool(d.Disabled)
+}
+```
+
+`internal/service/routes/route_schema.go` is the reference example. Cover both response shapes with unit tests (see `route_schema_test.go`) — CI only runs against one OPNsense version.
 
 ### Schema Documentation
 
