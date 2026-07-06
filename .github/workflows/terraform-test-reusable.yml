@@ -63,7 +63,7 @@ jobs:
               "firewall": ["firewall"],
               "unbound": ["unbound"],
               "ipsec": ["ipsec"],
-              "other": ["diagnostics", "dnsmasq", "interfaces", "kea",
+              "other": ["cron", "diagnostics", "dnsmasq", "interfaces", "kea",
                         "openvpn", "quagga", "routes", "trust", "wireguard"],
           }
           # Non-service packages, tested with "other" on full-suite runs.
