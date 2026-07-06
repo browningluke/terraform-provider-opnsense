@@ -37,3 +37,13 @@ website/vendor
 # Python
 __pycache__/
 *.pyc
+
+# codegraph
+.codegraph/
+
+# claude
+.claude/
+
+docs/plans
+
+.envrc
