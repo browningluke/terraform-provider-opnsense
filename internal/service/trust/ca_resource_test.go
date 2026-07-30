@@ -44,6 +44,43 @@ func TestAccTrustCaResource(t *testing.T) {
 	})
 }
 
+func TestAccTrustCaDataSource(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTrustCaDataSourceConfig("Test Internal CA", "internal", "US", "test.example.com"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("data.opnsense_trust_ca.test", "description", "Test Internal CA"),
+					resource.TestCheckResourceAttr("data.opnsense_trust_ca.test", "common_name", "test.example.com"),
+					resource.TestCheckResourceAttrSet("data.opnsense_trust_ca.test", "crt"),
+					resource.TestCheckResourceAttrSet("data.opnsense_trust_ca.test", "prv"),
+					resource.TestCheckResourceAttrSet("data.opnsense_trust_ca.test", "crt_payload"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTrustCaDataSourceConfig(description, action, country, commonName string) string {
+	return fmt.Sprintf(`
+resource "opnsense_trust_ca" "test" {
+  description = %[1]q
+  action      = %[2]q
+  key_type    = "2048"
+  digest      = "sha256"
+  lifetime    = "3650"
+  country     = %[3]q
+  common_name = %[4]q
+}
+
+data "opnsense_trust_ca" "test" {
+  id = opnsense_trust_ca.test.id
+}
+`, description, action, country, commonName)
+}
+
 func testAccTrustCaResourceConfig(description, action, country, commonName string) string {
 	return fmt.Sprintf(`
 resource "opnsense_trust_ca" "test" {

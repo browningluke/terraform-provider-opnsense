@@ -303,6 +303,11 @@ func certDataSourceSchema() dschema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Base64-encoded PEM CSR.",
 			},
+			"prv": dschema.StringAttribute{
+				Computed:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded PEM private key.",
+			},
 			"action": dschema.StringAttribute{
 				Computed: true,
 			},

@@ -52,6 +52,12 @@ func (r *aliasResource) ConfigValidators(ctx context.Context) []resource.ConfigV
 			path.MatchRoot("type"),
 			[]string{"urljson"},
 		),
+		// ip_protocol only applies when type is one of the alias types that support it.
+		validators.RequiresStringEqualsOneOf(
+			path.MatchRoot("ip_protocol"),
+			path.MatchRoot("type"),
+			[]string{"asn", "geoip", "external"},
+		),
 	}
 }
 

@@ -2,7 +2,7 @@
 resource "opnsense_dnsmasq_host" "test_sm" {
   hostname          = "test"
   ip_addresses      = ["10.8.2.1", "::10"]
-  harware_addresses = ["00:25:96:12:34:55"]
+  hardware_addresses = ["00:25:96:12:34:55"]
   client_id         = "01:02:f3"
 }
 
@@ -14,7 +14,7 @@ resource "opnsense_dnsmasq_host" "test_xl" {
   alias_records     = ["alias.example.com"]
   cname_records     = ["cname.example.com"]
   ip_addresses      = ["10.8.2.1", "::10"]
-  harware_addresses = ["00:25:96:12:34:55"]
+  hardware_addresses = ["00:25:96:12:34:55"]
   client_id         = "01:02:f3"
   is_ignored        = false
   comment           = "This is a test host"

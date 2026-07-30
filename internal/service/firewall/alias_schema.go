@@ -79,7 +79,6 @@ func aliasResourceSchema() schema.Schema {
 				Validators: []validator.Set{
 					setvalidator.ValueStringsAre(stringvalidator.OneOf("IPv4", "IPv6")),
 				},
-				Default: setdefault.StaticValue(tools.StringSliceToSet([]string{"IPv4"})),
 			},
 			"interface": schema.StringAttribute{
 				MarkdownDescription: "Choose on which interface this alias applies. Only applies (and must be set) when `type = \"dynipv6host\"`. Defaults to `\"\"`.",
@@ -195,6 +194,8 @@ func aliasDataSourceSchema() dschema.Schema {
 }
 
 func convertAliasSchemaToStruct(d *aliasResourceModel) (*firewall.Alias, error) {
+	normalizeAliasSchemaIPProtocol(d)
+
 	// Parse 'IPProtocol'
 	var protocolList []string
 	d.IPProtocol.ElementsAs(context.Background(), &protocolList, false)
@@ -237,13 +238,20 @@ func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) 
 		Description:    tools.StringOrNull(d.Description),
 	}
 
-	// Parse 'IPProtocol'
-	var protocolList []attr.Value
-	for _, i := range d.IPProtocol {
-		protocolList = append(protocolList, basetypes.NewStringValue(i))
+	if aliasTypeSupportsIPProtocol(d.Type.String()) {
+		// Parse 'IPProtocol'
+		var protocolList []attr.Value
+		for _, i := range d.IPProtocol {
+			protocolList = append(protocolList, basetypes.NewStringValue(i))
+		}
+		if len(protocolList) == 0 {
+			protocolList = append(protocolList, basetypes.NewStringValue("IPv4"))
+		}
+		protocolTypeList, _ := types.SetValue(types.StringType, protocolList)
+		model.IPProtocol = protocolTypeList
+	} else {
+		model.IPProtocol = tools.EmptySetValue(types.StringType)
 	}
-	protocolTypeList, _ := types.SetValue(types.StringType, protocolList)
-	model.IPProtocol = protocolTypeList
 
 	// Parse 'Content'
 	var contentList []attr.Value
@@ -266,4 +274,25 @@ func convertAliasStructToSchema(d *firewall.Alias) (*aliasResourceModel, error) 
 	model.Categories = categoriesTypeList
 
 	return model, nil
+}
+
+func normalizeAliasSchemaIPProtocol(d *aliasResourceModel) {
+	if aliasTypeSupportsIPProtocol(d.Type.ValueString()) {
+		if d.IPProtocol.IsNull() || d.IPProtocol.IsUnknown() {
+			d.IPProtocol = tools.StringSliceToSet([]string{"IPv4"})
+		}
+
+		return
+	}
+
+	d.IPProtocol = tools.EmptySetValue(types.StringType)
+}
+
+func aliasTypeSupportsIPProtocol(aliasType string) bool {
+	switch aliasType {
+	case "asn", "geoip", "external":
+		return true
+	default:
+		return false
+	}
 }
