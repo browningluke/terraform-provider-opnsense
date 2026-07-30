@@ -22,6 +22,6 @@ Query Forwarding section allows for entering arbitrary nameservers to forward qu
 - `enabled` (Boolean) Whether this route is enabled.
 - `server_ip` (String) IP address of DNS server to forward all requests.
 - `server_port` (Number) Port of DNS server, for usual DNS use `53`, if you use DoT set it to `853`.
-- `type` (String) Type of forward. Available values: `forward`, `dot`.
+- `type` (String) Type of forward. Available values: `query`, `dot`.
 - `verify_cn` (String) The Common Name of the DNS server (e.g. `dns.example.com`). This field is required to verify its TLS certificate. DNS-over-TLS is susceptible to man-in-the-middle attacks unless certificates can be verified.
 

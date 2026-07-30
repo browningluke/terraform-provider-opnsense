@@ -20,7 +20,7 @@ func TestAccUnboundForwardResource(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "domain", ""),
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "server_ip", "1.1.1.1"),
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "server_port", "53"),
-					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "forward"),
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "query"),
 					resource.TestCheckResourceAttrSet("opnsense_unbound_forward.test", "id"),
 				),
 			},
@@ -93,7 +93,7 @@ func TestAccUnboundForwardResource_TypeChange(t *testing.T) {
 			{
 				Config: testAccUnboundForwardResourceConfig("", "1.1.1.1", 53),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "forward"),
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "query"),
 				),
 			},
 			{
@@ -105,7 +105,7 @@ func TestAccUnboundForwardResource_TypeChange(t *testing.T) {
 			{
 				Config: testAccUnboundForwardResourceConfig("", "1.1.1.1", 53),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "forward"),
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "query"),
 				),
 			},
 		},

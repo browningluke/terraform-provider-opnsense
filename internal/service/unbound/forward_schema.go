@@ -44,12 +44,12 @@ func forwardResourceSchema() schema.Schema {
 				Required:            true,
 			},
 			"type": schema.StringAttribute{
-				MarkdownDescription: "Type of forward. Available values: `forward`, `dot`. Defaults to `forward`.",
+				MarkdownDescription: "Type of forward. Available values: `query`, `dot`. Defaults to `query`.",
 				Optional:            true,
 				Computed:            true,
-				Default:             stringdefault.StaticString("forward"),
+				Default:             stringdefault.StaticString("query"),
 				Validators: []validator.String{
-					stringvalidator.OneOf("forward", "dot"),
+					stringvalidator.OneOf("query", "dot"),
 				},
 			},
 			"server_ip": schema.StringAttribute{
@@ -97,7 +97,7 @@ func forwardDataSourceSchema() dschema.Schema {
 				Computed:            true,
 			},
 			"type": dschema.StringAttribute{
-				MarkdownDescription: "Type of forward. Available values: `forward`, `dot`.",
+				MarkdownDescription: "Type of forward. Available values: `query`, `dot`.",
 				Computed:            true,
 			},
 			"server_ip": dschema.StringAttribute{
@@ -116,11 +116,29 @@ func forwardDataSourceSchema() dschema.Schema {
 	}
 }
 
+// OPNsense's own enum for this field is "forward"/"dot". The schema exposes
+// "query"/"dot" instead, since this is the opnsense_unbound_forward
+// resource and a "type = forward" attribute on a "forward" resource reads
+// oddly. These two functions are the only place that translates between them.
+func typeToAPI(t string) string {
+	if t == "query" {
+		return "forward"
+	}
+	return t
+}
+
+func typeFromAPI(t string) string {
+	if t == "forward" {
+		return "query"
+	}
+	return t
+}
+
 func convertForwardSchemaToStruct(d *forwardResourceModel) (*unbound.Forward, error) {
 	return &unbound.Forward{
 		Enabled:  tools.BoolToString(d.Enabled.ValueBool()),
 		Domain:   d.Domain.ValueString(),
-		Type:     api.SelectedMap(d.Type.ValueString()),
+		Type:     api.SelectedMap(typeToAPI(d.Type.ValueString())),
 		Server:   d.ServerIP.ValueString(),
 		Port:     tools.Int64ToString(d.ServerPort.ValueInt64()),
 		VerifyCN: d.VerifyCN.ValueString(),
@@ -131,7 +149,7 @@ func convertForwardStructToSchema(d *unbound.Forward) (*forwardResourceModel, er
 	return &forwardResourceModel{
 		Enabled:    types.BoolValue(tools.StringToBool(d.Enabled)),
 		Domain:     types.StringValue(d.Domain),
-		Type:       types.StringValue(d.Type.String()),
+		Type:       types.StringValue(typeFromAPI(d.Type.String())),
 		ServerIP:   types.StringValue(d.Server),
 		ServerPort: types.Int64Value(tools.StringToInt64(d.Port)),
 		VerifyCN:   types.StringValue(d.VerifyCN),
