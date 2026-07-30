@@ -20,6 +20,7 @@ func TestAccUnboundForwardResource(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "domain", ""),
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "server_ip", "1.1.1.1"),
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "server_port", "53"),
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "forward"),
 					resource.TestCheckResourceAttrSet("opnsense_unbound_forward.test", "id"),
 				),
 			},
@@ -70,6 +71,7 @@ func TestAccUnboundForwardResource_DoT(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "server_ip", "1.1.1.1"),
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "server_port", "853"),
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "dot"),
 					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "verify_cn", "cloudflare-dns.com"),
 					resource.TestCheckResourceAttrSet("opnsense_unbound_forward.test", "id"),
 				),
@@ -78,6 +80,33 @@ func TestAccUnboundForwardResource_DoT(t *testing.T) {
 				ResourceName:      "opnsense_unbound_forward.test",
 				ImportState:       true,
 				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccUnboundForwardResource_TypeChange(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccUnboundForwardResourceConfig("", "1.1.1.1", 53),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "forward"),
+				),
+			},
+			{
+				Config: testAccUnboundForwardResourceConfigDoT("", "1.1.1.1", 853, "cloudflare-dns.com"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "dot"),
+				),
+			},
+			{
+				Config: testAccUnboundForwardResourceConfig("", "1.1.1.1", 53),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_unbound_forward.test", "type", "forward"),
+				),
 			},
 		},
 	})
@@ -118,6 +147,7 @@ func testAccUnboundForwardResourceConfigDoT(domain, serverIP string, serverPort 
 	return fmt.Sprintf(`
 resource "opnsense_unbound_forward" "test" {
   domain      = %[1]q
+  type        = "dot"
   server_ip   = %[2]q
   server_port = %[3]d
   verify_cn   = %[4]q

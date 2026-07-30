@@ -8,11 +8,42 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/opnsense-go/pkg/unbound"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
+
+// OPNsense's addForward/setForward endpoints always store type=forward and
+// addDot/setDot always store type=dot, regardless of the "type" value in the
+// request body - the endpoint alone picks the type server-side. So Add/Update
+// must be routed to the matching resource; Get/Delete don't care which one
+// created the entry and always use the Forward variant.
+func toDot(f *unbound.Forward) *unbound.Dot {
+	return &unbound.Dot{
+		Enabled:  f.Enabled,
+		Domain:   f.Domain,
+		Type:     f.Type,
+		Server:   f.Server,
+		Port:     f.Port,
+		VerifyCN: f.VerifyCN,
+	}
+}
+
+func (r *forwardResource) addForward(ctx context.Context, forward *unbound.Forward) (string, error) {
+	if forward.Type.String() == "dot" {
+		return r.client.Unbound().AddDot(ctx, toDot(forward))
+	}
+	return r.client.Unbound().AddForward(ctx, forward)
+}
+
+func (r *forwardResource) updateForward(ctx context.Context, id string, forward *unbound.Forward) error {
+	if forward.Type.String() == "dot" {
+		return r.client.Unbound().UpdateDot(ctx, id, toDot(forward))
+	}
+	return r.client.Unbound().UpdateForward(ctx, id, forward)
+}
 
 // Ensure provider defined types fully satisfy framework interfaces.
 var _ resource.Resource = &forwardResource{}
@@ -73,7 +104,7 @@ func (r *forwardResource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	// Add forward to unbound
-	id, err := r.client.Unbound().AddForward(ctx, forward)
+	id, err := r.addForward(ctx, forward)
 	if err != nil {
 		if id != "" {
 			data.Id = types.StringValue(id)
@@ -165,7 +196,7 @@ func (r *forwardResource) Update(ctx context.Context, req resource.UpdateRequest
 	}
 
 	// Update forward in unbound
-	err = r.client.Unbound().UpdateForward(ctx, data.Id.ValueString(), forward)
+	err = r.updateForward(ctx, data.Id.ValueString(), forward)
 	if err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to create forward, got error: %s", err))
