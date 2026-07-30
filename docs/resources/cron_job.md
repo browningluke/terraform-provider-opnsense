@@ -37,13 +37,13 @@ resource "opnsense_cron_job" "unbound_reload" {
 ### Required
 
 - `command` (String) Command to execute. Must be a command key known to OPNsense (e.g. `firmware poll`, `unbound restart`).
-- `description` (String) Description for this cron job.
 - `hours` (String) Hour(s) to run (cron expression, e.g. `0` or `*/6`).
 - `minutes` (String) Minute(s) to run (cron expression, e.g. `0` or `*/15`).
 
 ### Optional
 
 - `days` (String) Day(s) of month to run (cron expression, e.g. `*` or `1`).
+- `description` (String) Description for this cron job.
 - `enabled` (Boolean) Enable this cron job. Defaults to `true`.
 - `months` (String) Month(s) to run (cron expression, e.g. `*` or `1,6`).
 - `parameters` (String) Optional parameters to pass to the command.
