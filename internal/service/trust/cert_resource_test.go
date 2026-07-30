@@ -44,6 +44,56 @@ func TestAccTrustCertResource(t *testing.T) {
 	})
 }
 
+func TestAccTrustCertDataSource(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccTrustCertDataSourceConfig("Test Cert", "server.example.com", "server.example.com"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("data.opnsense_trust_cert.test", "description", "Test Cert"),
+					resource.TestCheckResourceAttr("data.opnsense_trust_cert.test", "common_name", "server.example.com"),
+					resource.TestCheckResourceAttrSet("data.opnsense_trust_cert.test", "crt"),
+					resource.TestCheckResourceAttrSet("data.opnsense_trust_cert.test", "prv"),
+					resource.TestCheckResourceAttrSet("data.opnsense_trust_cert.test", "crt_payload"),
+				),
+			},
+		},
+	})
+}
+
+func testAccTrustCertDataSourceConfig(description, commonName, altnamesDns string) string {
+	return fmt.Sprintf(`
+resource "opnsense_trust_ca" "test_ca" {
+  description = "Test CA for Cert"
+  action      = "internal"
+  key_type    = "2048"
+  digest      = "sha256"
+  lifetime    = "3650"
+  country     = "US"
+  common_name = "test-ca.example.com"
+}
+
+resource "opnsense_trust_cert" "test" {
+  description   = %[1]q
+  action        = "internal"
+  caref         = opnsense_trust_ca.test_ca.ref_id
+  key_type      = "2048"
+  digest        = "sha256"
+  cert_type     = "server_cert"
+  lifetime      = "397"
+  country       = "US"
+  common_name   = %[2]q
+  altnames_dns  = %[3]q
+}
+
+data "opnsense_trust_cert" "test" {
+  id = opnsense_trust_cert.test.id
+}
+`, description, commonName, altnamesDns)
+}
+
 func testAccTrustCertResourceConfig(description, commonName, altnamesDns string) string {
 	return fmt.Sprintf(`
 resource "opnsense_trust_ca" "test_ca" {

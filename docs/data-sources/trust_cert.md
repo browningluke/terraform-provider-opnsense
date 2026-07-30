@@ -52,6 +52,7 @@ data "opnsense_trust_cert" "example" {
 - `organization` (String)
 - `organizational_unit` (String)
 - `private_key_location` (String)
+- `prv` (String, Sensitive) Base64-encoded PEM private key.
 - `prv_payload` (String, Sensitive)
 - `ref_id` (String) Short hex reference ID used by other OPNsense subsystems.
 - `rfc3280_purpose` (String)

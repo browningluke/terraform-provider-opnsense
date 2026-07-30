@@ -42,6 +42,7 @@ data "opnsense_trust_ca" "example" {
 - `ocsp_uri` (String)
 - `organization` (String)
 - `organizational_unit` (String)
+- `prv` (String, Sensitive) Base64-encoded PEM private key.
 - `prv_payload` (String, Sensitive) Decoded PEM private key (sensitive).
 - `ref_id` (String) Short hex reference ID used by other OPNsense subsystems to reference this CA.
 - `serial` (String) Next serial number.

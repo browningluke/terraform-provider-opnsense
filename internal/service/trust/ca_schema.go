@@ -233,6 +233,11 @@ func caDataSourceSchema() dschema.Schema {
 				Computed:            true,
 				MarkdownDescription: "Base64-encoded PEM certificate body.",
 			},
+			"prv": dschema.StringAttribute{
+				Computed:            true,
+				Sensitive:           true,
+				MarkdownDescription: "Base64-encoded PEM private key.",
+			},
 			"serial": dschema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Next serial number.",
