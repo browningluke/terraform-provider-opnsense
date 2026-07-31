@@ -116,6 +116,15 @@ def main():
     code, out, _ = guest_exec("/usr/local/sbin/opnsense-version", [], max_wait_s=20)
     print(f"opnsense-version exit={code} output={out.strip()}")
 
+    target = os.environ.get("OPNSENSE_TARGET_PATCH")
+    if target and target not in out:
+        sys.exit(
+            f"upgraded to {out.strip()!r} but expected {target}. "
+            "OPNsense released a new patch: verify the test suite against it, "
+            "then bump OPNSENSE_TARGET_PATCH in "
+            ".github/workflows/build-opnsense-image-reusable.yml."
+        )
+
 
 if __name__ == "__main__":
     main()
