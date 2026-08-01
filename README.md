@@ -154,9 +154,9 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Kea/Dhcpv6/Peer`                | ✅        | ✅           |
 | `Kea/Dhcpv6/Reservation`         | ✅        | ✅           |
 | `Kea/Dhcpv6/Subnet`              | ✅        | ✅           |
-| `Monit/Settings`                 | ❌        | ❌           |
-| `Monit/Settings/Alert`           | ❌        | ❌           |
-| `Monit/Settings/Service`         | ❌        | ❌           |
+| `Monit/Settings`                 | ✅        | ✅           |
+| `Monit/Settings/Alert`           | ✅        | ✅           |
+| `Monit/Settings/Service`         | ✅        | ✅           |
 | `Monit/Settings/Test`            | ❌        | ❌           |
 | `Openvpn/Client Overwrites`      | ✅        | ✅           |
 | `Openvpn/Instances`              | ✅        | ✅           |
