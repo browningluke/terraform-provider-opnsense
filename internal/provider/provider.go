@@ -6,16 +6,17 @@ import (
 	"strconv"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/cron"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/diagnostics"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/dnsmasq"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/firewall"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/interfaces"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/ipsec"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/cron"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/kea"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/openvpn"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/quagga"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/routes"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/syslog"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/trust"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/unbound"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/wireguard"
@@ -300,6 +301,7 @@ func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 		openvpn.Resources(ctx),
 		quagga.Resources(ctx),
 		routes.Resources(ctx),
+		syslog.Resources(ctx),
 		trust.Resources(ctx),
 		unbound.Resources(ctx),
 		wireguard.Resources(ctx),
@@ -324,6 +326,7 @@ func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.
 		openvpn.DataSources(ctx),
 		quagga.DataSources(ctx),
 		routes.DataSources(ctx),
+		syslog.DataSources(ctx),
 		trust.DataSources(ctx),
 		unbound.DataSources(ctx),
 		wireguard.DataSources(ctx),
