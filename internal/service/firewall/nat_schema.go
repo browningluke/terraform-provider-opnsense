@@ -40,6 +40,8 @@ type natResourceModel struct {
 	Destination *firewallLocation `tfsdk:"destination"`
 	Target      *firewallTarget   `tfsdk:"target"`
 
+	StaticPort types.Bool `tfsdk:"static_port"`
+
 	Log         types.Bool   `tfsdk:"log"`
 	Description types.String `tfsdk:"description"`
 
@@ -189,6 +191,12 @@ func natResourceSchema() schema.Schema {
 					},
 				},
 			},
+			"static_port": schema.BoolAttribute{
+				MarkdownDescription: "When enabled, prevents the firewall from modifying the source port on TCP and UDP packets. Defaults to `false`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             booldefault.StaticBool(false),
+			},
 			"log": schema.BoolAttribute{
 				MarkdownDescription: "Log packets that are handled by this rule. Defaults to `false`.",
 				Optional:            true,
@@ -297,6 +305,10 @@ func natDataSourceSchema() dschema.Schema {
 					},
 				},
 			},
+			"static_port": dschema.BoolAttribute{
+				MarkdownDescription: "When enabled, prevents the firewall from modifying the source port on TCP and UDP packets.",
+				Computed:            true,
+			},
 			"log": dschema.BoolAttribute{
 				MarkdownDescription: "Log packets that are handled by this rule.",
 				Computed:            true,
@@ -325,6 +337,7 @@ func convertNATSchemaToStruct(d *natResourceModel) (*firewall.NAT, error) {
 		DestinationInvert: tools.BoolToString(d.Destination.Invert.ValueBool()),
 		Target:            d.Target.IP.ValueString(),
 		TargetPort:        d.Target.Port.ValueString(),
+		StaticPort:        tools.BoolToString(d.StaticPort.ValueBool()),
 		Log:               tools.BoolToString(d.Log.ValueBool()),
 		Description:       d.Description.ValueString(),
 	}, nil
@@ -352,6 +365,7 @@ func convertNATStructToSchema(d *firewall.NAT) (*natResourceModel, error) {
 			IP:   types.StringValue(d.Target),
 			Port: types.StringValue(d.TargetPort),
 		},
+		StaticPort:  types.BoolValue(tools.StringToBool(d.StaticPort)),
 		Log:         types.BoolValue(tools.StringToBool(d.Log)),
 		Description: tools.StringOrNull(d.Description),
 	}, nil

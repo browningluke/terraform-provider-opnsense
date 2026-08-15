@@ -28,6 +28,7 @@ Network Address Translation (abbreviated to NAT) is a way to separate external a
 - `protocol` (String) Choose which IP protocol this rule should match.
 - `sequence` (Number) Specify the order of this NAT rule.
 - `source` (Attributes) (see [below for nested schema](#nestedatt--source))
+- `static_port` (Boolean) When enabled, prevents the firewall from modifying the source port on TCP and UDP packets.
 - `target` (Attributes) (see [below for nested schema](#nestedatt--target))
 
 <a id="nestedatt--destination"></a>
