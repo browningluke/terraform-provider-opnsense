@@ -18,6 +18,7 @@ import (
 var _ resource.Resource = &dhcpv4SubnetResource{}
 var _ resource.ResourceWithConfigure = &dhcpv4SubnetResource{}
 var _ resource.ResourceWithImportState = &dhcpv4SubnetResource{}
+var _ resource.ResourceWithUpgradeState = &dhcpv4SubnetResource{}
 
 func newDhcpv4SubnetResource() resource.Resource {
 	return &dhcpv4SubnetResource{}
@@ -171,4 +172,41 @@ func (r *dhcpv4SubnetResource) Delete(ctx context.Context, req resource.DeleteRe
 
 func (r *dhcpv4SubnetResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}
+
+func (r *dhcpv4SubnetResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	schemaV0 := dhcpv4SubnetResourceSchemaV0()
+	return map[int64]resource.StateUpgrader{
+		0: {
+			PriorSchema: &schemaV0,
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				var oldState dhcpv4SubnetResourceModelV0
+				resp.Diagnostics.Append(req.State.Get(ctx, &oldState)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				newState := &dhcpv4SubnetResourceModel{
+					Subnet:            oldState.Subnet,
+					Pools:             oldState.Pools,
+					ValidLifetime:     types.Int64Null(),
+					MatchClientId:     oldState.MatchClientId,
+					AutoCollect:       oldState.AutoCollect,
+					Routers:           oldState.Routers,
+					StaticRoutes:      oldState.StaticRoutes,
+					DomainNameServers: oldState.DomainNameServers,
+					DomainName:        oldState.DomainName,
+					DomainSearch:      oldState.DomainSearch,
+					NTPServers:        oldState.NTPServers,
+					TimeServers:       oldState.TimeServers,
+					NextServer:        oldState.NextServer,
+					TFTPServer:        oldState.TFTPServer,
+					TFTPBootfile:      oldState.TFTPBootfile,
+					Description:       oldState.Description,
+					Id:                oldState.Id,
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, newState)...)
+			},
+		},
+	}
 }

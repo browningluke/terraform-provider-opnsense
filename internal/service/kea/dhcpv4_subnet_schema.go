@@ -6,6 +6,7 @@ import (
 
 	"github.com/browningluke/opnsense-go/pkg/kea"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -21,6 +23,8 @@ import (
 type dhcpv4SubnetResourceModel struct {
 	Subnet types.String `tfsdk:"subnet"`
 	Pools  types.Set    `tfsdk:"pools"`
+
+	ValidLifetime types.Int64 `tfsdk:"valid_lifetime"`
 
 	MatchClientId types.Bool `tfsdk:"match_client_id"`
 
@@ -48,6 +52,7 @@ type dhcpv4SubnetResourceModel struct {
 func dhcpv4SubnetResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "Configure DHCPv4 subnets for Kea.",
+		Version:             1,
 
 		Attributes: map[string]schema.Attribute{
 			"subnet": schema.StringAttribute{
@@ -60,6 +65,13 @@ func dhcpv4SubnetResourceSchema() schema.Schema {
 				Computed:            true,
 				ElementType:         types.StringType,
 				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
+			},
+			"valid_lifetime": schema.Int64Attribute{
+				MarkdownDescription: "Valid lifetime for leases in this subnet, in seconds. When omitted, the global Kea DHCPv4 valid lifetime is inherited.",
+				Optional:            true,
+				Validators: []validator.Int64{
+					int64validator.AtLeast(0),
+				},
 			},
 			"match_client_id": schema.BoolAttribute{
 				MarkdownDescription: "By default, KEA uses client-identifiers instead of MAC addresses to locate clients, disabling this option changes back to matching on MAC address which is used by most dhcp implementations. Defaults to `true`.",
@@ -191,6 +203,10 @@ func dhcpv4SubnetDataSourceSchema() dschema.Schema {
 				Computed:            true,
 				ElementType:         types.StringType,
 			},
+			"valid_lifetime": dschema.Int64Attribute{
+				MarkdownDescription: "Valid lifetime for leases in this subnet, in seconds.",
+				Computed:            true,
+			},
 			"match_client_id": dschema.BoolAttribute{
 				MarkdownDescription: "Whether to match on client-identifier.",
 				Computed:            true,
@@ -274,8 +290,14 @@ func convertDhcpv4SubnetSchemaToStruct(d *dhcpv4SubnetResourceModel) (*kea.Subne
 			route.RouterIp.ValueString())
 	}
 
+	validLifetime := ""
+	if !d.ValidLifetime.IsNull() && !d.ValidLifetime.IsUnknown() {
+		validLifetime = tools.Int64ToString(d.ValidLifetime.ValueInt64())
+	}
+
 	return &kea.SubnetV4{
 		Subnet:                d.Subnet.ValueString(),
+		ValidLifetime:         validLifetime,
 		NextServer:            d.NextServer.ValueString(),
 		Pools:                 tools.SetToString(d.Pools, "\n"),
 		MatchClientId:         tools.BoolToString(d.MatchClientId.ValueBool()),
@@ -299,6 +321,7 @@ func convertDhcpv4SubnetStructToSchema(d *kea.SubnetV4) (*dhcpv4SubnetResourceMo
 	model := &dhcpv4SubnetResourceModel{
 		Subnet:            types.StringValue(d.Subnet),
 		Pools:             tools.StringSliceToSet(strings.Split(d.Pools, "\n")),
+		ValidLifetime:     tools.StringToInt64Null(d.ValidLifetime),
 		MatchClientId:     types.BoolValue(tools.StringToBool(d.MatchClientId)),
 		AutoCollect:       types.BoolValue(tools.StringToBool(d.OptionDataAutoCollect)),
 		Routers:           tools.StringSliceToSet(d.OptionData.Routers),
@@ -346,4 +369,37 @@ func convertDhcpv4SubnetStructToSchema(d *kea.SubnetV4) (*dhcpv4SubnetResourceMo
 	model.StaticRoutes = v
 
 	return model, nil
+}
+
+// dhcpv4SubnetResourceModelV0 describes the resource state before valid_lifetime was added.
+type dhcpv4SubnetResourceModelV0 struct {
+	Subnet types.String `tfsdk:"subnet"`
+	Pools  types.Set    `tfsdk:"pools"`
+
+	MatchClientId types.Bool `tfsdk:"match_client_id"`
+	AutoCollect   types.Bool `tfsdk:"auto_collect"`
+
+	Routers      types.Set `tfsdk:"routers"`
+	StaticRoutes types.Set `tfsdk:"static_routes"`
+
+	DomainNameServers types.Set    `tfsdk:"dns_servers"`
+	DomainName        types.String `tfsdk:"domain_name"`
+	DomainSearch      types.Set    `tfsdk:"domain_search"`
+
+	NTPServers  types.Set `tfsdk:"ntp_servers"`
+	TimeServers types.Set `tfsdk:"time_servers"`
+
+	NextServer   types.String `tfsdk:"next_server"`
+	TFTPServer   types.String `tfsdk:"tftp_server"`
+	TFTPBootfile types.String `tfsdk:"tftp_bootfile"`
+
+	Description types.String `tfsdk:"description"`
+	Id          types.String `tfsdk:"id"`
+}
+
+func dhcpv4SubnetResourceSchemaV0() schema.Schema {
+	previous := dhcpv4SubnetResourceSchema()
+	previous.Version = 0
+	delete(previous.Attributes, "valid_lifetime")
+	return previous
 }

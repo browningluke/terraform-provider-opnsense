@@ -18,6 +18,7 @@ func TestAccKeaDhcpv4SubnetResource(t *testing.T) {
 				Config: testAccDhcpv4SubnetResourceConfig(
 					"192.168.200.0/24",
 					"192.168.200.100 - 192.168.200.200",
+					86400,
 					false,
 					"192.168.200.1",
 					"8.8.8.8",
@@ -27,6 +28,7 @@ func TestAccKeaDhcpv4SubnetResource(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "subnet", "192.168.200.0/24"),
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "pools.#", "1"),
 					resource.TestCheckTypeSetElemAttr("opnsense_kea_dhcpv4_subnet.test", "pools.*", "192.168.200.100 - 192.168.200.200"),
+					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "valid_lifetime", "86400"),
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "match_client_id", "true"),
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "auto_collect", "false"),
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "routers.#", "1"),
@@ -48,6 +50,7 @@ func TestAccKeaDhcpv4SubnetResource(t *testing.T) {
 				Config: testAccDhcpv4SubnetResourceConfig(
 					"192.168.200.0/24",
 					"192.168.200.100 - 192.168.200.150",
+					43200,
 					false,
 					"192.168.200.1",
 					"8.8.8.8",
@@ -56,6 +59,7 @@ func TestAccKeaDhcpv4SubnetResource(t *testing.T) {
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "pools.#", "1"),
 					resource.TestCheckTypeSetElemAttr("opnsense_kea_dhcpv4_subnet.test", "pools.*", "192.168.200.100 - 192.168.200.150"),
+					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "valid_lifetime", "43200"),
 					resource.TestCheckResourceAttr("opnsense_kea_dhcpv4_subnet.test", "description", "Test Kea DHCPv4 Subnet Updated"),
 				),
 			},
@@ -64,15 +68,16 @@ func TestAccKeaDhcpv4SubnetResource(t *testing.T) {
 	})
 }
 
-func testAccDhcpv4SubnetResourceConfig(subnet, pool string, autoCollect bool, router, dns, description string) string {
+func testAccDhcpv4SubnetResourceConfig(subnet, pool string, validLifetime int, autoCollect bool, router, dns, description string) string {
 	return fmt.Sprintf(`
 resource "opnsense_kea_dhcpv4_subnet" "test" {
-  subnet       = %[1]q
-  pools        = [%[2]q]
-  auto_collect = %[3]t
-  routers      = [%[4]q]
-  dns_servers  = [%[5]q]
-  description  = %[6]q
+  subnet         = %[1]q
+  pools          = [%[2]q]
+  valid_lifetime = %[3]d
+  auto_collect   = %[4]t
+  routers        = [%[5]q]
+  dns_servers    = [%[6]q]
+  description    = %[7]q
 }
-`, subnet, pool, autoCollect, router, dns, description)
+`, subnet, pool, validLifetime, autoCollect, router, dns, description)
 }

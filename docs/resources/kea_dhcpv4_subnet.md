@@ -102,6 +102,7 @@ resource "opnsense_kea_dhcpv4_subnet" "example" {
 - `tftp_bootfile` (String) Boot filename to request. Defaults to `""`.
 - `tftp_server` (String) TFTP server address or fqdn. Defaults to `""`.
 - `time_servers` (Set of String) Set of RFC 868 time servers available to the client. Defaults to `[]`.
+- `valid_lifetime` (Number) Valid lifetime for leases in this subnet, in seconds. When omitted, the global Kea DHCPv4 valid lifetime is inherited.
 
 ### Read-Only
 

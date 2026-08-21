@@ -41,6 +41,7 @@ data "opnsense_kea_dhcpv4_subnet" "example" {
 - `tftp_bootfile` (String) Boot filename to request.
 - `tftp_server` (String) TFTP server address or fqdn.
 - `time_servers` (Set of String) Set of RFC 868 time servers available to the client.
+- `valid_lifetime` (Number) Valid lifetime for leases in this subnet, in seconds.
 
 <a id="nestedatt--static_routes"></a>
 ### Nested Schema for `static_routes`
