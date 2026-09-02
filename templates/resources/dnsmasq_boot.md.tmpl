@@ -1,0 +1,34 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.RenderedProviderName}}"
+subcategory: Dnsmasq
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+## Example Usage
+
+{{ tffile (printf "%s%s%s" "examples/resources/" .Name "/resource.tf") }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Import
+
+In Terraform v1.5.0 and later, use an [`import` block](https://developer.hashicorp.com/terraform/language/import) to import {{.Name}} using the `id`. For example:
+Add the id column to get the UUID of the domain at the domain list view.
+
+```terraform
+import {
+  to = {{.Name}}.example
+  id = "<opnsense-resource-id>"
+}
+```
+
+Using `terraform import`, import {{.Name}} using the `id`. For example:
+
+```console
+% terraform import {{.Name}}.example <opnsense-resource-id>
+```

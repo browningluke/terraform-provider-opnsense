@@ -41,21 +41,22 @@ resource "opnsense_dnsmasq_host" "test_xl" {
 
 ### Required
 
-- `hostname` (String) Name of the host, without the domain part.
-- `ip_addresses` (Set of String) IP addresses of the host.
+- `hostname` (String) Name of the host, without the domain part. Use "*" to create a wildcard entry.
+- `ip_addresses` (Set of String) IP addresses of the host, e.g. 192.168.100.100 or fd00:abcd::1. Can be multiple IPv4 and IPv6 addresses for dual stack configurations. Setting multiple addresses will automatically assign the best match based on the subnet of the interface receiving the DHCP Discover.
 
 ### Optional
 
-- `alias_records` (Set of String) Alias records of the host.
-- `client_id` (String) Client ID of the host.
-- `cname_records` (Set of String) CNAME records of the host.
-- `comment` (String) Optional comment.
-- `description` (String) Optional description.
-- `domain` (String) Domain of the host.
-- `hardware_addresses` (Set of String) Hardware addresses of the host.
-- `is_ignored` (Boolean) Whether DHCP packet is ignored for this host.
-- `is_local_domain` (Boolean) Whether this is a local domain.
-- `tag` (String) UUID of the dnsmasq tag to associate with this host. Defaults to `""`.
+- `alias_records` (Set of String) Adds additional static A, AAAA and PTR records for the given alternative names (FQDN). Please note that these records are only created if IP addresses are configured in this host entry.
+- `client_id` (String) Match the identifier of the client, e.g., DUID for DHCPv6. Setting the special character "*" will ignore the client identifier for DHCPv4 leases if a client offers both as choice.
+- `cname_records` (Set of String) Adds additional CNAME records for the given alternative names (FQDN). Useful if this host entry has dynamic IPv4 and partial IPv6 addresses, as the CNAME record will point to the name instead of static IP addresses.
+- `comment` (String) You may enter a comment here for your reference (not parsed)
+- `description` (String) You may enter a description here for your reference (not parsed)
+- `domain` (String) Domain of the host, e.g. example.com
+- `hardware_addresses` (Set of String) Match the hardware address of the client. Can be multiple addresses, e.g., if the client has multiple network cards. Though keep in mind that Dnsmasq cannot assume which address is the correct one when multiple send DHCP Discover at the same time.
+- `is_ignored` (Boolean) Ignore any DHCP packets of this host. Useful if it should get served by a different DHCP server.
+- `is_local_domain` (Boolean) Set the above domain as local. This will configure this DNS server as authoritative; it will not forward queries to any upstream servers for this domain.
+- `lease_time` (Number) Defines how long the addresses (leases) given out by the server are valid (in seconds). Set 0 for infinite.
+- `tag` (String) Optional tag to set for requests matching this range which can be used to selectively match DHCP options. Can be left empty if options with an interface tag exist, since the client automatically receives this tag based on the interface receiving the DHCP Discover.
 
 ### Read-Only
 

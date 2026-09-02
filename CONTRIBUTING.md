@@ -169,6 +169,151 @@ If the OPNsense API endpoint you're implementing belongs to an existing service 
 3. **Implement all required interfaces** for your resource/data source
 4. **Add comprehensive acceptance tests** (using the [Terraform Provider Framework](https://developer.hashicorp.com/terraform/plugin/framework/acctests))
 
+#### Handle singleton resources like service settings
+
+Some OPNsense API endpoints represent singleton configuration objects. These objects already exist as part of the service configuration and cannot be created or destroyed independently. In Terraform, they are therefore represented as singleton resources that must be imported before they can be managed.
+
+1. **Special implementation case for the schema**:
+
+```go
+// settingsResourceModel describes the resource data model.
+// This is a SINGLETON resource — it manages existing upstream configuration
+// that cannot be created or destroyed via Terraform.
+type settingsResourceModel struct {
+	Id    types.String `tfsdk:"id"`
+	Value types.Bool   `tfsdk:"value"`
+}
+
+func settingsResourceSchema() schema.Schema {
+	return schema.Schema{
+		MarkdownDescription: "Manages Service general settings. This is a singleton resource that manages existing upstream configuration.\n\n" +
+			"**Important:** This resource must be imported before it can be managed:\n" +
+			"```bash\n" +
+			"terraform import opnsense_service_settings.settings service_settings\n" +
+			"```\n\n" +
+			"After importing, you can manage the configuration with `terraform apply`. " +
+			"Running `terraform destroy` will remove the resource from state but will NOT modify the upstream configuration.",
+
+		Version: 1,
+
+		Attributes: map[string]schema.Attribute{
+			"id": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Always set to `service_settings`. Use this value when importing: `terraform import opnsense_service_settings.settings service_settings`",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
+                Validators: []validator.String{
+					stringvalidator.OneOf("service_settings"),
+				},
+			},
+            // normal configuration for the other attributes
+		},
+	}
+}
+```
+
+* Add all attributes as usal
+* Add a special `MarkdownDescription` block for the schema to describe the usage of the singleton and the import. 
+* Add a special `MarkdownDescription` block for the `id` to describe the special import name for the singleton (e.g. `service_settings`)
+* The `id` attribute must be constrained to the fixed singleton import ID. This prevents a state value that does not represent the singleton resource. 
+
+Implementation example: `internal/service/wireguard/settings_schema.go`.
+
+2. **Special implementation for the resource**:
+
+```go
+[...]
+
+// settingsResource defines the resource implementation.
+// This is a SINGLETON resource - it manages existing upstream configuration
+// that cannot be created or destroyed via Terraform.
+type settingsResource struct {
+	client opnsense.Client
+}
+
+[...]
+
+// Create is blocked for singleton resources. Users must import the resource first.
+func (r *settingsResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var data *settingsResourceModel
+
+	// Read Terraform plan data into the model
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// IMPORTANT: Block resource creation with a clear error message
+	resp.Diagnostics.AddError(
+		"Cannot Create Singleton Resource",
+		"This resource manages existing service configuration that cannot be created or destroyed.\n\n"+
+			"To manage this resource, you must import it first:\n"+
+			"  terraform import opnsense_service_settings.<name> service_settings\n\n"+
+			"After importing, you can manage the configuration with terraform apply.",
+	)
+}
+
+[...]
+
+// Delete removes the resource from Terraform state but does NOT modify upstream.
+// This is the key behavior for singleton resources - they can't be destroyed.
+func (r *settingsResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data *settingsResourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Log a warning that the upstream configuration is not being deleted
+	tflog.Warn(ctx,
+		"Singleton resource removed from Terraform state. "+
+			"The service configuration remains unchanged and will not be deleted. "+
+			"To manage this resource again, re-import it with: "+
+			"terraform import opnsense_service_settings.<name> service_settings")
+
+	// Add a warning to the user output
+	resp.Diagnostics.AddWarning(
+		"Singleton Resource Removed From State Only",
+		"This resource has been removed from Terraform state, but the "+
+			"Service configuration has NOT been deleted or modified. The settings "+
+			"remain active in the upstream system.\n\n"+
+			"To manage this resource again in the future, re-import it:\n"+
+			"  terraform import opnsense_service_settings.<name> service_settings",
+	)
+
+	// Terraform automatically removes the resource from state
+	// We do NOT make any API calls to delete/reset upstream configuration
+}
+
+// ImportState imports the singleton resource using the fixed ID "service_settings".
+func (r *settingsResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	// Validate that the import ID is "service_settings"
+	if req.ID != "service_settings" {
+		resp.Diagnostics.AddError(
+			"Invalid Import ID",
+			"This is a singleton resource and must be imported using the ID 'service_settings'.\n\n"+
+				"Usage:\n"+
+				"  terraform import opnsense_service_settings.<name> service_settings\n\n"+
+				fmt.Sprintf("You provided: %q", req.ID),
+		)
+		return
+	}
+
+	// Set the ID attribute in state
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), req.ID)...)
+
+	tflog.Info(ctx, "imported service settings resource", map[string]any{"id": req.ID})
+}
+```
+
+Implementation example: `internal/service/wireguard/settings_resource.go`.
+
+3. **Add documentation for the singleton resource** Check `templates/resources/wireguard_settings.md.tmpl` and `examples/resources/opnsense_wireguard_settings/resource.tf`
+
+
 #### Creating a New Service
 
 If you're implementing an OPNsense API endpoint that doesn't fit into any existing service (e.g., adding support for a new OPNsense module):
@@ -318,9 +463,9 @@ $ TF_ACC=1 go test -v -p 1 ./internal/service/firewall/ -run TestAccFirewallFilt
 
 > **Note:** The `-p 1` flag is **required** to run tests serially, avoiding conflicts from concurrent access to the shared OPNsense instance.
 
-### Writing Tests
+### Writing Resource Tests
 
-Acceptance tests should follow this pattern:
+Resource acceptance tests should follow this pattern:
 
 ```go
 func TestAccResourceName(t *testing.T) {
@@ -366,6 +511,90 @@ All tests should cover:
 > The OPNsense VM configured in the automated test pipeline only has a **single interface configured (`wan`)**.
 >
 > This may affect your test expectations or cause differences between your local tests (which may have multiple interfaces) and CI tests. When writing acceptance tests that reference interfaces, be aware of this limitation and ensure your tests work with the minimal `wan`-only configuration.
+
+### Writing DataSource Tests
+
+DataSource acceptance tests follow a slightly different approach for implementing the tests:
+
+```go
+func TestAccResourceDataSource(t *testing.T) {
+	acctest.AccPreCheck(t)
+	client := acctest.Client(t)
+
+    // Set resource values
+	const (
+		testValue1 = "value_1"
+		testValue2 = "VaLuE2"
+	)
+
+    // Create resource for opnsense-go api
+	apiResource := &service.Resource{
+        Value1: testValue1,
+        Value2: testValue2,
+	}
+
+    // Create test fixture via opnsense-go and register it for auto deletion after testing
+	id := acctest.CreateDataSourceTestResource(t, acctest.ResourceLifecycle[*service.Resource]{
+		Create: client.Service().AddResource,
+		Delete: client.Service().DeleteResource,
+	}, apiResource)
+
+    // Tests all values you set in your resource
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccResourceDataSourceConfig(id),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("data.opnsense_service_resource.test", "value1", testValue1),
+					resource.TestCheckResourceAttr("data.opnsense_service_resource.test", "value2", testValue2),
+				),
+			},
+		},
+	})
+
+    // No deletion needed, the test environment will delete the test resource
+}
+
+func testAccResourceDataSourceConfig(id string) string {
+    // In most cases the id is enough, if you need to add filter add them to your tests
+	return fmt.Sprintf(`
+data "opnsense_service_resource" "test" {
+  id = "%s"
+}
+`, id)
+}
+```
+
+DataSource tests should cover:
+1. **Create test fixture** – Create the object required by the test directly through the opnsense-go API.
+2. **Read** - Verify attributes are correctly read.
+
+Data Sources do not manage the lifecycle of an OPNsense object. Therefore, acceptance tests do not test **Update**, **Delete**, or **Import** operations.
+
+When you allow multiple fields for filters, add more tests for the filter scenarios of the resource.
+
+> [!IMPORTANT]
+> The OPNsense VM configured in the automated test pipeline only has a **single interface configured (`wan`)**.
+>
+> This may affect your test expectations or cause differences between your local tests (which may have multiple interfaces) and CI tests. When writing acceptance tests that reference interfaces, be aware of this limitation and ensure your tests work with the minimal `wan`-only configuration.
+
+
+### Writing Schema Conversion Tests
+
+Conversion tests should focus on transformations that cannot be sufficiently validated through acceptance tests, especially special value mappings, normalization, nested structures, null handling, and API-specific representations.
+
+```go
+func TestYourConversionScenario(t *testing.T) {
+	model, err := convertResourceStructToSchema(&upstream.Range{
+		SpecialValue1: "special-conversion-value",
+		SpecialValue2: "more-special-case ",
+	})
+	require.NoError(t, err)
+	assert.True(t, model.ConversionResult.IsNull())
+	assert.Equal(t, types.StringValue("super-special-result"), model.SpecialResultCase)
+}
+```
 
 ## Code Standards
 

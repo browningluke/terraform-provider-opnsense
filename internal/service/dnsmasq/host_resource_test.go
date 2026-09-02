@@ -80,11 +80,12 @@ func TestAccDnsmasqHostResource_WithOptionalFields(t *testing.T) {
 					false,
 					"192.168.1.100",
 					[]string{"alias.test.local"},
-					[]string{"alternate.test.local"},
+					[]string{"alternate_test_local"},
 					[]string{"aa:bb:cc:dd:ee:ff"},
 					"00:03:00:01:aa:bb:cc:dd:ee:ff",
 					"Test description",
 					"Test comment",
+					"",
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "hostname", "optfieldhost"),
@@ -96,7 +97,7 @@ func TestAccDnsmasqHostResource_WithOptionalFields(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "alias_records.#", "1"),
 					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "alias_records.*", "alias.test.local"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "cname_records.#", "1"),
-					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "cname_records.*", "alternate.test.local"),
+					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "cname_records.*", "alternate_test_local"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "hardware_addresses.#", "1"),
 					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "hardware_addresses.*", "aa:bb:cc:dd:ee:ff"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "client_id", "00:03:00:01:aa:bb:cc:dd:ee:ff"),
@@ -120,23 +121,25 @@ func TestAccDnsmasqHostResource_WithOptionalFields(t *testing.T) {
 					true,
 					"192.168.1.100",
 					[]string{"alias.test.local"},
-					[]string{"alternate.test.local", "alternate2.test.local"},
+					[]string{"alternate_test_local", "alternate2_test_local"},
 					[]string{"aa:bb:cc:dd:ee:ff", "11:22:33:44:55:66"},
 					"00:03:00:01:aa:bb:cc:dd:ee:ff",
 					"Updated description",
 					"Updated comment",
+					"3600",
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "is_local_domain", "false"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "is_ignored", "true"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "cname_records.#", "2"),
-					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "cname_records.*", "alternate.test.local"),
-					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "cname_records.*", "alternate2.test.local"),
+					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "cname_records.*", "alternate_test_local"),
+					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "cname_records.*", "alternate2_test_local"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "hardware_addresses.#", "2"),
 					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "hardware_addresses.*", "aa:bb:cc:dd:ee:ff"),
 					resource.TestCheckTypeSetElemAttr("opnsense_dnsmasq_host.test", "hardware_addresses.*", "11:22:33:44:55:66"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "description", "Updated description"),
 					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "comment", "Updated comment"),
+					resource.TestCheckResourceAttr("opnsense_dnsmasq_host.test", "lease_time", "3600"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -171,7 +174,7 @@ func testAccDnsmasqHostResourceConfigOptional(
 	isLocalDomain, isIgnored bool,
 	ip string,
 	aliasRecords, cnameRecords, hwAddresses []string,
-	clientID, description, comment string,
+	clientID, description, comment, lease_time string,
 ) string {
 	aliasRecordsLine := ""
 	if len(aliasRecords) > 0 {
@@ -185,6 +188,10 @@ func testAccDnsmasqHostResourceConfigOptional(
 	if len(hwAddresses) > 0 {
 		hwAddressesLine = fmt.Sprintf("  hardware_addresses  = [\"%s\"]\n", strings.Join(hwAddresses, `", "`))
 	}
+	leaseTimeLine := ""
+	if len(lease_time) > 0 {
+		leaseTimeLine = fmt.Sprintf("  lease_time  = %s\n", lease_time)
+	}
 	return fmt.Sprintf(`
 resource "opnsense_dnsmasq_host" "test" {
   hostname        = %[1]q
@@ -192,9 +199,13 @@ resource "opnsense_dnsmasq_host" "test" {
   is_local_domain = %[3]t
   is_ignored      = %[4]t
   ip_addresses    = [%[5]q]
-%[6]s%[7]s%[8]s  client_id       = %[9]q
+  %[6]s
+	%[7]s
+	%[8]s  
+  client_id       = %[9]q
   description     = %[10]q
   comment         = %[11]q
+	%[12]s
 }
-`, hostname, domain, isLocalDomain, isIgnored, ip, aliasRecordsLine, cnameRecordsLine, hwAddressesLine, clientID, description, comment)
+`, hostname, domain, isLocalDomain, isIgnored, ip, aliasRecordsLine, cnameRecordsLine, hwAddressesLine, clientID, description, comment, leaseTimeLine)
 }

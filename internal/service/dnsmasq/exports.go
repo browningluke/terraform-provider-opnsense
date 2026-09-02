@@ -10,11 +10,23 @@ import (
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewHostResource,
+		newDomainResource,
+		newOptionResource,
+		newRangeResource,
+		newTagResource,
+		newSettingsResource,
+		newBootResource,
 	}
 }
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		newClientDataSource,
+		newHostDataSource,
+		newDomainDataSource,
+		newOptionDataSource,
+		newRangeDataSource,
+		newTagDataSource,
+		newSettingsDataSource,
+		newBootDataSource,
 	}
 }

@@ -12,6 +12,8 @@ import (
 	"os"
 	"testing"
 
+	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/browningluke/terraform-provider-opnsense/internal/provider"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 )
@@ -23,6 +25,59 @@ const (
 var (
 	ProtoV6ProviderFactories map[string]func() (tfprotov6.ProviderServer, error) = protoV6ProviderFactoriesInit(context.Background(), ProviderName)
 )
+
+// Builds a OPNsense-go client which can be used to create new resources at OPNsense in front of tests.
+func Client(t *testing.T) opnsense.Client {
+	t.Helper()
+
+	apiClient := api.NewClient(api.Options{
+		Uri:           os.Getenv("OPNSENSE_URI"),
+		APIKey:        os.Getenv("OPNSENSE_API_KEY"),
+		APISecret:     os.Getenv("OPNSENSE_API_SECRET"),
+		AllowInsecure: os.Getenv("OPNSENSE_ALLOW_INSECURE") == "true",
+		Logger:        log.Default(),
+	})
+
+	return opnsense.NewClient(apiClient)
+}
+
+// Cleanup handling for data-source based tests to auto-clean all test fixture resources.
+func cleanup(t *testing.T, cleanup func() error) {
+	t.Helper()
+
+	t.Cleanup(func() {
+		if err := cleanup(); err != nil {
+			t.Errorf("acceptance test cleanup failed: %v", err)
+		}
+	})
+}
+
+type ResourceLifecycle[T any] struct {
+	Create func(context.Context, T) (string, error)
+	Delete func(context.Context, string) error
+}
+
+// Data Source testing lifecycle helper methode to create the fixture resource
+// and register the auto cleanup after the test execution.
+func CreateDataSourceTestResource[T any](
+	t *testing.T,
+	lifecycle ResourceLifecycle[T],
+	resource T,
+) string {
+	ctx := context.Background()
+	t.Helper()
+
+	id, err := lifecycle.Create(ctx, resource)
+	if err != nil {
+		t.Fatalf("failed to create test resource: %v", err)
+	}
+
+	cleanup(t, func() error {
+		return lifecycle.Delete(ctx, id)
+	})
+
+	return id
+}
 
 func protoV6ProviderFactoriesInit(ctx context.Context, providerNames ...string) map[string]func() (tfprotov6.ProviderServer, error) {
 	factories := make(map[string]func() (tfprotov6.ProviderServer, error))

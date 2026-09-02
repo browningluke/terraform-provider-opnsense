@@ -2,9 +2,11 @@ package validators
 
 import (
 	"context"
+	"net"
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-framework-validators/helpers/validatordiag"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"regexp"
 )
 
 type ipOrCIDRValidator struct{}
@@ -63,4 +65,36 @@ func (validator cidrValidator) ValidateString(ctx context.Context, request valid
 
 func CIDR() validator.String {
 	return cidrValidator{}
+}
+
+type ipValidator struct{}
+
+func (validator ipValidator) Description(_ context.Context) string {
+	return "must be a valid IPv4 or IPv6 address (e.g. 192.168.0.1, 2001:db8::1)"
+}
+
+func (validator ipValidator) MarkdownDescription(ctx context.Context) string {
+	return validator.Description(ctx)
+}
+
+func (validator ipValidator) ValidateString(ctx context.Context, request validator.StringRequest, response *validator.StringResponse) {
+	if request.ConfigValue.IsNull() || request.ConfigValue.IsUnknown() {
+		return
+	}
+
+	value := request.ConfigValue.ValueString()
+
+	ip := net.ParseIP(value)
+	if ip == nil {
+		response.Diagnostics.Append(validatordiag.InvalidAttributeValueDiagnostic(
+			request.Path,
+			validator.Description(ctx),
+			value,
+		))
+		return
+	}
+}
+
+func IP() validator.String {
+	return ipValidator{}
 }
