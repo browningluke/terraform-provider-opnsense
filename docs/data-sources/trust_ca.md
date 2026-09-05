@@ -31,7 +31,7 @@ data "opnsense_trust_ca" "example" {
 - `city` (String)
 - `common_name` (String) Common name (CN) of the CA certificate.
 - `country` (String) ISO 3166-1 alpha-2 country code.
-- `crt` (String) Base64-encoded PEM certificate body.
+- `crt` (String) PEM certificate body (not base64-encoded).
 - `crt_payload` (String) Decoded PEM certificate body.
 - `description` (String) Description of the CA.
 - `digest` (String) Digest algorithm.
@@ -42,7 +42,7 @@ data "opnsense_trust_ca" "example" {
 - `ocsp_uri` (String)
 - `organization` (String)
 - `organizational_unit` (String)
-- `prv` (String, Sensitive) Base64-encoded PEM private key.
+- `prv` (String, Sensitive) PEM private key (not base64-encoded).
 - `prv_payload` (String, Sensitive) Decoded PEM private key (sensitive).
 - `ref_id` (String) Short hex reference ID used by other OPNsense subsystems to reference this CA.
 - `serial` (String) Next serial number.
