@@ -56,8 +56,8 @@ resource "opnsense_trust_cert" "web" {
 - `cert_type` (String) Certificate type: `server_cert`, `usr_cert` (default), `combined_server_client`. Defaults to `usr_cert`.
 - `city` (String)
 - `country` (String) ISO 3166-1 alpha-2 country code (e.g. `US`, `CA`, `DE`).
-- `crt` (String) Base64-encoded PEM certificate body. Required when `action` is `import`. Computed when `action` is `internal`.
-- `csr` (String) Base64-encoded PEM Certificate Signing Request. Required when `action` is `sign_csr` or `import_csr`.
+- `crt` (String) PEM certificate body (not base64-encoded). Required when `action` is `import` or `import_csr`. Computed when `action` is `internal`.
+- `csr` (String) PEM Certificate Signing Request (not base64-encoded). Required when `action` is `sign_csr` or `import_csr`.
 - `description` (String) Optional description for this certificate.
 - `digest` (String) Digest algorithm: `sha224`, `sha256` (default), `sha384`, `sha512`. Defaults to `sha256`.
 - `email` (String)
@@ -67,7 +67,7 @@ resource "opnsense_trust_cert" "web" {
 - `organization` (String)
 - `organizational_unit` (String)
 - `private_key_location` (String) Where to store the private key: `firewall` (default, store on the firewall) or `external` (CSR only, no key stored). Defaults to `firewall`.
-- `prv` (String, Sensitive) Base64-encoded PEM private key. Required when `action` is `import`. Computed when `action` is `internal`.
+- `prv` (String, Sensitive) PEM private key (not base64-encoded). Required when `action` is `import`. Computed when `action` is `internal`.
 - `rfc3280_purpose` (String) Extended Key Usage OID string (e.g. `id-kp-serverAuth`, `id-kp-clientAuth`). Computed by OPNsense based on `cert_type` when not explicitly set.
 - `state` (String)
 

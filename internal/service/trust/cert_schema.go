@@ -1,6 +1,8 @@
 package trust
 
 import (
+	"fmt"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/trust"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
@@ -83,7 +85,7 @@ func certResourceSchema() schema.Schema {
 				Default:             stringdefault.StaticString(""),
 			},
 			"crt": schema.StringAttribute{
-				MarkdownDescription: "Base64-encoded PEM certificate body. Required when `action` is `import`. Computed when `action` is `internal`.",
+				MarkdownDescription: "PEM certificate body (not base64-encoded). Required when `action` is `import` or `import_csr`. Computed when `action` is `internal`.",
 				Optional:            true,
 				Computed:            true,
 				PlanModifiers: []planmodifier.String{
@@ -91,13 +93,13 @@ func certResourceSchema() schema.Schema {
 				},
 			},
 			"csr": schema.StringAttribute{
-				MarkdownDescription: "Base64-encoded PEM Certificate Signing Request. Required when `action` is `sign_csr` or `import_csr`.",
+				MarkdownDescription: "PEM Certificate Signing Request (not base64-encoded). Required when `action` is `sign_csr` or `import_csr`.",
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
 			},
 			"prv": schema.StringAttribute{
-				MarkdownDescription: "Base64-encoded PEM private key. Required when `action` is `import`. Computed when `action` is `internal`.",
+				MarkdownDescription: "PEM private key (not base64-encoded). Required when `action` is `import`. Computed when `action` is `internal`.",
 				Optional:            true,
 				Computed:            true,
 				Sensitive:           true,
@@ -297,16 +299,16 @@ func certDataSourceSchema() dschema.Schema {
 			},
 			"crt": dschema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Base64-encoded PEM certificate body.",
+				MarkdownDescription: "PEM certificate body (not base64-encoded).",
 			},
 			"csr": dschema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Base64-encoded PEM CSR.",
+				MarkdownDescription: "PEM CSR (not base64-encoded).",
 			},
 			"prv": dschema.StringAttribute{
 				Computed:            true,
 				Sensitive:           true,
-				MarkdownDescription: "Base64-encoded PEM private key.",
+				MarkdownDescription: "PEM private key (not base64-encoded).",
 			},
 			"action": dschema.StringAttribute{
 				Computed: true,
@@ -396,11 +398,19 @@ func certDataSourceSchema() dschema.Schema {
 
 func convertCertSchemaToStruct(d *certResourceModel) (*trust.Cert, error) {
 	return &trust.Cert{
-		Description:        d.Description.ValueString(),
-		CaRef:              api.SelectedMap(d.CaRef.ValueString()),
-		Crt:                d.Crt.ValueString(),
-		Csr:                d.Csr.ValueString(),
-		Prv:                d.Prv.ValueString(),
+		Description: d.Description.ValueString(),
+		CaRef:       api.SelectedMap(d.CaRef.ValueString()),
+		Crt:         d.Crt.ValueString(),
+		Csr:         d.Csr.ValueString(),
+		Prv:         d.Prv.ValueString(),
+		// The OPNsense API ignores the persisted crt/csr/prv fields on
+		// write. It parses the certificate/CSR/key from these volatile
+		// *_payload fields instead (raw PEM, not base64), and derives
+		// crt/prv/caref itself. See opnsense/core Trust/Cert.xml and
+		// CertController::setBaseHook.
+		CrtPayload:         d.Crt.ValueString(),
+		CsrPayload:         d.Csr.ValueString(),
+		PrvPayload:         d.Prv.ValueString(),
 		Action:             api.SelectedMap(d.Action.ValueString()),
 		KeyType:            api.SelectedMap(d.KeyType.ValueString()),
 		Digest:             api.SelectedMap(d.Digest.ValueString()),
@@ -424,13 +434,29 @@ func convertCertSchemaToStruct(d *certResourceModel) (*trust.Cert, error) {
 }
 
 func convertCertStructToSchema(d *trust.Cert) (*certResourceModel, error) {
+	// crt/csr/prv are persisted by OPNsense as base64-encoded PEM; decode
+	// them so the schema attribute holds raw PEM, matching what the write
+	// path now sends via crt_payload/csr_payload/prv_payload.
+	crt, err := tools.Base64Decode(d.Crt)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode crt: %w", err)
+	}
+	csr, err := tools.Base64Decode(d.Csr)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode csr: %w", err)
+	}
+	prv, err := tools.Base64Decode(d.Prv)
+	if err != nil {
+		return nil, fmt.Errorf("unable to decode prv: %w", err)
+	}
+
 	return &certResourceModel{
 		RefId:              tools.StringOrNull(d.RefId),
 		Description:        types.StringValue(d.Description),
 		CaRef:              types.StringValue(d.CaRef.String()),
-		Crt:                types.StringValue(d.Crt),
-		Csr:                types.StringValue(d.Csr),
-		Prv:                types.StringValue(d.Prv),
+		Crt:                types.StringValue(crt),
+		Csr:                types.StringValue(csr),
+		Prv:                types.StringValue(prv),
 		Action:             types.StringValue(d.Action.String()),
 		KeyType:            types.StringValue(d.KeyType.String()),
 		Digest:             types.StringValue(d.Digest.String()),

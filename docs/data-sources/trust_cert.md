@@ -36,9 +36,9 @@ data "opnsense_trust_cert" "example" {
 - `city` (String)
 - `common_name` (String)
 - `country` (String)
-- `crt` (String) Base64-encoded PEM certificate body.
+- `crt` (String) PEM certificate body (not base64-encoded).
 - `crt_payload` (String)
-- `csr` (String) Base64-encoded PEM CSR.
+- `csr` (String) PEM CSR (not base64-encoded).
 - `csr_payload` (String)
 - `description` (String)
 - `digest` (String)
@@ -52,7 +52,7 @@ data "opnsense_trust_cert" "example" {
 - `organization` (String)
 - `organizational_unit` (String)
 - `private_key_location` (String)
-- `prv` (String, Sensitive) Base64-encoded PEM private key.
+- `prv` (String, Sensitive) PEM private key (not base64-encoded).
 - `prv_payload` (String, Sensitive)
 - `ref_id` (String) Short hex reference ID used by other OPNsense subsystems.
 - `rfc3280_purpose` (String)

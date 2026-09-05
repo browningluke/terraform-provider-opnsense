@@ -2,6 +2,7 @@ package tools
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -77,6 +78,19 @@ func StringToBool(s string) bool {
 }
 
 // Strings
+
+// Base64Decode decodes a base64-encoded string returned by the OPNsense API
+// into its raw form. Empty input decodes to empty output rather than an error.
+func Base64Decode(s string) (string, error) {
+	if s == "" {
+		return "", nil
+	}
+	b, err := base64.StdEncoding.DecodeString(s)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
 
 func StringOrNull(s string) types.String {
 	if s != "" {
