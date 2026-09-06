@@ -9,28 +9,25 @@ import (
 )
 
 // TestAccInterfacesAssignmentResource exercises the full create/update/import/
-// delete lifecycle by assigning a spare device to a new optional interface.
-// Skipped unless OPNSENSE_TEST_ASSIGNMENT_SPARE_DEVICE is set: the CI VM is
-// single-NIC with that NIC already carrying wan traffic, so there is no
-// device it's safe to assign and unassign here. Also requires OPNsense 26.7+
-// — the underlying AssignmentController endpoint doesn't exist on the 26.1
-// image the CI VM uses.
+// delete lifecycle. Rather than requiring a spare physical NIC, it creates a
+// throwaway VLAN on the CI VM's NIC and assigns that VLAN's device to a new
+// optional interface, so the test runs on a single-NIC box without touching
+// live traffic.
+//
+// Skipped unless OPNSENSE_TEST_ASSIGNMENT=1: the underlying
+// AssignmentController endpoint only exists on OPNsense 26.7+, and the CI VM
+// image is 26.1.
 func TestAccInterfacesAssignmentResource(t *testing.T) {
-	device := acctest.AssignmentSpareDevicePreCheck(t)
-	if device == "" {
-		t.Skip("OPNSENSE_TEST_ASSIGNMENT_SPARE_DEVICE must be set to a spare, non-live device to run this test")
-	}
-
 	resource.Test(t, resource.TestCase{
-		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		PreCheck:                 func() { acctest.AssignmentPreCheck(t) },
 		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{
-				Config: testAccAssignmentResourceConfig(device, "Assignment test"),
+				Config: testAccAssignmentResourceConfig("AssignmentTest"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "device", device),
-					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "description", "Assignment test"),
+					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "device", testAccAssignmentVlanDevice),
+					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "description", "AssignmentTest"),
 					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "lock", "false"),
 					resource.TestCheckResourceAttrSet("opnsense_interfaces_assignment.test", "id"),
 				),
@@ -43,10 +40,10 @@ func TestAccInterfacesAssignmentResource(t *testing.T) {
 			},
 			// Update and Read testing
 			{
-				Config: testAccAssignmentResourceConfig(device, "Updated assignment test"),
+				Config: testAccAssignmentResourceConfig("UpdatedAssignmentTest"),
 				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "device", device),
-					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "description", "Updated assignment test"),
+					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "device", testAccAssignmentVlanDevice),
+					resource.TestCheckResourceAttr("opnsense_interfaces_assignment.test", "description", "UpdatedAssignmentTest"),
 				),
 			},
 			// Delete testing automatically occurs in TestCase
@@ -54,11 +51,29 @@ func TestAccInterfacesAssignmentResource(t *testing.T) {
 	})
 }
 
-func testAccAssignmentResourceConfig(device, description string) string {
+const (
+	// testAccAssignmentVlanDevice is set explicitly on the VLAN resource so the
+	// assignment can reference it directly. Left blank, OPNsense generates the
+	// device name and it would have to be looked up via
+	// opnsense_interfaces_overview_all.
+	testAccAssignmentVlanDevice = "vlan0.147"
+	testAccAssignmentVlanParent = "vtnet0"
+	testAccAssignmentVlanTag    = 147
+)
+
+func testAccAssignmentResourceConfig(description string) string {
 	return fmt.Sprintf(`
-resource "opnsense_interfaces_assignment" "test" {
-  device      = %[1]q
-  description = %[2]q
+resource "opnsense_interfaces_vlan" "test" {
+  description = "assignment acc test"
+  tag         = %[1]d
+  priority    = 0
+  parent      = %[2]q
+  device      = %[3]q
 }
-`, device, description)
+
+resource "opnsense_interfaces_assignment" "test" {
+  device      = opnsense_interfaces_vlan.test.device
+  description = %[4]q
+}
+`, testAccAssignmentVlanTag, testAccAssignmentVlanParent, testAccAssignmentVlanDevice, description)
 }

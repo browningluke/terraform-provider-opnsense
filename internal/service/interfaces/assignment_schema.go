@@ -1,13 +1,17 @@
 package interfaces
 
 import (
+	"regexp"
+
 	"github.com/browningluke/opnsense-go/pkg/interfaces"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -34,14 +38,28 @@ func assignmentResourceSchema() schema.Schema {
 				Required:            true,
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description here for your reference (not parsed).",
-				Optional:            true,
+				MarkdownDescription: "Optional description here for your reference (not parsed). " +
+					"OPNsense only accepts letters, digits and underscores here — spaces and other " +
+					"punctuation are rejected by the API.",
+				Optional: true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-zA-Z0-9_]{0,255}$`),
+						"must contain only letters, digits and underscores, and be at most 255 characters",
+					),
+				},
 			},
 			"lock": schema.BoolAttribute{
-				MarkdownDescription: "Prevent removal of the interface. Defaults to `false`.",
-				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(false),
+				// OPNsense's own model defaults lock to 1, but a locked interface cannot be
+				// removed ("Interface locked, unset lock first before removal"), which would
+				// leave `terraform destroy` unable to unassign what it created. Default to
+				// false so the resource lifecycle is complete; set it explicitly to opt in.
+				MarkdownDescription: "Prevent removal of the interface. Defaults to `false`. " +
+					"Note this differs from the OPNsense web UI, which defaults to locked; a locked " +
+					"interface cannot be unassigned, so `terraform destroy` fails until `lock` is set back to `false`.",
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
