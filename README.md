@@ -126,6 +126,7 @@ This provider is actively expanding to cover the OPNsense API. The tables below 
 | `Firewall/NPTv6`                 | ❌        | ❌           |
 | `Firewall/Source NAT`            | ✅        | ✅           |
 | `Firewall/One-to-One NAT`        | ✅        | ✅           |
+| `Interfaces/Assignment`          | ✅        | ✅           |
 | `Interfaces/Bridge`              | ❌        | ❌           |
 | `Interfaces/Gif`                 | ❌        | ❌           |
 | `Interfaces/Gre`                 | ❌        | ❌           |

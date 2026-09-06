@@ -8,6 +8,7 @@ import (
 
 func Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
+		newAssignmentResource,
 		newVipResource,
 		newVlanResource,
 	}
@@ -15,6 +16,7 @@ func Resources(ctx context.Context) []func() resource.Resource {
 
 func DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
+		newAssignmentDataSource,
 		newVipDataSource,
 		newVlanDataSource,
 		newOverviewInterfaceDataSource,

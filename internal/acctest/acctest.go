@@ -65,6 +65,24 @@ func DomainOverridePreCheck(t *testing.T) {
 	}
 }
 
+// AssignmentPreCheck skips the test unless OPNSENSE_TEST_ASSIGNMENT=1.
+// The AssignmentController endpoint only exists on OPNsense 26.7+; the CI VM
+// image is 26.1, where every call 404s. Set this variable when running against
+// a 26.7 or newer box.
+//
+// The test itself no longer needs a spare physical device: it creates a
+// throwaway VLAN and assigns that, so it works on the single-NIC CI VM once the
+// image is new enough.
+func AssignmentPreCheck(t *testing.T) {
+	t.Helper()
+
+	if os.Getenv("OPNSENSE_TEST_ASSIGNMENT") != "1" {
+		t.Skip("OPNSENSE_TEST_ASSIGNMENT=1 required: AssignmentController endpoint only exists on OPNsense 26.7+")
+	}
+
+	AccPreCheck(t)
+}
+
 // KeaDhcpv6PreCheck skips the test unless OPNSENSE_KEA_DHCPV6_IFACE is set to a
 // valid interface name (e.g. "wan"). When set, it configures that interface in the
 // Kea DHCPv6 general settings before the test runs and resets it to empty on cleanup.
