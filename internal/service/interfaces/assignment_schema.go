@@ -99,7 +99,7 @@ func assignmentDataSourceSchema() dschema.Schema {
 
 func convertAssignmentSchemaToStruct(d *assignmentResourceModel) (*interfaces.Assignment, error) {
 	return &interfaces.Assignment{
-		Device:      d.Device.ValueString(),
+		Device:      api.SelectedMap(d.Device.ValueString()),
 		Description: d.Description.ValueString(),
 		Lock:        tools.BoolToString(d.Lock.ValueBool()),
 	}, nil
@@ -107,7 +107,7 @@ func convertAssignmentSchemaToStruct(d *assignmentResourceModel) (*interfaces.As
 
 func convertAssignmentStructToSchema(d *interfaces.Assignment) (*assignmentResourceModel, error) {
 	return &assignmentResourceModel{
-		Device:      types.StringValue(d.Device),
+		Device:      types.StringValue(d.Device.String()),
 		Description: tools.StringOrNull(d.Description),
 		Lock:        types.BoolValue(tools.StringToBool(d.Lock)),
 	}, nil
