@@ -164,6 +164,17 @@ func (r *clientResource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
+	// OPNsense keeps the peer-to-instance association on the client, in a field
+	// this schema does not model, and clears it when setClient omits it. Carry
+	// the current value through so an update does not detach the peer.
+	current, err := r.client.Wireguard().GetClient(ctx, data.Id.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError("Client Error",
+			fmt.Sprintf("Unable to read wg client, got error: %s", err))
+		return
+	}
+	wgClient.Servers = current.Servers
+
 	// Update wg client in unbound
 	err = r.client.Wireguard().UpdateClient(ctx, data.Id.ValueString(), wgClient)
 	if err != nil {
