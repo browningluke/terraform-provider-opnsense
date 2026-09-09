@@ -1,8 +1,12 @@
 package dnsmasq
 
 import (
+	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/dnsmasq"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider/generic"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -13,6 +17,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var hostDefinition = generic.Definition[
+	dnsmasq.Host,
+	hostResourceModel,
+]{
+	ServiceName: "dnsmasq",
+	TypeName:    "host",
+
+	ResourceSchema:   hostResourceSchema(),
+	DataSourceSchema: hostDataSourceSchema(),
+
+	FromModel: convertHostSchemaToStruct,
+	ToModel:   convertHostStructToSchema,
+
+	GetID: func(m *hostResourceModel) types.String {
+		return m.Id
+	},
+
+	SetID: func(m *hostResourceModel, id types.String) {
+		m.Id = id
+	},
+
+	Create: func(ctx context.Context, client opnsense.Client, group *dnsmasq.Host) (string, error) {
+		return client.Dnsmasq().AddHost(ctx, group)
+	},
+
+	Read: func(ctx context.Context, client opnsense.Client, id string) (*dnsmasq.Host, error) {
+		return client.Dnsmasq().GetHost(ctx, id)
+	},
+
+	Update: func(ctx context.Context, client opnsense.Client, id string, group *dnsmasq.Host) error {
+		return client.Dnsmasq().UpdateHost(ctx, id, group)
+	},
+
+	Delete: func(ctx context.Context, client opnsense.Client, id string) error {
+		return client.Dnsmasq().DeleteHost(ctx, id)
+	},
+}
 
 type hostResourceModel struct {
 	Hostname        types.String `tfsdk:"hostname"`

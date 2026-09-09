@@ -3,7 +3,9 @@ package wireguard
 import (
 	"context"
 
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/browningluke/opnsense-go/pkg/wireguard"
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider/generic"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/hashicorp/terraform-plugin-framework-validators/setvalidator"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
@@ -16,6 +18,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var clientDefinition = generic.Definition[
+	wireguard.Client,
+	clientResourceModel,
+]{
+	ServiceName: "wireguard",
+	TypeName:    "client",
+
+	ResourceSchema:   clientResourceSchema(),
+	DataSourceSchema: clientDataSourceSchema(),
+
+	FromModel: convertClientSchemaToStruct,
+	ToModel:   convertClientStructToSchema,
+
+	GetID: func(m *clientResourceModel) types.String {
+		return m.Id
+	},
+
+	SetID: func(m *clientResourceModel, id types.String) {
+		m.Id = id
+	},
+
+	Create: func(ctx context.Context, client opnsense.Client, group *wireguard.Client) (string, error) {
+		return client.Wireguard().AddClient(ctx, group)
+	},
+
+	Read: func(ctx context.Context, client opnsense.Client, id string) (*wireguard.Client, error) {
+		return client.Wireguard().GetClient(ctx, id)
+	},
+
+	Update: func(ctx context.Context, client opnsense.Client, id string, group *wireguard.Client) error {
+		return client.Wireguard().UpdateClient(ctx, id, group)
+	},
+
+	Delete: func(ctx context.Context, client opnsense.Client, id string) error {
+		return client.Wireguard().DeleteClient(ctx, id)
+	},
+}
 
 // clientResourceModel describes the resource data model.
 type clientResourceModel struct {
