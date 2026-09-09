@@ -7,6 +7,8 @@ import (
 
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/firewall"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider/generic"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
@@ -25,6 +27,44 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var filterDefinition = generic.Definition[
+	firewall.Filter,
+	filterResourceModel,
+]{
+	ServiceName: "firewall",
+	TypeName:    "filter",
+
+	ResourceSchema:   filterResourceSchema(),
+	DataSourceSchema: filterDataSourceSchema(),
+
+	FromModel: convertFilterSchemaToStruct,
+	ToModel:   convertFilterStructToSchema,
+
+	GetID: func(m *filterResourceModel) types.String {
+		return m.Id
+	},
+
+	SetID: func(m *filterResourceModel, id types.String) {
+		m.Id = id
+	},
+
+	Create: func(ctx context.Context, client opnsense.Client, group *firewall.Filter) (string, error) {
+		return client.Firewall().AddFilter(ctx, group)
+	},
+
+	Read: func(ctx context.Context, client opnsense.Client, id string) (*firewall.Filter, error) {
+		return client.Firewall().GetFilter(ctx, id)
+	},
+
+	Update: func(ctx context.Context, client opnsense.Client, id string, group *firewall.Filter) error {
+		return client.Firewall().UpdateFilter(ctx, id, group)
+	},
+
+	Delete: func(ctx context.Context, client opnsense.Client, id string) error {
+		return client.Firewall().DeleteFilter(ctx, id)
+	},
+}
 
 type firewallLocation struct {
 	Net    types.String `tfsdk:"net"`
