@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/opnsense-go/pkg/trust"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -36,4 +37,6 @@ type Definition[OpnSenseType any, TerraformSchema any] struct {
 	ReadHook   func(context.Context, opnsense.Client, *TerraformSchema) error
 	UpdateHook func(context.Context, opnsense.Client, *TerraformSchema) error
 	DeleteHook func(context.Context, opnsense.Client, *TerraformSchema) error
+
+	Reconfigure func(context.Context, opnsense.Client) (*trust.ActionResult, error)
 }

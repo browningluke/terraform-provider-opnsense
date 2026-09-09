@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -20,7 +19,7 @@ type GenericResource[OpnSenseType any, TerraformSchema any] struct {
 }
 
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = fmt.Sprintf("%s_%s_%s", req.ProviderTypeName, r.Definition.ServiceName, r.Definition.TypeName)
+	resp.TypeName = buildTerraformTypeName(req.ProviderTypeName, r.Definition)
 }
 
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
@@ -28,27 +27,19 @@ func (r *GenericResource[OpnSenseType, TerraformSchema]) Schema(ctx context.Cont
 }
 
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
-	if req.ProviderData == nil {
+	client, err := configureClient(req.ProviderData)
+	if err != nil {
+		resp.Diagnostics.AddError("Unexpected Resource Configure Type", err.Error())
 		return
 	}
 
-	apiClient, ok := req.ProviderData.(*api.Client)
-	if !ok {
-		resp.Diagnostics.AddError(
-			"Unexpected Resource Configure Type",
-			fmt.Sprintf("Expected *opnsense.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
-		)
-		return
-	}
-
-	r.Client = opnsense.NewClient(apiClient)
+	r.Client = client
 }
 
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	if r.Definition.Create == nil {
 		resp.Diagnostics.AddError("Invalid Resource Definition",
-			fmt.Sprintf("Create operation is not defined for '%s_%s'.", r.Definition.ServiceName, r.Definition.TypeName),
+			fmt.Sprintf("Create operation is not defined for '%s %s'.", r.Definition.ServiceName, r.Definition.TypeName),
 		)
 		return
 	}
@@ -113,63 +104,38 @@ func (r *GenericResource[OpnSenseType, TerraformSchema]) Create(ctx context.Cont
 }
 
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	if r.Definition.Read == nil {
-		resp.Diagnostics.AddError("Invalid Resource Definition",
-			fmt.Sprintf("Read operation is not defined for '%s_%s'.", r.Definition.ServiceName, r.Definition.TypeName),
-		)
-		return
-	}
-
 	var data *TerraformSchema
 
-	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Get resource from OPNsense API
-	resourceStruct, err := r.Definition.Read(ctx, r.Client, r.Definition.GetID(data).ValueString())
+	model, err := readResource(ctx, r.Client, r.Definition, data)
 	if err != nil {
 		var notFoundError *errs.NotFoundError
+
 		if errors.As(err, &notFoundError) {
-			tflog.Warn(ctx, fmt.Sprintf("%s %s not present in remote, removing from state", r.Definition.ServiceName, r.Definition.TypeName))
+			tflog.Warn(
+				ctx,
+				fmt.Sprintf("%s %s not present in remote, removing from state", r.Definition.ServiceName, r.Definition.TypeName),
+			)
 			resp.State.RemoveResource(ctx)
 			return
 		}
 
-		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read '%s' from '%s', got error: %s", r.Definition.TypeName, r.Definition.ServiceName, err))
+		resp.Diagnostics.AddError("Client Error", err.Error())
 		return
 	}
 
-	// Convert OPNsense struct to TF schema
-	model, err := r.Definition.ToModel(resourceStruct)
-	if err != nil {
-		resp.Diagnostics.AddError("Client Error",
-			fmt.Sprintf("Unable to read '%s' from '%s', got error: %s", r.Definition.TypeName, r.Definition.ServiceName, err))
-		return
-	}
-
-	// ID cannot be added by convert... func, have to add here
-	r.Definition.SetID(model, r.Definition.GetID(data))
-
-	if r.Definition.ReadHook != nil {
-		if err := r.Definition.ReadHook(ctx, r.Client, model); err != nil {
-			resp.Diagnostics.AddError("Read Hook Error", err.Error())
-			return
-		}
-	}
-
-	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &model)...)
 }
 
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	if r.Definition.Update == nil {
 		resp.Diagnostics.AddError("Invalid Resource Definition",
-			fmt.Sprintf("Update operation is not defined for '%s_%s'.", r.Definition.ServiceName, r.Definition.TypeName),
+			fmt.Sprintf("Update operation is not defined for '%s %s'.", r.Definition.ServiceName, r.Definition.TypeName),
 		)
 		return
 	}
@@ -213,7 +179,7 @@ func (r *GenericResource[OpnSenseType, TerraformSchema]) Update(ctx context.Cont
 func (r *GenericResource[OpnSenseType, TerraformSchema]) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	if r.Definition.Delete == nil {
 		resp.Diagnostics.AddError("Invalid Resource Definition",
-			fmt.Sprintf("Delete operation is not defined for '%s_%s'.", r.Definition.ServiceName, r.Definition.TypeName),
+			fmt.Sprintf("Delete operation is not defined for '%s %s'.", r.Definition.ServiceName, r.Definition.TypeName),
 		)
 		return
 	}

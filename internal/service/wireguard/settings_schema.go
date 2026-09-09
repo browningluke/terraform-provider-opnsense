@@ -1,7 +1,11 @@
 package wireguard
 
 import (
+	"context"
+
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/browningluke/opnsense-go/pkg/wireguard"
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider/generic"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -10,6 +14,43 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var serviceName = "wireguard"
+
+var settingsDefinition = generic.Definition[
+	wireguard.WireguardGeneral,
+	settingsResourceModel,
+]{
+	ServiceName: serviceName,
+	TypeName:    "settings",
+
+	ResourceSchema:   settingsResourceSchema(),
+	DataSourceSchema: settingsDataSourceSchema(),
+
+	FromModel: convertSettingsSchemaToStruct,
+	ToModel:   convertSettingsStructToSchema,
+
+	GetID: func(m *settingsResourceModel) types.String {
+		return types.StringValue(serviceName + "_settings")
+	},
+	SetID: func(m *settingsResourceModel, id types.String) {
+		m.Id = id
+	},
+
+	Read: func(ctx context.Context, client opnsense.Client, _ string) (*wireguard.WireguardGeneral, error) {
+		result, err := client.Wireguard().GeneralGet(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &result.General, nil
+	},
+
+	Update: func(ctx context.Context, client opnsense.Client, _ string, data *wireguard.WireguardGeneral) error {
+		_, err := client.Wireguard().GeneralSet(ctx, data)
+		return err
+	},
+}
 
 // settingsResourceModel describes the resource data model.
 // This is a SINGLETON resource — it manages existing upstream configuration

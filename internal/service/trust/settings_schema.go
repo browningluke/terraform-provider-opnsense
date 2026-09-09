@@ -1,8 +1,12 @@
 package trust
 
 import (
+	"context"
+
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/opnsense-go/pkg/opnsense"
 	"github.com/browningluke/opnsense-go/pkg/trust"
+	"github.com/browningluke/terraform-provider-opnsense/internal/provider/generic"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -11,6 +15,47 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
+
+var serviceName = "trust"
+
+var settingsDefinition = generic.Definition[
+	trust.TrustSettings,
+	settingsResourceModel,
+]{
+	ServiceName: serviceName,
+	TypeName:    "settings",
+
+	ResourceSchema:   settingsResourceSchema(),
+	DataSourceSchema: settingsDataSourceSchema(),
+
+	FromModel: convertSettingsSchemaToStruct,
+	ToModel:   convertSettingsStructToSchema,
+
+	GetID: func(m *settingsResourceModel) types.String {
+		return types.StringValue(serviceName + "_settings")
+	},
+	SetID: func(m *settingsResourceModel, id types.String) {
+		m.Id = id
+	},
+
+	Read: func(ctx context.Context, client opnsense.Client, _ string) (*trust.TrustSettings, error) {
+		result, err := client.Trust().SettingsGet(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		return &result.Trust, nil
+	},
+
+	Update: func(ctx context.Context, client opnsense.Client, _ string, data *trust.TrustSettings) error {
+		_, err := client.Trust().SettingsSet(ctx, data)
+		return err
+	},
+
+	Reconfigure: func(ctx context.Context, client opnsense.Client) (*trust.ActionResult, error) {
+		return client.Trust().SettingsReconfigure(ctx)
+	},
+}
 
 type settingsResourceModel struct {
 	Id                      types.String `tfsdk:"id"`
