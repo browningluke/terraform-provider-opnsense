@@ -6,14 +6,14 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 )
 
-var genericGroupResource = &generic.GenericResource[dnsmasq.Host, hostResourceModel]{
+var genericHostResource = &generic.GenericResource[dnsmasq.Host, hostResourceModel]{
 	Definition: hostDefinition,
 }
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = genericGroupResource
-var _ resource.ResourceWithConfigure = genericGroupResource
+var _ resource.Resource = genericHostResource
+var _ resource.ResourceWithConfigure = genericHostResource
 
 func NewHostResource() resource.Resource {
-	return genericGroupResource
+	return genericHostResource
 }
