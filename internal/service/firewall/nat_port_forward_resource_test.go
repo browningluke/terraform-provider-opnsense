@@ -8,6 +8,57 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
+func TestAccFirewallNatPortForwardBug175_portAlias(t *testing.T) {
+	aliasName := "testports_aliasName"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccFirewallNatPortForwardBug175_portAlias(aliasName),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "source.port", aliasName),
+					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "destination.port", aliasName),
+					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "target.port", aliasName),
+				),
+			},
+		},
+	})
+}
+
+func testAccFirewallNatPortForwardBug175_portAlias(aliasName string) string {
+	return fmt.Sprintf(`
+resource "opnsense_firewall_alias" "example_ports" {
+  name    = %[1]q
+  type    = "port"
+  content = ["8080", "8443"]
+}
+
+resource "opnsense_firewall_nat_port_forward" "test" {
+  interface = ["wan"]
+  protocol  = "tcp"
+
+  source = {
+    net  = "any"
+    port = opnsense_firewall_alias.example_ports.name
+  }
+
+  destination = {
+    net  = "wanip"
+    port = opnsense_firewall_alias.example_ports.name
+  }
+
+  target = {
+    ip   = "192.168.1.10"
+    port = opnsense_firewall_alias.example_ports.name
+  }
+
+  description = "Issue 175"
+}
+`, aliasName)
+}
+
 func TestAccFirewallNatPortForwardResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:                 func() { acctest.AccPreCheck(t) },
