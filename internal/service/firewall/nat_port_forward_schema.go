@@ -65,6 +65,11 @@ type natPortForwardResourceModelV1 struct {
 	Id types.String `tfsdk:"id"`
 }
 
+var portNumberRangeOrWellKnownNameValidator = stringvalidator.RegexMatches(
+	regexp.MustCompile(`^(\d|-)+$|^(\w){0,32}$`),
+	"must be number (80), range (80-443), well known name (http) or alias name",
+)
+
 func natPortForwardResourceSchema() schema.Schema {
 	return schema.Schema{
 		Version:             2,
@@ -134,8 +139,7 @@ func natPortForwardResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
-								"must be number (80), range (80-443) or well known name (http)"),
+							portNumberRangeOrWellKnownNameValidator,
 						},
 					},
 					"invert": schema.BoolAttribute{
@@ -176,8 +180,7 @@ func natPortForwardResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^(\\w){0,32}$"),
-								"must be number (80), range (80-443), well known name (http) or alias name"),
+							portNumberRangeOrWellKnownNameValidator,
 						},
 					},
 					"invert": schema.BoolAttribute{
@@ -201,8 +204,7 @@ func natPortForwardResourceSchema() schema.Schema {
 						Computed:            true,
 						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
-							stringvalidator.RegexMatches(regexp.MustCompile("^(\\d|-)+$|^([a-z])+$"),
-								"must be number (80), range (80-443) or well known name (http)"),
+							portNumberRangeOrWellKnownNameValidator,
 						},
 					},
 				},
