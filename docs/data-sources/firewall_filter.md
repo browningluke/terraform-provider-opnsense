@@ -40,12 +40,12 @@ Read-Only:
 - `allow_options` (Boolean) Whether packets with IP options are allowed to pass. Otherwise they are blocked.
 - `destination` (Attributes) (see [below for nested schema](#nestedatt--filter--destination))
 - `direction` (String) The direction of the traffic. The default policy is to filter inbound traffic, which sets the policy to the interface originally receiving the traffic.
-- `icmp_type` (Set of String)
-- `ip_protocol` (String)
+- `icmp_type` (Set of String) If the transport protocol is ICMP, this option allows you to specify the ICMP types.
+- `ip_protocol` (String) The IP protocol version that should match, e.g., IPv4 or IPv6. Valid values are `inet` (v4), `inet66` (v6) or `inet46` (v4 and/or v6).
 - `log` (Boolean) Whether packets handled by this rule are logged.
-- `protocol` (String)
+- `protocol` (String) The transport protocol that should match, e.g., TCP or UDP. Can contain sub-level configuration like for IMCP.
 - `quick` (Boolean) Whether a packet matching this rule is the last matching rule. If quick is enabled, the specified action is taken immediately.
-- `schedule` (String)
+- `schedule` (String) Rules can also be scheduled to be active at specific days or time ranges, you can create schedules in Firewall ‣ Advanced ‣ Schedules and select one in the rule. If the rule times out the states will be removed and the rule will be skipped. This means, if there is still a matching rule after the scheduled rule that allows the traffic, it will be used instead. Keep this in mind when using scheduled rules, and carefully build the ruleset around them, e.g., with additional block rules.
 - `source` (Attributes) (see [below for nested schema](#nestedatt--filter--source))
 - `tcp_flags` (Set of String) The TCP flags that must be set for this rule to match.
 - `tcp_flags_out_of` (Set of String) The TCP flags that must be cleared for this rule to match.
@@ -56,7 +56,7 @@ Read-Only:
 Read-Only:
 
 - `invert` (Boolean) Whether the sense of the match is inverted.
-- `net` (String)
+- `net` (String) Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
 - `port` (String) Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.
 
 
@@ -66,7 +66,7 @@ Read-Only:
 Read-Only:
 
 - `invert` (Boolean) Whether the sense of the match is inverted.
-- `net` (String)
+- `net` (String) Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.
 - `port` (String) Source port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.
 
 
@@ -96,7 +96,7 @@ Read-Only:
 
 - `low_delay_set` (Number) Used in combination with set priority, packets which have a TOS of lowdelay and TCP ACKs with no data payload will be assigned this priority when offered.
 - `match` (Number) Only matches packets which have the given queueing priority assigned.
-- `match_tos` (String)
+- `match_tos` (String) Only match packets which have the given TOS/DSCP marker.
 - `set` (Number) The specific queueing priority assigned to packets matching this rule. If the packet is transmitted on a vlan(4) interface, the queueing priority will be written as the priority code point in the 802.1Q VLAN header.
 
 

@@ -235,15 +235,17 @@ func filterResourceSchema() schema.Schema {
 						},
 					},
 					"ip_protocol": schema.StringAttribute{
-						Optional: true,
-						Computed: true,
+						MarkdownDescription: "The IP protocol version that should match, e.g., IPv4 or IPv6. Valid values are `inet` (v4), `inet66` (v6) or `inet46` (v4 and/or v6).",
+						Optional:            true,
+						Computed:            true,
 						Validators: []validator.String{
 							stringvalidator.OneOf("inet", "inet6", "inet46"),
 						},
 						Default: stringdefault.StaticString("inet"),
 					},
 					"protocol": schema.StringAttribute{
-						Required: true,
+						MarkdownDescription: "The transport protocol that should match, e.g., TCP or UDP. Can contain sub-level configuration like for IMCP.",
+						Required:            true,
 						Validators: []validator.String{
 							stringvalidator.OneOf(
 								"3PC",
@@ -383,10 +385,11 @@ func filterResourceSchema() schema.Schema {
 						},
 					},
 					"icmp_type": schema.SetAttribute{
-						Optional:    true,
-						Computed:    true,
-						ElementType: types.StringType,
-						Default:     setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
+						MarkdownDescription: "If the transport protocol is ICMP, this option allows you to specify the ICMP types.",
+						Optional:            true,
+						Computed:            true,
+						ElementType:         types.StringType,
+						Default:             setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 						Validators: []validator.Set{
 							setvalidator.ValueStringsAre(stringvalidator.OneOf(
 								"althost",
@@ -427,9 +430,10 @@ func filterResourceSchema() schema.Schema {
 						),
 						Attributes: map[string]schema.Attribute{
 							"net": schema.StringAttribute{
-								Optional: true,
-								Computed: true,
-								Default:  stringdefault.StaticString("any"),
+								MarkdownDescription: "Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+								Optional:            true,
+								Computed:            true,
+								Default:             stringdefault.StaticString("any"),
 							},
 							"port": schema.StringAttribute{
 								MarkdownDescription: "Source port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `\"\"`.",
@@ -468,9 +472,10 @@ func filterResourceSchema() schema.Schema {
 						),
 						Attributes: map[string]schema.Attribute{
 							"net": schema.StringAttribute{
-								Optional: true,
-								Computed: true,
-								Default:  stringdefault.StaticString("any"),
+								MarkdownDescription: "Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+								Optional:            true,
+								Computed:            true,
+								Default:             stringdefault.StaticString("any"),
 							},
 							"port": schema.StringAttribute{
 								MarkdownDescription: "Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash. Defaults to `\"\"`.",
@@ -511,9 +516,10 @@ func filterResourceSchema() schema.Schema {
 						Default:             setdefault.StaticValue(types.SetValueMust(types.StringType, []attr.Value{})),
 					},
 					"schedule": schema.StringAttribute{
-						Optional: true,
-						Computed: true,
-						Default:  stringdefault.StaticString(""),
+						MarkdownDescription: "Rules can also be scheduled to be active at specific days or time ranges, you can create schedules in Firewall ‣ Advanced ‣ Schedules and select one in the rule. If the rule times out the states will be removed and the rule will be skipped. This means, if there is still a matching rule after the scheduled rule that allows the traffic, it will be used instead. Keep this in mind when using scheduled rules, and carefully build the ruleset around them, e.g., with additional block rules.",
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString(""),
 					},
 				},
 			},
@@ -881,9 +887,10 @@ func filterResourceSchema() schema.Schema {
 						},
 					},
 					"match_tos": schema.StringAttribute{
-						Optional: true,
-						Computed: true,
-						Default:  stringdefault.StaticString(""),
+						MarkdownDescription: "Only match packets which have the given TOS/DSCP marker.",
+						Optional:            true,
+						Computed:            true,
+						Default:             stringdefault.StaticString(""),
 						Validators: []validator.String{
 							stringvalidator.OneOf(
 								"",
@@ -1009,20 +1016,24 @@ func filterDataSourceSchema() dschema.Schema {
 						Computed:            true,
 					},
 					"ip_protocol": dschema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: "The IP protocol version that should match, e.g., IPv4 or IPv6. Valid values are `inet` (v4), `inet66` (v6) or `inet46` (v4 and/or v6).",
+						Computed:            true,
 					},
 					"protocol": dschema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: "The transport protocol that should match, e.g., TCP or UDP. Can contain sub-level configuration like for IMCP.",
+						Computed:            true,
 					},
 					"icmp_type": dschema.SetAttribute{
-						Computed:    true,
-						ElementType: types.StringType,
+						MarkdownDescription: "If the transport protocol is ICMP, this option allows you to specify the ICMP types.",
+						Computed:            true,
+						ElementType:         types.StringType,
 					},
 					"source": dschema.SingleNestedAttribute{
 						Computed: true,
 						Attributes: map[string]dschema.Attribute{
 							"net": dschema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: "Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+								Computed:            true,
 							},
 							"port": dschema.StringAttribute{
 								MarkdownDescription: "Source port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.",
@@ -1038,7 +1049,8 @@ func filterDataSourceSchema() dschema.Schema {
 						Computed: true,
 						Attributes: map[string]dschema.Attribute{
 							"net": dschema.StringAttribute{
-								Computed: true,
+								MarkdownDescription: "Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+								Computed:            true,
 							},
 							"port": dschema.StringAttribute{
 								MarkdownDescription: "Destination port number or well known name (imap, imaps, http, https, ...), for ranges use a dash.",
@@ -1065,7 +1077,8 @@ func filterDataSourceSchema() dschema.Schema {
 						ElementType:         types.StringType,
 					},
 					"schedule": dschema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: "Rules can also be scheduled to be active at specific days or time ranges, you can create schedules in Firewall ‣ Advanced ‣ Schedules and select one in the rule. If the rule times out the states will be removed and the rule will be skipped. This means, if there is still a matching rule after the scheduled rule that allows the traffic, it will be used instead. Keep this in mind when using scheduled rules, and carefully build the ruleset around them, e.g., with additional block rules.",
+						Computed:            true,
 					},
 				},
 			},
@@ -1187,7 +1200,8 @@ func filterDataSourceSchema() dschema.Schema {
 						Computed:            true,
 					},
 					"match_tos": dschema.StringAttribute{
-						Computed: true,
+						MarkdownDescription: "Only match packets which have the given TOS/DSCP marker.",
+						Computed:            true,
 					},
 				},
 			},
@@ -1567,7 +1581,7 @@ func filterResourceSchemaV0() schema.Schema {
 				),
 				Attributes: map[string]schema.Attribute{
 					"net": schema.StringAttribute{
-						MarkdownDescription: "Specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
+						MarkdownDescription: "Comma separated list of specify the IP address, CIDR or alias for the destination of the packet for this mapping. For `<INT> net`, enter `<int>` (e.g. `lan`). For `<INT> address`, enter `<int>ip` (e.g. `lanip`). Defaults to `any`.",
 						Optional:            true,
 						Computed:            true,
 						Default:             stringdefault.StaticString("any"),
