@@ -182,3 +182,39 @@ resource "opnsense_firewall_filter" "comprehensive" {
     match_local = ""
   }
 }
+
+# Example 6: Use multiple source and destination networks
+resource "opnsense_firewall_filter" "allow_from_multiple_networks" {
+  enabled     = true
+  sequence    = 100
+  description = "Allow from multiple multiple networks"
+
+  categories = [
+    opnsense_firewall_category.example.id,
+  ]
+
+  interface = {
+    interface = ["wan"]
+  }
+
+  filter = {
+    quick     = true
+    action    = "pass"
+    direction = "in"
+    protocol  = "TCP"
+
+    source = {
+      net = "192.168.1.100,opt1,lo0"
+    }
+
+    destination = {
+      net  = "192.168.17.100"
+    }
+
+    log = true
+  }
+
+  stateful_firewall = {
+    type = "keep"
+  }
+}
