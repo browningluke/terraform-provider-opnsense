@@ -66,6 +66,30 @@ func TestAccWireguardServerResource_WithTunnelAddress(t *testing.T) {
 	})
 }
 
+// OPNsense installs no routes at all for a server with disable_routes and no gateway, as a
+// road-warrior server whose peers sit inside its own tunnel subnet needs.
+func TestAccWireguardServerResource_DisableRoutesWithoutGateway(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccWireguardServerResourceDisableRoutesConfig(),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_wireguard_server.test", "disable_routes", "true"),
+					resource.TestCheckResourceAttr("opnsense_wireguard_server.test", "gateway", ""),
+				),
+			},
+			{
+				ResourceName:            "opnsense_wireguard_server.test",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{"private_key"},
+			},
+		},
+	})
+}
+
 func testAccWireguardServerResourceConfig(name, privkey, pubkey string) string {
 	return `
 resource "opnsense_wireguard_server" "test" {
@@ -84,6 +108,18 @@ resource "opnsense_wireguard_server" "test" {
   public_key     = "N6z94WfQPp2uLMs2uPA2CASRZBdPXUCJcZyrFufTkVE="
   tunnel_address = ["10.0.0.1/24"]
   port           = 51820
+}
+`
+}
+
+func testAccWireguardServerResourceDisableRoutesConfig() string {
+	return `
+resource "opnsense_wireguard_server" "test" {
+  name           = "test-noroutes-server"
+  private_key    = "iD8W5IupKNnbt18tFt9PxpTLlBeBu+yxEUseLQT3OVQ="
+  public_key     = "N6z94WfQPp2uLMs2uPA2CASRZBdPXUCJcZyrFufTkVE="
+  tunnel_address = ["10.0.0.1/24"]
+  disable_routes = true
 }
 `
 }

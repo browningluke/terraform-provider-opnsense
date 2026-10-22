@@ -71,7 +71,7 @@ resource "opnsense_wireguard_server" "example0" {
 - `disable_routes` (Boolean) Disables installation of routes. Usually you only enable this to do own routing decisions via a local gateway and gateway rules. Defaults to `false`.
 - `dns` (Set of String) The interface specific DNS servers. Defaults to `[]`.
 - `enabled` (Boolean) Enable this server. Defaults to `true`.
-- `gateway` (String) The gateway IP here when using Disable Routes feature. You also have to add this as a gateway in OPNsense. Must be set when `disable_routes` is `true`. Defaults to `""`.
+- `gateway` (String) The gateway IP here when using Disable Routes feature: OPNsense then routes only this address through the tunnel. You also have to add this as a gateway in OPNsense. Leave empty with `disable_routes` to install no routes at all. Defaults to `""`.
 - `mtu` (Number) The interface MTU for this interface. Set to `-1` to use the MTU from main interface. Defaults to `-1`.
 - `peers` (Set of String) List of peer IDs for this server. Defaults to `[]`.
 - `port` (Number) The fixed port for this instance to listen on. The standard port range starts at 51820. Defaults to `-1`.

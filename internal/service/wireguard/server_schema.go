@@ -5,9 +5,7 @@ import (
 
 	"github.com/browningluke/opnsense-go/pkg/wireguard"
 	"github.com/browningluke/terraform-provider-opnsense/internal/tools"
-	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	dschema "github.com/hashicorp/terraform-plugin-framework/datasource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
@@ -15,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/setdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -101,13 +98,10 @@ func serverResourceSchema() schema.Schema {
 				Default:             booldefault.StaticBool(false),
 			},
 			"gateway": schema.StringAttribute{
-				MarkdownDescription: "The gateway IP here when using Disable Routes feature. You also have to add this as a gateway in OPNsense. Must be set when `disable_routes` is `true`. Defaults to `\"\"`.",
+				MarkdownDescription: "The gateway IP here when using Disable Routes feature: OPNsense then routes only this address through the tunnel. You also have to add this as a gateway in OPNsense. Leave empty with `disable_routes` to install no routes at all. Defaults to `\"\"`.",
 				Optional:            true,
 				Computed:            true,
 				Default:             stringdefault.StaticString(""),
-				Validators: []validator.String{
-					validators.RequiredWhenBool(path.MatchRoot("disable_routes"), true),
-				},
 			},
 			"instance": schema.StringAttribute{
 				Computed:            true,
