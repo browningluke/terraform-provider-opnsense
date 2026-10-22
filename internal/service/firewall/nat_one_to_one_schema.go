@@ -158,7 +158,7 @@ func natOneToOneResourceSchema() schema.Schema {
 				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 0 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.",
+				MarkdownDescription: "Optional description here for your reference (not parsed). Must be at most 255 characters, on a single line.",
 				Optional:            true,
 			},
 			"id": schema.StringAttribute{

@@ -48,7 +48,7 @@ resource "opnsense_firewall_nat_port_forward" "wan_https_k3s_ingress" {
 
 ### Optional
 
-- `description` (String) Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.
+- `description` (String) Optional description here for your reference (not parsed). Must be between 1 and 255 characters, on a single line.
 - `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `enabled` (Boolean) Enable this port forwarding rule. Defaults to `true`.
 - `ip_protocol` (String) Select the Internet Protocol version this rule applies to. Available values: `inet`, `inet6`. Defaults to `inet`.

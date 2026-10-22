@@ -25,6 +25,13 @@ type firewallTarget struct {
 	Port types.String `tfsdk:"port"`
 }
 
+// natDescriptionValidator mirrors OPNsense's DescriptionField: the text stays on one line and
+// holds no NUL, vertical tab or form feed. Any other character, such as `_`, `-` or `:`, is valid.
+var natDescriptionValidator = stringvalidator.RegexMatches(
+	regexp.MustCompile(`^[^\n\r\x00\v\f]*$`),
+	"must be a single line without control characters",
+)
+
 // natResourceModel describes the resource data model.
 type natResourceModel struct {
 	Enabled    types.Bool `tfsdk:"enabled"`
@@ -196,13 +203,10 @@ func natResourceSchema() schema.Schema {
 				Default:             booldefault.StaticBool(false),
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.",
+				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 1 and 255 characters, on a single line.",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[a-zA-Z0-9 .]*$`),
-						"must only contain only alphanumeric characters, spaces or `.`",
-					),
+					natDescriptionValidator,
 					stringvalidator.LengthBetween(1, 255),
 				},
 			},

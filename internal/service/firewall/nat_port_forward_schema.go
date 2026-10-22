@@ -223,13 +223,10 @@ func natPortForwardResourceSchema() schema.Schema {
 				},
 			},
 			"description": schema.StringAttribute{
-				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 1 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.",
+				MarkdownDescription: "Optional description here for your reference (not parsed). Must be between 1 and 255 characters, on a single line.",
 				Optional:            true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[a-zA-Z0-9 .]*$`),
-						"must only contain only alphanumeric characters, spaces or `.`",
-					),
+					natDescriptionValidator,
 					stringvalidator.LengthBetween(1, 255),
 				},
 			},

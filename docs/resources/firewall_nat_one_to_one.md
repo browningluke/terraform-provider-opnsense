@@ -68,7 +68,7 @@ resource "opnsense_firewall_nat_one_to_one" "example_three" {
 ### Optional
 
 - `categories` (Set of String) Set of category IDs to apply. Defaults to `[]`.
-- `description` (String) Optional description here for your reference (not parsed). Must be between 0 and 255 characters. Must be a character in set `[a-zA-Z0-9 .]`.
+- `description` (String) Optional description here for your reference (not parsed). Must be at most 255 characters, on a single line.
 - `destination` (Attributes) (see [below for nested schema](#nestedatt--destination))
 - `enabled` (Boolean) Enable this firewall NAT rule. Defaults to `true`.
 - `interface` (String) Choose which interface this rule applies to. Defaults to `wan`.

@@ -56,7 +56,7 @@ func TestAccFirewallNatPortForwardResource(t *testing.T) {
 					"10.0.0.0/8", "1024-65535", true,
 					"10.10.10.23/32", "53", true,
 					"192.168.10.20", "53",
-					"enable", "Updated NAT port forward",
+					"enable", "Updated NAT_port-forward: v2",
 				),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "enabled", "false"),
@@ -72,7 +72,7 @@ func TestAccFirewallNatPortForwardResource(t *testing.T) {
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "target.ip", "192.168.10.20"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "target.port", "53"),
 					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "nat_reflection", "enable"),
-					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "description", "Updated NAT port forward"),
+					resource.TestCheckResourceAttr("opnsense_firewall_nat_port_forward.test", "description", "Updated NAT_port-forward: v2"),
 					resource.TestCheckResourceAttrSet("opnsense_firewall_nat_port_forward.test", "id"),
 				),
 			},
