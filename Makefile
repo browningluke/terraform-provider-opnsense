@@ -1,4 +1,4 @@
-.PHONY: mkdocs build-local build fmt test testacc
+.PHONY: docs mkdocs build-local build fmt test testacc
 
 # Variables for testacc
 PKG ?=

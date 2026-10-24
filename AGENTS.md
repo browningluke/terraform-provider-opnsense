@@ -140,6 +140,16 @@ if d.Enabled == "" {
 
 When `Read` receives a `*errs.NotFoundError`, call `resp.State.RemoveResource(ctx)` and return — do not add an error diagnostic. This lets Terraform detect and recreate deleted-out-of-band resources.
 
+### Plugin-backed Services
+
+Services provided by an OPNsense plugin (`os-*` package) need that plugin in the CI image:
+
+1. Add the package to `scripts/opnsense-plugins.txt`. The image build installs it via `scripts/install-plugins.py`, after the core upgrade (OPNsense refuses plugin installs on an outdated core). Editing either file invalidates the cached image.
+2. Use `acctest.PluginPreCheck(t, "os-<plugin>")` as the test `PreCheck`, so the tests skip on instances without the plugin.
+3. Say "Requires the `os-<plugin>` plugin." in the resource and data source `MarkdownDescription`.
+
+`internal/service/mdnsrepeater` is the reference example. `quagga` (os-frr) predates this and has no acceptance tests.
+
 ### Acceptance Test Pattern
 
 ```go
@@ -160,7 +170,7 @@ Each test must cover Create, Read, Update, Delete (automatic), and ImportState.
 
 ### Documentation Generation
 
-Docs in `docs/` are auto-generated from schema `MarkdownDescription` fields via `tfplugindocs` (triggered by `//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs` in `main.go`). Always run `make docs` and commit the result after schema changes.
+Docs in `docs/` are auto-generated from schema `MarkdownDescription` fields via `tfplugindocs` (triggered by `//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs` in `main.go`). Always run `make docs` and commit the result after schema changes. New resources and data sources also need a template in `templates/resources/` or `templates/data-sources/`, which sets the docs `subcategory`; copy one from the same service.
 
 ## Keeping This File Up-to-Date
 

@@ -1,0 +1,4 @@
+# OPNsense plugins installed into the CI test image by install-plugins.py.
+# One package per line. Acceptance tests for plugin-backed resources call
+# acctest.PluginPreCheck so they skip on instances without the plugin.
+os-mdns-repeater

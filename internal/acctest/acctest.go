@@ -10,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/browningluke/terraform-provider-opnsense/internal/provider"
@@ -64,6 +65,65 @@ func DomainOverridePreCheck(t *testing.T) {
 		t.Skip("OPNSENSE_TEST_DOMAIN_OVERRIDE=1 required: addDomainOverride endpoint removed in OPNsense 25+")
 	}
 }
+
+// PluginPreCheck skips the test unless the named OPNsense plugin (e.g.
+// "os-mdns-repeater") is installed. CI installs the plugins listed in
+// scripts/opnsense-plugins.txt.
+func PluginPreCheck(t *testing.T, plugin string) {
+	t.Helper()
+	AccPreCheck(t)
+
+	installed, err := installedPlugins()
+	if err != nil {
+		t.Fatalf("PluginPreCheck: failed to list plugins: %s", err)
+	}
+	if !installed[plugin] {
+		t.Skipf("plugin %s is not installed", plugin)
+	}
+}
+
+// installedPlugins is cached because core/firmware/info takes several seconds.
+var installedPlugins = sync.OnceValues(func() (map[string]bool, error) {
+	req, err := http.NewRequest(http.MethodGet, os.Getenv("OPNSENSE_URI")+"/api/core/firmware/info", nil)
+	if err != nil {
+		return nil, fmt.Errorf("new request: %w", err)
+	}
+	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString(
+		[]byte(os.Getenv("OPNSENSE_API_KEY")+":"+os.Getenv("OPNSENSE_API_SECRET"))))
+
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: os.Getenv("OPNSENSE_ALLOW_INSECURE") == "true",
+		},
+	}}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("do request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	var info struct {
+		Plugin []struct {
+			Name      string `json:"name"`
+			Installed string `json:"installed"`
+		} `json:"plugin"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&info); err != nil {
+		return nil, fmt.Errorf("decode response: %w", err)
+	}
+
+	installed := make(map[string]bool)
+	for _, p := range info.Plugin {
+		if p.Installed == "1" {
+			installed[p.Name] = true
+		}
+	}
+	return installed, nil
+})
 
 // KeaDhcpv6PreCheck skips the test unless OPNSENSE_KEA_DHCPV6_IFACE is set to a
 // valid interface name (e.g. "wan"). When set, it configures that interface in the
