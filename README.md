@@ -197,18 +197,18 @@ The following is a non-exhaustive list of the plugin APIs OPNsense supports. The
 | `Acmeclient/Action`            | ❌        | ❌           |
 | `Haproxy/Maintenance`          | ❌        | ❌           |
 | `Haproxy/Settings`             | ❌        | ❌           |
-| `Haproxy/Settings/Acl`         | ❌        | ❌           |
-| `Haproxy/Settings/Action`      | ❌        | ❌           |
-| `Haproxy/Settings/Backend`     | ❌        | ❌           |
+| `Haproxy/Settings/Acl`         | ✅        | ❌           |
+| `Haproxy/Settings/Action`      | ✅        | ❌           |
+| `Haproxy/Settings/Backend`     | ✅        | ❌           |
 | `Haproxy/Settings/Cpu`         | ❌        | ❌           |
 | `Haproxy/Settings/Errorfile`   | ❌        | ❌           |
 | `Haproxy/Settings/Fcgi`        | ❌        | ❌           |
-| `Haproxy/Settings/Frontend`    | ❌        | ❌           |
+| `Haproxy/Settings/Frontend`    | ✅ (rule list only) | ❌           |
 | `Haproxy/Settings/Group`       | ❌        | ❌           |
 | `Haproxy/Settings/Healthcheck` | ❌        | ❌           |
 | `Haproxy/Settings/Lua`         | ❌        | ❌           |
 | `Haproxy/Settings/Mapfile`     | ❌        | ❌           |
-| `Haproxy/Settings/Server`      | ❌        | ❌           |
+| `Haproxy/Settings/Server`      | ✅        | ❌           |
 | `Haproxy/Settings/User`        | ❌        | ❌           |
 | `Quagga/General`               | ❌        | ❌           |
 | `Quagga/Bfd`                   | ❌        | ❌           |
