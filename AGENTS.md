@@ -158,6 +158,12 @@ func TestAccResourceName(t *testing.T) {
 
 Each test must cover Create, Read, Update, Delete (automatic), and ImportState.
 
+### Plugin Services
+
+The CI image has no plugins installed. Acceptance tests for a plugin skip unless an opt-in variable says the plugin is present on the test instance, e.g. `OPNSENSE_TEST_HAPROXY=1` for `internal/service/haproxy` (`os-haproxy`).
+
+A HAProxy frontend is split across two resources that write disjoint keys, relying on OPNsense's `set*` endpoints applying only the posted keys: `opnsense_haproxy_frontend` (opnsense-go `haproxy.Frontend`, no `linkedActions`) and `opnsense_haproxy_frontend_actions` (`haproxy.FrontendActions`, only `linkedActions`, also usable on a frontend created outside Terraform). Keep `linkedActions` out of `haproxy.Frontend`, otherwise the two resources reset each other; `TestAccHAProxyFrontend` fails if they do. The rule list uses `api.SelectedMapListOrdered`, since `SelectedMapList` sorts and loses the evaluation order.
+
 ### Documentation Generation
 
 Docs in `docs/` are auto-generated from schema `MarkdownDescription` fields via `tfplugindocs` (triggered by `//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs` in `main.go`). Always run `make docs` and commit the result after schema changes.

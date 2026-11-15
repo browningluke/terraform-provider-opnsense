@@ -80,7 +80,7 @@ func (v requiredWhenStringEqualsOneOfValidator) ValidateResource(ctx context.Con
 
 // isDependentFieldSet checks if the dependent field is set (non-default/non-empty).
 // Supports all Terraform types: Int64, String, Bool, Float64, Number, Set, List, Map, Object.
-// Returns false if the field is null, unknown, or considered "not set" based on type-specific logic.
+// Returns false if the field is null or considered "not set" based on type-specific logic, true if unknown.
 func (v requiredWhenStringEqualsOneOfValidator) isDependentFieldSet(ctx context.Context, req resource.ValidateConfigRequest, expression path.Expression) (bool, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -100,8 +100,13 @@ func (v requiredWhenStringEqualsOneOfValidator) isDependentFieldSet(ctx context.
 		return false, diags
 	}
 
-	if matchedPathValue.IsNull() || matchedPathValue.IsUnknown() {
+	if matchedPathValue.IsNull() {
 		return false, diags
+	}
+	// An unknown value (e.g. a reference to another resource's id) is set once
+	// known; validation runs again then.
+	if matchedPathValue.IsUnknown() {
+		return true, diags
 	}
 
 	switch value := matchedPathValue.(type) {
