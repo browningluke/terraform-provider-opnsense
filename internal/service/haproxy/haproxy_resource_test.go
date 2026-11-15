@@ -25,8 +25,8 @@ func haproxyPreCheck(t *testing.T) {
 	}
 }
 
-// testFrontend creates the frontend the rule list is attached to. The provider
-// does not manage frontends, so the test creates one through the API.
+// testFrontend creates a frontend through the API, standing in for one that is
+// managed outside Terraform.
 func testFrontend(t *testing.T) string {
 	t.Helper()
 	c := &haproxy.Controller{Api: api.NewClient(api.Options{
@@ -39,12 +39,7 @@ func testFrontend(t *testing.T) string {
 		MaxRetries:    4,
 	})}
 	ctx := context.Background()
-	fe := struct {
-		Name string `json:"name"`
-		Bind string `json:"bind"`
-		Mode string `json:"mode"`
-	}{"tf-acc-test-frontend", "127.0.0.1:18080", "http"}
-	id, err := api.Add(c.Client(), ctx, haproxy.FrontendOpts, &fe)
+	id, err := c.AddFrontend(ctx, &haproxy.Frontend{Enabled: "1", Name: "tf-acc-test-frontend", Bind: api.SelectedMapList{"127.0.0.1:18080"}, Mode: "http"})
 	if err != nil {
 		t.Fatalf("creating test frontend: %s", err)
 	}
@@ -144,4 +139,80 @@ resource "opnsense_haproxy_frontend_actions" "test" {
   action_ids  = [opnsense_haproxy_action.%[3]s.id, opnsense_haproxy_action.%[4]s.id]
 }
 `, frontendID, port, first, second)
+}
+
+// TestAccHAProxyFrontend points opnsense_haproxy_frontend and
+// opnsense_haproxy_frontend_actions at the same frontend. Every step ends with
+// a refresh and an empty-plan check, so a resource that resets the other's
+// field fails here.
+func TestAccHAProxyFrontend(t *testing.T) {
+	haproxyPreCheck(t)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccHAProxyFrontendConfig("first", `["127.0.0.1:18081"]`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "name", "tf-acc-test-fe"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "mode", "http"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "enabled", "true"),
+					resource.TestCheckTypeSetElemAttr("opnsense_haproxy_frontend.test", "bind.*", "127.0.0.1:18081"),
+					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend.test", "default_backend", "opnsense_haproxy_backend.fe", "id"),
+					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend_actions.fe", "frontend_id", "opnsense_haproxy_frontend.test", "id"),
+					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend_actions.fe", "action_ids.0", "opnsense_haproxy_action.fe", "id"),
+				),
+			},
+			{ResourceName: "opnsense_haproxy_frontend.test", ImportState: true, ImportStateVerify: true},
+			{
+				// Changing the frontend must keep the rule list.
+				Config: testAccHAProxyFrontendConfig("second", `["127.0.0.1:18081", "127.0.0.1:18082"]`),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "description", "second"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "bind.#", "2"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend_actions.fe", "action_ids.#", "1"),
+				),
+			},
+		},
+	})
+}
+
+func testAccHAProxyFrontendConfig(description, bind string) string {
+	return fmt.Sprintf(`
+resource "opnsense_haproxy_server" "fe" {
+  name    = "tf-acc-test-fe-server"
+  address = "192.0.2.21"
+  port    = 80
+}
+
+resource "opnsense_haproxy_backend" "fe" {
+  name                 = "tf-acc-test-fe-backend"
+  linked_servers       = [opnsense_haproxy_server.fe.id]
+  health_check_enabled = false
+}
+
+resource "opnsense_haproxy_acl" "fe" {
+  name       = "tf-acc-test-fe-path"
+  expression = "path_beg"
+  value      = "/.well-known/acme-challenge/"
+}
+
+resource "opnsense_haproxy_action" "fe" {
+  name        = "tf-acc-test-fe-rule"
+  linked_acls = [opnsense_haproxy_acl.fe.id]
+  use_backend = opnsense_haproxy_backend.fe.id
+}
+
+resource "opnsense_haproxy_frontend" "test" {
+  name            = "tf-acc-test-fe"
+  description     = %[1]q
+  bind            = %[2]s
+  default_backend = opnsense_haproxy_backend.fe.id
+}
+
+resource "opnsense_haproxy_frontend_actions" "fe" {
+  frontend_id = opnsense_haproxy_frontend.test.id
+  action_ids  = [opnsense_haproxy_action.fe.id]
+}
+`, description, bind)
 }

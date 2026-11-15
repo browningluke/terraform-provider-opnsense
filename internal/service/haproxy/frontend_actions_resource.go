@@ -61,7 +61,7 @@ func (r *frontendActionsResource) Create(ctx context.Context, req resource.Creat
 
 	frontendID := data.FrontendId.ValueString()
 	// Fail with a clear message instead of a validation error when the frontend does not exist.
-	if _, err := r.client.Haproxy().GetFrontend(ctx, frontendID); err != nil {
+	if _, err := r.client.Haproxy().GetFrontendActions(ctx, frontendID); err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to read haproxy frontend %s, got error: %s", frontendID, err))
 		return
@@ -73,7 +73,7 @@ func (r *frontendActionsResource) Create(ctx context.Context, req resource.Creat
 		return
 	}
 
-	if err := r.client.Haproxy().UpdateFrontend(ctx, frontendID, frontend); err != nil {
+	if err := r.client.Haproxy().UpdateFrontendActions(ctx, frontendID, frontend); err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to set haproxy frontend actions, got error: %s", err))
 		return
@@ -92,7 +92,7 @@ func (r *frontendActionsResource) Read(ctx context.Context, req resource.ReadReq
 		return
 	}
 
-	frontend, err := r.client.Haproxy().GetFrontend(ctx, data.Id.ValueString())
+	frontend, err := r.client.Haproxy().GetFrontendActions(ctx, data.Id.ValueString())
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {
@@ -128,7 +128,7 @@ func (r *frontendActionsResource) Update(ctx context.Context, req resource.Updat
 		return
 	}
 
-	if err := r.client.Haproxy().UpdateFrontend(ctx, data.Id.ValueString(), frontend); err != nil {
+	if err := r.client.Haproxy().UpdateFrontendActions(ctx, data.Id.ValueString(), frontend); err != nil {
 		resp.Diagnostics.AddError("Client Error",
 			fmt.Sprintf("Unable to set haproxy frontend actions, got error: %s", err))
 		return
@@ -146,7 +146,7 @@ func (r *frontendActionsResource) Delete(ctx context.Context, req resource.Delet
 	}
 
 	// The frontend is not owned here, so only its rule list is cleared.
-	err := r.client.Haproxy().UpdateFrontend(ctx, data.Id.ValueString(), &haproxy.Frontend{LinkedActions: api.SelectedMapListOrdered{}})
+	err := r.client.Haproxy().UpdateFrontendActions(ctx, data.Id.ValueString(), &haproxy.FrontendActions{LinkedActions: api.SelectedMapListOrdered{}})
 	if err != nil {
 		var notFoundError *errs.NotFoundError
 		if errors.As(err, &notFoundError) {

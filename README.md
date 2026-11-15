@@ -203,7 +203,7 @@ The following is a non-exhaustive list of the plugin APIs OPNsense supports. The
 | `Haproxy/Settings/Cpu`         | ❌        | ❌           |
 | `Haproxy/Settings/Errorfile`   | ❌        | ❌           |
 | `Haproxy/Settings/Fcgi`        | ❌        | ❌           |
-| `Haproxy/Settings/Frontend`    | ✅ (rule list only) | ❌           |
+| `Haproxy/Settings/Frontend`    | ✅        | ❌           |
 | `Haproxy/Settings/Group`       | ❌        | ❌           |
 | `Haproxy/Settings/Healthcheck` | ❌        | ❌           |
 | `Haproxy/Settings/Lua`         | ❌        | ❌           |

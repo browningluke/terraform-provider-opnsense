@@ -13,6 +13,7 @@ func Resources(ctx context.Context) []func() resource.Resource {
 		newBackendResource,
 		newAclResource,
 		newActionResource,
+		newFrontendResource,
 		newFrontendActionsResource,
 	}
 }

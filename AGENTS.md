@@ -162,7 +162,7 @@ Each test must cover Create, Read, Update, Delete (automatic), and ImportState.
 
 The CI image has no plugins installed. Acceptance tests for a plugin skip unless an opt-in variable says the plugin is present on the test instance, e.g. `OPNSENSE_TEST_HAPROXY=1` for `internal/service/haproxy` (`os-haproxy`).
 
-`opnsense_haproxy_frontend_actions` owns one attribute of an object it does not create: it writes only `linkedActions` of an existing frontend, relying on OPNsense's `set*` endpoints applying only the posted keys. Its ordered list uses opnsense-go's `api.SelectedMapListOrdered`, since `SelectedMapList` sorts and loses the evaluation order.
+A HAProxy frontend is split across two resources that write disjoint keys, relying on OPNsense's `set*` endpoints applying only the posted keys: `opnsense_haproxy_frontend` (opnsense-go `haproxy.Frontend`, no `linkedActions`) and `opnsense_haproxy_frontend_actions` (`haproxy.FrontendActions`, only `linkedActions`, also usable on a frontend created outside Terraform). Keep `linkedActions` out of `haproxy.Frontend`, otherwise the two resources reset each other; `TestAccHAProxyFrontend` fails if they do. The rule list uses `api.SelectedMapListOrdered`, since `SelectedMapList` sorts and loses the evaluation order.
 
 ### Documentation Generation
 

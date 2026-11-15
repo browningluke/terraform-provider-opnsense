@@ -25,7 +25,7 @@ type frontendActionsResourceModel struct {
 func frontendActionsResourceSchema() schema.Schema {
 	return schema.Schema{
 		MarkdownDescription: "The ordered rule list (`linkedActions`) of an existing HAProxy frontend. " +
-			"This resource owns only that list: the frontend itself, with its listen addresses, certificates and other settings, stays managed elsewhere. " +
+			"This resource owns only that list. The frontend itself is managed with `opnsense_haproxy_frontend`, which never touches the list, or outside Terraform. " +
 			"The list is authoritative, so every rule the frontend should run must be listed, including rules other tools add " +
 			"(the ACME client plugin appends its `redirect_acme_challenges` rule if it is missing). " +
 			"Destroying this resource empties the frontend's rule list. Requires the `os-haproxy` plugin.",
@@ -60,13 +60,13 @@ func frontendActionsResourceSchema() schema.Schema {
 	}
 }
 
-func convertFrontendActionsSchemaToStruct(ctx context.Context, d *frontendActionsResourceModel) (*haproxy.Frontend, diag.Diagnostics) {
+func convertFrontendActionsSchemaToStruct(ctx context.Context, d *frontendActionsResourceModel) (*haproxy.FrontendActions, diag.Diagnostics) {
 	ids := api.SelectedMapListOrdered{}
 	diags := d.ActionIds.ElementsAs(ctx, &ids, false)
-	return &haproxy.Frontend{LinkedActions: ids}, diags
+	return &haproxy.FrontendActions{LinkedActions: ids}, diags
 }
 
-func convertFrontendActionsStructToSchema(ctx context.Context, id string, d *haproxy.Frontend) (*frontendActionsResourceModel, diag.Diagnostics) {
+func convertFrontendActionsStructToSchema(ctx context.Context, id string, d *haproxy.FrontendActions) (*frontendActionsResourceModel, diag.Diagnostics) {
 	ids, diags := types.ListValueFrom(ctx, types.StringType, []string(d.LinkedActions))
 	return &frontendActionsResourceModel{
 		FrontendId: types.StringValue(id),
