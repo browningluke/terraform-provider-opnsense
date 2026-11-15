@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"testing"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
@@ -125,12 +126,14 @@ resource "opnsense_haproxy_acl" "path" {
 resource "opnsense_haproxy_action" "web" {
   name        = "tf-acc-test-web"
   linked_acls = [opnsense_haproxy_acl.host.id, opnsense_haproxy_acl.path.id]
+  type        = "use_backend"
   use_backend = opnsense_haproxy_backend.test.id
 }
 
 resource "opnsense_haproxy_action" "other" {
   name        = "tf-acc-test-other"
   linked_acls = [opnsense_haproxy_acl.path.id]
+  type        = "use_backend"
   use_backend = opnsense_haproxy_backend.test.id
 }
 
@@ -161,16 +164,23 @@ func TestAccHAProxyFrontend(t *testing.T) {
 					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend.test", "default_backend", "opnsense_haproxy_backend.fe", "id"),
 					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend_actions.fe", "frontend_id", "opnsense_haproxy_frontend.test", "id"),
 					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend_actions.fe", "action_ids.0", "opnsense_haproxy_action.fe", "id"),
+					resource.TestCheckResourceAttrPair("opnsense_haproxy_frontend_actions.fe", "action_ids.1", "opnsense_haproxy_action.redirect", "id"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_action.redirect", "type", "http-request"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_action.redirect", "http_request_action", "redirect"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_action.redirect", "http_request_option", "scheme https code 301"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_action.redirect", "linked_acls.#", "0"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_action.redirect", "use_backend", ""),
 				),
 			},
 			{ResourceName: "opnsense_haproxy_frontend.test", ImportState: true, ImportStateVerify: true},
+			{ResourceName: "opnsense_haproxy_action.redirect", ImportState: true, ImportStateVerify: true},
 			{
 				// Changing the frontend must keep the rule list.
 				Config: testAccHAProxyFrontendConfig("second", `["127.0.0.1:18081", "127.0.0.1:18082"]`),
 				Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "description", "second"),
 					resource.TestCheckResourceAttr("opnsense_haproxy_frontend.test", "bind.#", "2"),
-					resource.TestCheckResourceAttr("opnsense_haproxy_frontend_actions.fe", "action_ids.#", "1"),
+					resource.TestCheckResourceAttr("opnsense_haproxy_frontend_actions.fe", "action_ids.#", "2"),
 				),
 			},
 		},
@@ -200,7 +210,16 @@ resource "opnsense_haproxy_acl" "fe" {
 resource "opnsense_haproxy_action" "fe" {
   name        = "tf-acc-test-fe-rule"
   linked_acls = [opnsense_haproxy_acl.fe.id]
+  type        = "use_backend"
   use_backend = opnsense_haproxy_backend.fe.id
+}
+
+# No conditions: applies to every request.
+resource "opnsense_haproxy_action" "redirect" {
+  name                = "tf-acc-test-fe-https"
+  type                = "http-request"
+  http_request_action = "redirect"
+  http_request_option = "scheme https code 301"
 }
 
 resource "opnsense_haproxy_frontend" "test" {
@@ -212,7 +231,37 @@ resource "opnsense_haproxy_frontend" "test" {
 
 resource "opnsense_haproxy_frontend_actions" "fe" {
   frontend_id = opnsense_haproxy_frontend.test.id
-  action_ids  = [opnsense_haproxy_action.fe.id]
+  action_ids  = [opnsense_haproxy_action.fe.id, opnsense_haproxy_action.redirect.id]
 }
 `, description, bind)
+}
+
+func TestAccHAProxyActionValidation(t *testing.T) {
+	haproxyPreCheck(t)
+
+	resource.Test(t, resource.TestCase{
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				// use_backend rule without a backend.
+				Config: `
+resource "opnsense_haproxy_action" "bad" {
+  name = "tf-acc-test-bad"
+  type = "use_backend"
+}`,
+				ExpectError: regexp.MustCompile(`use_backend`),
+			},
+			{
+				// redirect arguments on a use_backend rule.
+				Config: `
+resource "opnsense_haproxy_action" "bad" {
+  name                = "tf-acc-test-bad"
+  type                = "use_backend"
+  use_backend         = "6b1a0c6e-0000-4000-8000-00000000000a"
+  http_request_option = "scheme https code 301"
+}`,
+				ExpectError: regexp.MustCompile(`http_request_option`),
+			},
+		},
+	})
 }

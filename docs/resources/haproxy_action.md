@@ -3,12 +3,12 @@
 page_title: "opnsense_haproxy_action Resource - terraform-provider-opnsense"
 subcategory: ""
 description: |-
-  A HAProxy rule (action): what HAProxy does when its conditions match. A rule takes effect once it is linked to a frontend with opnsense_haproxy_frontend_actions. Only the use_backend type is supported so far. Requires the os-haproxy plugin.
+  A HAProxy rule (action): what HAProxy does when its conditions match. A rule takes effect once it is linked to a frontend with opnsense_haproxy_frontend_actions. Supported types are use_backend and http-request with the redirect keyword. HAProxy runs all http-request rules of a frontend before any use_backend rule, whatever their order in the list. Requires the os-haproxy plugin.
 ---
 
 # opnsense_haproxy_action (Resource)
 
-A HAProxy rule (action): what HAProxy does when its conditions match. A rule takes effect once it is linked to a frontend with `opnsense_haproxy_frontend_actions`. Only the `use_backend` type is supported so far. Requires the `os-haproxy` plugin.
+A HAProxy rule (action): what HAProxy does when its conditions match. A rule takes effect once it is linked to a frontend with `opnsense_haproxy_frontend_actions`. Supported types are `use_backend` and `http-request` with the `redirect` keyword. HAProxy runs all `http-request` rules of a frontend before any `use_backend` rule, whatever their order in the list. Requires the `os-haproxy` plugin.
 
 ## Example Usage
 
@@ -18,7 +18,20 @@ resource "opnsense_haproxy_action" "web_acme" {
   name        = "web-acme-challenge"
   linked_acls = [opnsense_haproxy_acl.host.id, opnsense_haproxy_acl.acme_path.id]
   operator    = "and"
+  type        = "use_backend"
   use_backend = opnsense_haproxy_backend.web.id
+}
+
+# Redirect everything except ACME challenges to HTTPS, same host and path.
+# HAProxy runs http-request rules before use_backend rules, so without the
+# "unless" condition the challenges would be redirected too.
+resource "opnsense_haproxy_action" "https_redirect" {
+  name                = "https-redirect"
+  test_type           = "unless"
+  linked_acls         = [opnsense_haproxy_acl.acme_path.id]
+  type                = "http-request"
+  http_request_action = "redirect"
+  http_request_option = "scheme https code 301"
 }
 ```
 
@@ -27,17 +40,19 @@ resource "opnsense_haproxy_action" "web_acme" {
 
 ### Required
 
-- `linked_acls` (Set of String) UUIDs of the conditions (`opnsense_haproxy_acl`) this rule tests.
 - `name` (String) Name to identify this rule. Must not contain `.`, `,`, `;`, brackets, braces or tabs.
-- `use_backend` (String) UUID of the backend pool (`opnsense_haproxy_backend`) that receives matching requests.
+- `type` (String) Rule type: `use_backend` sends matching requests to `use_backend`, `http-request` runs `http_request_action`.
 
 ### Optional
 
 - `description` (String) Description for this rule. Defaults to `""`.
 - `enabled` (Boolean) Enable this rule. Defaults to `true`.
+- `http_request_action` (String) `http-request` keyword. Only `redirect` is supported so far. Required for type `http-request`. Defaults to `""`.
+- `http_request_option` (String) Arguments of the `http-request` keyword, e.g. `scheme https code 301` for a permanent redirect to HTTPS with the same host and path. Required for type `http-request`. Defaults to `""`.
+- `linked_acls` (Set of String) UUIDs of the conditions (`opnsense_haproxy_acl`) this rule tests. Empty means the rule applies to every request. Defaults to `[]`.
 - `operator` (String) How multiple conditions are combined, `and` or `or`. Defaults to `and`.
 - `test_type` (String) `if` runs the rule when the conditions match, `unless` when they do not. Defaults to `if`.
-- `type` (String) Rule type. Only `use_backend` is supported so far. Defaults to `use_backend`.
+- `use_backend` (String) UUID of the backend pool (`opnsense_haproxy_backend`) that receives matching requests. Required for type `use_backend`. Defaults to `""`.
 
 ### Read-Only
 

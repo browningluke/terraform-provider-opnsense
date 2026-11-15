@@ -8,6 +8,7 @@ import (
 	"github.com/browningluke/opnsense-go/pkg/api"
 	"github.com/browningluke/opnsense-go/pkg/errs"
 	"github.com/browningluke/opnsense-go/pkg/opnsense"
+	"github.com/browningluke/terraform-provider-opnsense/internal/validators"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -17,6 +18,7 @@ import (
 var _ resource.Resource = &actionResource{}
 var _ resource.ResourceWithConfigure = &actionResource{}
 var _ resource.ResourceWithImportState = &actionResource{}
+var _ resource.ResourceWithConfigValidators = &actionResource{}
 
 func newActionResource() resource.Resource {
 	return &actionResource{}
@@ -32,6 +34,22 @@ func (r *actionResource) Metadata(ctx context.Context, req resource.MetadataRequ
 
 func (r *actionResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = actionResourceSchema()
+}
+
+func (r *actionResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	var v []resource.ConfigValidator
+	// Each type-specific attribute is required for, and only allowed with, its type.
+	for _, d := range [][2]string{
+		{"use_backend", "use_backend"},
+		{"http_request_action", "http-request"},
+		{"http_request_option", "http-request"},
+	} {
+		v = append(v,
+			validators.RequiredWhenStringEqualsOneOf(path.MatchRoot(d[0]), path.MatchRoot("type"), []string{d[1]}),
+			validators.RequiresStringEqualsOneOf(path.MatchRoot(d[0]), path.MatchRoot("type"), []string{d[1]}),
+		)
+	}
+	return v
 }
 
 func (r *actionResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {

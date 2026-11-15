@@ -89,4 +89,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/browningluke/opnsense-go => github.com/Moep90/opnsense-go v0.25.1-0.20261115181259-855fd7e52491
+replace github.com/browningluke/opnsense-go => github.com/Moep90/opnsense-go v0.25.1-0.20261115182934-fd647f1e2667
