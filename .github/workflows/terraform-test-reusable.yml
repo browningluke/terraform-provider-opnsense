@@ -14,7 +14,7 @@ permissions:
 env:
   OPNSENSE_SSH_PORT: 8022
   OPNSENSE_WEB_PORT: 8443
-  TERRAFORM_PLUGIN_URI: "registry.terraform.io/browningluke/opnsense"
+  TERRAFORM_PLUGIN_URI: "registry.terraform.io/constellio/opnsense"
   OPNSENSE_KEA_DHCPV6_IFACE: wan
 
 jobs:
@@ -63,7 +63,7 @@ jobs:
               "firewall": ["firewall"],
               "unbound": ["unbound"],
               "ipsec": ["ipsec"],
-              "other": ["cron", "diagnostics", "dnsmasq", "interfaces", "kea",
+              "other": ["auth", "cron", "diagnostics", "dnsmasq", "interfaces", "kea",
                         "openvpn", "quagga", "routes", "trust", "wireguard"],
           }
           # Non-service packages, tested with "other" on full-suite runs.

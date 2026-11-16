@@ -6,12 +6,13 @@ import (
 	"strconv"
 
 	"github.com/browningluke/opnsense-go/pkg/api"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/auth"
+	"github.com/browningluke/terraform-provider-opnsense/internal/service/cron"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/diagnostics"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/dnsmasq"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/firewall"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/interfaces"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/ipsec"
-	"github.com/browningluke/terraform-provider-opnsense/internal/service/cron"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/kea"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/openvpn"
 	"github.com/browningluke/terraform-provider-opnsense/internal/service/quagga"
@@ -290,12 +291,13 @@ func (p *opnsenseProvider) Configure(ctx context.Context, req provider.Configure
 
 func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Resource {
 	controllers := [][]func() resource.Resource{
+		auth.Resources(ctx),
+		cron.Resources(ctx),
 		diagnostics.Resources(ctx),
 		dnsmasq.Resources(ctx),
 		firewall.Resources(ctx),
 		interfaces.Resources(ctx),
 		ipsec.Resources(ctx),
-		cron.Resources(ctx),
 		kea.Resources(ctx),
 		openvpn.Resources(ctx),
 		quagga.Resources(ctx),
@@ -314,12 +316,13 @@ func (p *opnsenseProvider) Resources(ctx context.Context) []func() resource.Reso
 
 func (p *opnsenseProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	controllers := [][]func() datasource.DataSource{
+		auth.DataSources(ctx),
+		cron.DataSources(ctx),
 		diagnostics.DataSources(ctx),
 		dnsmasq.DataSources(ctx),
 		firewall.DataSources(ctx),
 		interfaces.DataSources(ctx),
 		ipsec.DataSources(ctx),
-		cron.DataSources(ctx),
 		kea.DataSources(ctx),
 		openvpn.DataSources(ctx),
 		quagga.DataSources(ctx),

@@ -1,5 +1,12 @@
 # Agent Instructions
 
+## Public project
+
+This repository is an open-source Terraform provider. Do **not** put internal
+tracker IDs (Jira keys, private ticket URLs) in commits, MR titles/bodies, code,
+docs, or branch names. Keep examples generic. Deployment-specific tooling
+(private registry mirrors, org CI publish jobs) belongs outside this repo.
+
 ## Build, Test, and Lint
 
 ```bash

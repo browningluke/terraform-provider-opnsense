@@ -43,14 +43,15 @@ func protoV6ProviderFactoriesInit(ctx context.Context, providerNames ...string) 
 }
 
 func AccPreCheck(t *testing.T) {
+	t.Helper()
 	if v := os.Getenv("OPNSENSE_URI"); v == "" {
-		t.Fatal("OPNSENSE_URI must be set for acceptance tests")
+		t.Skip("OPNSENSE_URI must be set for acceptance tests")
 	}
 	if v := os.Getenv("OPNSENSE_API_KEY"); v == "" {
-		t.Fatal("OPNSENSE_API_KEY must be set for acceptance tests")
+		t.Skip("OPNSENSE_API_KEY must be set for acceptance tests")
 	}
 	if v := os.Getenv("OPNSENSE_API_SECRET"); v == "" {
-		t.Fatal("OPNSENSE_API_SECRET must be set for acceptance tests")
+		t.Skip("OPNSENSE_API_SECRET must be set for acceptance tests")
 	}
 }
 
