@@ -35,6 +35,27 @@ func TestConvertUserSchemaToStruct(t *testing.T) {
 	require.Equal(t, "ssh-ed25519 AAAA alice@example.com", user.AuthorizedKeys)
 }
 
+func TestConvertUserSchemaToStruct_PasswordDisablesScramble(t *testing.T) {
+	model := &userResourceModel{
+		Enabled:          types.BoolValue(true),
+		Name:             types.StringValue("alice"),
+		FullName:         types.StringValue("Alice Example"),
+		Email:            types.StringValue("alice@example.com"),
+		Comment:          types.StringValue(""),
+		Shell:            types.StringValue("/bin/sh"),
+		Groups:           tools.StringSliceToSet([]string{}),
+		Privileges:       tools.StringSliceToSet([]string{}),
+		AuthorizedKeys:   tools.StringSliceToSet([]string{}),
+		ScramblePassword: types.BoolValue(true),
+		Password:         types.StringValue("s3cret"),
+	}
+
+	user, err := convertUserSchemaToStruct(model, []string{})
+	require.NoError(t, err)
+	require.Equal(t, "s3cret", user.Password)
+	require.Equal(t, "0", user.ScrambledPassword)
+}
+
 func TestConvertUserStructToSchema(t *testing.T) {
 	user := &opnauth.User{
 		Name:             "alice",

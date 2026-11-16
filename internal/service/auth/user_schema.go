@@ -96,12 +96,12 @@ func userResourceSchema() schema.Schema {
 				Default:             setdefault.StaticValue(tools.EmptySetValue(types.StringType)),
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "Password for GUI/login. Sensitive. Leave unset when `scramble_password` is true. Not returned by the API after create.",
+				MarkdownDescription: "Password for GUI/login. Sensitive. Do not set together with `scramble_password = true` (set `scramble_password = false` when providing a password). Not returned by the API after create.",
 				Optional:            true,
 				Sensitive:           true,
 			},
 			"scramble_password": schema.BoolAttribute{
-				MarkdownDescription: "When `true` (default), OPNsense generates a random password. Prefer this for SSH-key-only users.",
+				MarkdownDescription: "When `true` (default), OPNsense generates a random password. Prefer this for SSH-key-only users. Ignored when `password` is set (the configured password is used instead).",
 				Optional:            true,
 				Computed:            true,
 				Default:             booldefault.StaticBool(true),
@@ -126,8 +126,10 @@ func convertUserSchemaToStruct(d *userResourceModel, groupGIDs []string) (*opnau
 		password = d.Password.ValueString()
 	}
 
+	// Never send scramble together with an explicit password: OPNsense would
+	// generate a random password and ignore the configured one.
 	scramble := "0"
-	if d.ScramblePassword.ValueBool() {
+	if password == "" && d.ScramblePassword.ValueBool() {
 		scramble = "1"
 	}
 

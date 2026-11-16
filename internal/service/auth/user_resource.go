@@ -18,9 +18,16 @@ import (
 var _ resource.Resource = &userResource{}
 var _ resource.ResourceWithConfigure = &userResource{}
 var _ resource.ResourceWithImportState = &userResource{}
+var _ resource.ResourceWithConfigValidators = &userResource{}
 
 func newUserResource() resource.Resource {
 	return &userResource{}
+}
+
+func (r *userResource) ConfigValidators(ctx context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		passwordScrambleConflictValidator{},
+	}
 }
 
 type userResource struct {

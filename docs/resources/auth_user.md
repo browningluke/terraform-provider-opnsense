@@ -41,9 +41,9 @@ resource "opnsense_auth_user" "alice" {
 - `enabled` (Boolean) Enable this user. Defaults to `true`.
 - `full_name` (String) Display name / description shown in the UI.
 - `groups` (Set of String) Group memberships by **name** (e.g. `admins`). Names only: the API stores GIDs but Terraform always reads names back.
-- `password` (String, Sensitive) Password for GUI/login. Sensitive. Leave unset when `scramble_password` is true. Not returned by the API after create.
+- `password` (String, Sensitive) Password for GUI/login. Sensitive. Do not set together with `scramble_password = true` (set `scramble_password = false` when providing a password). Not returned by the API after create.
 - `privileges` (Set of String) Direct privilege IDs (e.g. `page-all`). Prefer assigning privileges via groups when possible.
-- `scramble_password` (Boolean) When `true` (default), OPNsense generates a random password. Prefer this for SSH-key-only users.
+- `scramble_password` (Boolean) When `true` (default), OPNsense generates a random password. Prefer this for SSH-key-only users. Ignored when `password` is set (the configured password is used instead).
 - `shell` (String) Login shell. Empty means the OPNsense default (no shell except for root). Use `/bin/sh` for SSH shell access.
 
 ### Read-Only
