@@ -33,8 +33,7 @@ type userResourceModel struct {
 
 func userResourceSchema() schema.Schema {
 	return schema.Schema{
-		// Keep default schema version 0: the resource already shipped without
-		// Version, and the state shape is unchanged (no UpgradeState needed).
+		Version:             1,
 		MarkdownDescription: "Local OPNsense users (`System > Access > Users`), including SSH authorized keys and group memberships.",
 
 		Attributes: map[string]schema.Attribute{
@@ -45,7 +44,7 @@ func userResourceSchema() schema.Schema {
 				Default:             booldefault.StaticBool(true),
 			},
 			"name": schema.StringAttribute{
-				MarkdownDescription: "Login name (e.g. `martin.catty`).",
+				MarkdownDescription: "Login name (e.g. `alice`).",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
