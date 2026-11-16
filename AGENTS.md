@@ -7,6 +7,11 @@ tracker IDs (Jira keys, private ticket URLs) in commits, MR titles/bodies, code,
 docs, or branch names. Keep examples generic. Deployment-specific tooling
 (private registry mirrors, org CI publish jobs) belongs outside this repo.
 
+Contributions must follow `CONTRIBUTING.md` and
+`.github/pull_request_template.md` (PR title `resource - Brief description`,
+full template body, README API coverage, examples, schema `Version: 1` for new
+resources).
+
 ## Build, Test, and Lint
 
 ```bash
