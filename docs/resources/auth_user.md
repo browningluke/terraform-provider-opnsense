@@ -13,13 +13,13 @@ Local OPNsense users (`System > Access > Users`), including SSH authorized keys 
 
 ```terraform
 resource "opnsense_auth_user" "alice" {
-  name              = "alice"
-  full_name         = "Alice Example"
-  email             = "alice@example.com"
-  shell             = "/bin/sh"
-  scramble_password = true
-  groups            = ["admins"]
-  privileges        = ["page-all"]
+  name               = "alice"
+  full_name          = "Alice Example"
+  email              = "alice@example.com"
+  shell              = "/bin/sh"
+  scramble_password  = true
+  groups             = ["admins"]
+  privileges         = ["page-all"]
   authorized_keys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIexample alice@example.com",
   ]
@@ -49,14 +49,3 @@ resource "opnsense_auth_user" "alice" {
 ### Read-Only
 
 - `id` (String) UUID of the user.
-
-## Import
-
-Import is supported using the following syntax:
-
-```terraform
-import {
-  to = opnsense_auth_user.example
-  id = "<opnsense-user-uuid>"
-}
-```
