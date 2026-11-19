@@ -30,6 +30,8 @@ type hostOverrideResourceModel struct {
 	MXPriority types.Int64  `tfsdk:"mx_priority"`
 	MXDomain   types.String `tfsdk:"mx_host"`
 
+	TTL types.Int64 `tfsdk:"ttl"`
+
 	Id types.String `tfsdk:"id"`
 }
 
@@ -89,6 +91,15 @@ func hostOverrideResourceSchema() schema.Schema {
 					}...),
 				},
 			},
+			"ttl": schema.Int64Attribute{
+				MarkdownDescription: "TTL of the host in seconds, e.g. 3600. Set to `-1` to use Unbound's default. Requires OPNsense 25.7 or later. Defaults to `-1`.",
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(-1),
+				Validators: []validator.Int64{
+					int64validator.Between(-1, 2147483647),
+				},
+			},
 			"description": schema.StringAttribute{
 				MarkdownDescription: "Optional description here for your reference (not parsed).",
 				Optional:            true,
@@ -145,6 +156,10 @@ func hostOverrideDataSourceSchema() dschema.Schema {
 				MarkdownDescription: "Host name of MX host, e.g. mail.example.com.",
 				Computed:            true,
 			},
+			"ttl": dschema.Int64Attribute{
+				MarkdownDescription: "TTL of the host in seconds, or `-1` when Unbound's default applies.",
+				Computed:            true,
+			},
 		},
 	}
 }
@@ -158,6 +173,7 @@ func convertHostOverrideSchemaToStruct(d *hostOverrideResourceModel) (*unbound.H
 		Server:      d.Server.ValueString(),
 		MXDomain:    d.MXDomain.ValueString(),
 		MXPriority:  tools.Int64ToStringNegative(d.MXPriority.ValueInt64()),
+		TTL:         tools.Int64ToStringNegative(d.TTL.ValueInt64()),
 		Description: d.Description.ValueString(),
 	}, nil
 }
@@ -171,6 +187,7 @@ func convertHostOverrideStructToSchema(d *unbound.HostOverride) (*hostOverrideRe
 		Server:      types.StringValue(d.Server),
 		MXPriority:  types.Int64Value(tools.StringToInt64(d.MXPriority)),
 		MXDomain:    types.StringValue(d.MXDomain),
+		TTL:         types.Int64Value(tools.StringToInt64(d.TTL)),
 		Description: tools.StringOrNull(d.Description),
 	}, nil
 }

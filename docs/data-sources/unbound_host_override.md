@@ -25,5 +25,6 @@ Host overrides can be used to change DNS results from client queries or to add c
 - `mx_host` (String) Host name of MX host, e.g. mail.example.com.
 - `mx_priority` (Number) Priority of MX record, e.g. 10.
 - `server` (String) IP address of the host, e.g. 192.168.100.100 or fd00:abcd::1.
+- `ttl` (Number) TTL of the host in seconds, or `-1` when Unbound's default applies.
 - `type` (String) Type of resource record. Available values: `A`, `AAAA`, `MX`.
 
