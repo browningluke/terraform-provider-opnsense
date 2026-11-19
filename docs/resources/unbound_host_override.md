@@ -20,6 +20,9 @@ resource "opnsense_unbound_host_override" "a_override" {
   hostname = "*"
   domain = "example.com"
   server = "192.168.1.1"
+
+  // Optional, requires OPNsense 25.7+; omit to use Unbound's default of 3600
+  ttl = 300
 }
 
 // 'AAAA' record
