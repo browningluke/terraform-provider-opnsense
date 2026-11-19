@@ -61,6 +61,7 @@ resource "opnsense_unbound_host_override" "mx_override" {
 - `mx_host` (String) Host name of MX host, e.g. mail.example.com. Must be set when `type` is `MX`.
 - `mx_priority` (Number) Priority of MX record, e.g. 10. Must be set when `type` is `MX`.
 - `server` (String) IP address of the host, e.g. 192.168.100.100 or fd00:abcd::1. Must be set when `type` is `A` or `AAAA`.
+- `ttl` (Number) TTL of the host in seconds, e.g. 3600. Set to `-1` to use Unbound's default. Requires OPNsense 25.7 or later. Defaults to `-1`.
 - `type` (String) Type of resource record. Available values: `A`, `AAAA`, `MX`. Defaults to `A`.
 
 ### Read-Only

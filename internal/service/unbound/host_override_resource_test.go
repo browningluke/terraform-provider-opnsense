@@ -153,6 +153,40 @@ func TestAccUnboundHostOverrideResource_WithDescription(t *testing.T) {
 	})
 }
 
+func TestAccUnboundHostOverrideResource_TTL(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:                 func() { acctest.AccPreCheck(t) },
+		ProtoV6ProviderFactories: acctest.ProtoV6ProviderFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccUnboundHostOverrideResourceConfigTTL("testhost", "example.com", "192.168.1.10", 300),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_unbound_host_override.test", "ttl", "300"),
+					resource.TestCheckResourceAttrSet("opnsense_unbound_host_override.test", "id"),
+				),
+			},
+			{
+				ResourceName:      "opnsense_unbound_host_override.test",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testAccUnboundHostOverrideResourceConfigTTL("testhost", "example.com", "192.168.1.10", 60),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_unbound_host_override.test", "ttl", "60"),
+				),
+			},
+			{
+				// Dropping ttl falls back to Unbound's default
+				Config: testAccUnboundHostOverrideResourceConfig("testhost", "example.com", "192.168.1.10"),
+				Check: resource.ComposeAggregateTestCheckFunc(
+					resource.TestCheckResourceAttr("opnsense_unbound_host_override.test", "ttl", "-1"),
+				),
+			},
+		},
+	})
+}
+
 func testAccUnboundHostOverrideResourceConfig(hostname, domain, server string) string {
 	return fmt.Sprintf(`
 resource "opnsense_unbound_host_override" "test" {
@@ -195,6 +229,17 @@ resource "opnsense_unbound_host_override" "test" {
   mx_priority = %[3]d
 }
 `, domain, mxHost, mxPriority)
+}
+
+func testAccUnboundHostOverrideResourceConfigTTL(hostname, domain, server string, ttl int) string {
+	return fmt.Sprintf(`
+resource "opnsense_unbound_host_override" "test" {
+  hostname = %[1]q
+  domain   = %[2]q
+  server   = %[3]q
+  ttl      = %[4]d
+}
+`, hostname, domain, server, ttl)
 }
 
 func testAccUnboundHostOverrideResourceConfigWithDescription(hostname, domain, server, description string) string {
